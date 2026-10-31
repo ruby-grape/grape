@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-# Act like a Grape::Router::Route but for greedy_match
-# see @neutral_map
-
 module Grape
   class Router
-    class GreedyRoute < BaseRoute
+    # Stands in for a Grape::Router::Route on a path, whatever the HTTP method:
+    # it answers a method the path has no route for with the methods it does,
+    # as a 405 or an auto-OPTIONS. Never runs a route's block. See @neutral_map.
+    class AllowedMethodsRoute < BaseRoute
       extend Forwardable
 
       def_delegators :@endpoint, :call

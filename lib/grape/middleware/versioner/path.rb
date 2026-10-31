@@ -59,12 +59,12 @@ module Grape
         # the normalize, prefix-strip and slice below for the same answer.
         #
         # Nil, and the path parsed as before, when there are no routing args at
-        # all (the middleware used outside a Grape router) and for the greedy
-        # routes behind auto-OPTIONS and 405, which capture nothing. An Array
-        # means the route declared a +:version+ segment of its own on top of the
-        # versioning one: Mustermann then reports the capture as every position
-        # it matched rather than the single segment recorded here, so that too
-        # is left to the path parse.
+        # all (the middleware used outside a Grape router) and for the
+        # allowed-methods routes behind auto-OPTIONS and 405, which capture
+        # nothing. An Array means the route declared a +:version+ segment of its
+        # own on top of the versioning one: Mustermann then reports the capture
+        # as every position it matched rather than the single segment recorded
+        # here, so that too is left to the path parse.
         def routed_version(env)
           version = env[Grape::Env::GRAPE_ROUTING_ARGS]&.[](:version)
           version if version.is_a?(String)

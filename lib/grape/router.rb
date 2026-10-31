@@ -7,11 +7,11 @@ module Grape
       @neutral_regexes = []
       # Plain hashes with no auto-vivifying default: a lookup for an HTTP method
       # that has no routes must not insert a key. `compile!` freezes them all,
-      # so request-time reads never mutate shared state (see #match? / #rotation).
+      # so request-time reads never mutate shared state (see #star_route_for / #rotation).
       @map = {}
       @optimized_map = {}
-      # Per HTTP method, the greedy routes still worth trying once that method's
-      # own routes have missed a path (see #compile_neighbour_map).
+      # Per HTTP method, the allowed-methods routes still worth trying once that
+      # method's own routes have missed a path (see #compile_neighbour_map).
       @neighbour_map = {}
     end
 
@@ -36,9 +36,9 @@ module Grape
       (@map[route.request_method] ||= []) << route
     end
 
-    def associate_routes(greedy_route)
-      @neutral_regexes << greedy_route.to_regexp(@neutral_map.length)
-      @neutral_map << greedy_route
+    def associate_routes(allowed_methods_route)
+      @neutral_regexes << allowed_methods_route.to_regexp(@neutral_map.length)
+      @neutral_map << allowed_methods_route
     end
 
     def call(env)
@@ -54,7 +54,7 @@ module Grape
         # path versioner above all -- reads the path this routed on instead of
         # normalizing PATH_INFO a second time.
         env[Grape::Env::GRAPE_NORMALIZED_PATH] = input
-        transaction(input, request_method, env)
+        dispatch(input, request_method, env)
       end
     end
 
@@ -62,7 +62,7 @@ module Grape
       any = with_optimization do
         input = utf8_path(input) if @utf8_patterns && !input.ascii_only?
         # A path that is not valid UTF-8 comes back nil and matches nothing.
-        greedy_match?(input)
+        allowed_methods_route_for(input)
       end
       return if any == default_response
 
@@ -95,29 +95,29 @@ module Grape
     # 1. the routes registered for +method+ — the compiled-union match first,
     #    then, when that route cascades, its siblings (see #rotation);
     # 2. the ANY (+'*'+) routes;
-    # 3. the greedy neighbour, which answers 405 — and auto-OPTIONS, ahead of
-    #    the ANY routes.
+    # 3. the allowed-methods route, which answers 405 — and auto-OPTIONS, ahead
+    #    of the ANY routes.
     #
     # Returns nil when nothing answered, leaving the caller to 404. A response
     # that cascades is never final, whatever its status: the route has declined,
     # so its body is closed and the caller's 404 stands in for it. That 404 still
     # carries X-Cascade, so a mounting app upstream can keep looking.
-    def transaction(input, method, env)
+    def dispatch(input, method, env)
       union, routes, buckets, static_routes = @optimized_map[method]
       if (static = static_routes&.[](input))
         exact_route, captures = static
         settle(input, method, env, process_static_route(exact_route, captures, env), exact_route)
       elsif (bucket = buckets&.bucket_for(input))
-        bucket_transaction(bucket, input, method, env)
+        dispatch_to_bucket(bucket, input, method, env)
       else
-        union_transaction(union, routes, input, method, env)
+        dispatch_to_union(union, routes, input, method, env)
       end
     end
 
-    # #transaction for a path a bucket narrowed the routes for. A bucket
+    # #dispatch for a path a bucket narrowed the routes for. A bucket
     # numbers its groups its own way, so it hands over the captures numbered
     # for its own union along with the match.
-    def bucket_transaction(bucket, input, method, env)
+    def dispatch_to_bucket(bucket, input, method, env)
       exact_route = nil
       response = bucket.match(input) do |route, m, captures|
         exact_route = route
@@ -126,10 +126,11 @@ module Grape
       settle(input, method, env, response, exact_route)
     end
 
-    # #transaction for a path matched against all the routes for +method+.
-    # Matched here rather than through #match? so the MatchData survives: the
-    # route's path captures are groups of it (see Route#params_for).
-    def union_transaction(union, routes, input, method, env)
+    # #dispatch for a path matched against all the routes for +method+. The
+    # route comes out of the MatchData here, rather than from a lookup answering
+    # only the route, as its path captures are groups of it (see
+    # Route#params_for).
+    def dispatch_to_union(union, routes, input, method, env)
       exact_route = nil
       response = union&.match(input) do |m|
         exact_route = matched_route(routes, m)
@@ -138,43 +139,39 @@ module Grape
       settle(input, method, env, response, exact_route)
     end
 
-    # What #transaction answers once +exact_route+ answered with +response+:
-    # that response, unless it cascades. A route that declined (+response+
-    # cascades), or none matching (+response+ is nil), leaves the rest to try.
+    # What #dispatch answers once +exact_route+ answered with +response+: that
+    # response, unless it cascades. No route for +method+ matching (+response+ is
+    # nil) and one declining (+response+ cascades) leave different things to try.
     def settle(input, method, env, response, exact_route)
-      return response if halt?(response)
+      return after_miss(input, method, env) unless response
 
-      # A cascading route has only declined this request. Its siblings — the
-      # routes sharing this path but differing in, say, version — must be
-      # tried before falling back to the ANY routes and the greedy neighbour.
-      # Skipped when nothing matched: the compiled union is the disjunction of
-      # the same patterns #rotation walks, so a miss there is a miss here.
-      cascaded = !response.nil?
-      if cascaded
-        response = rotation(input, method, env, exact_route)
-        return response if response
-      end
-
-      neighbours(input, method, env, cascaded)
+      final_response(response) || after_cascade(input, method, env, exact_route)
     end
 
-    # The ANY ('*') routes and the greedy neighbour, tried once the routes for
-    # +method+ have declined. +cascaded+ says whether any of them matched: the
-    # auto-OPTIONS and 405 answers are only right when none did.
-    def neighbours(input, method, env, cascaded)
-      # Only ever read while nothing for +method+ has matched, so once a route
-      # has -- and cascaded -- there is no neighbour to look for.
-      last_neighbor_route = neighbour_match?(input, method) unless cascaded
+    # No route for +method+ matched, so the path may still answer another method.
+    # #rotation has nothing to add: the compiled union is the disjunction of the
+    # same patterns it walks, so a miss there is a miss here.
+    def after_miss(input, method, env)
+      allowed_methods_route = neighbour_route_for(input, method)
+      return process_route(allowed_methods_route, input, env, include_allow_header: true) if allowed_methods_route && method == Rack::OPTIONS
 
-      # If last_neighbor_route exists and request method is OPTIONS,
-      # return response by using #include_allow_header.
-      return process_route(last_neighbor_route, input, env, include_allow_header: true) if last_neighbor_route && method == Rack::OPTIONS
-
-      star_route = match?(input, '*')
+      star_route = star_route_for(input)
       # An ANY route that declined still matched, so no 405 follows it.
       return final_response(process_route(star_route, input, env)) if star_route
 
-      process_route(last_neighbor_route, input, env, include_allow_header: true) if last_neighbor_route
+      process_route(allowed_methods_route, input, env, include_allow_header: true) if allowed_methods_route
+    end
+
+    # A route for +method+ matched and declined this request. Its siblings -- the
+    # routes sharing this path but differing in, say, version -- are tried before
+    # the ANY routes. The auto-OPTIONS and 405 answers are not: a route matched,
+    # so the method is allowed.
+    def after_cascade(input, method, env, exact_route)
+      answer = rotation(input, method, env, exact_route)
+      return answer if answer
+
+      star_route = star_route_for(input)
+      final_response(process_route(star_route, input, env)) if star_route
     end
 
     # The routes registered for +method+ other than +exact_route+, tried in
@@ -192,20 +189,13 @@ module Grape
       answer
     end
 
-    # +response+, or nil when it cascades.
+    # +response+, or nil once it has cascaded: the route has declined, so its
+    # body is closed and whatever answers next stands in for it.
     def final_response(response)
-      response if halt?(response)
-    end
+      return response unless cascade?(response)
 
-    # Returns true if `response` should be returned as-is from the enclosing
-    # transaction. Closes the body as a side effect when the response is
-    # cascading so callers can safely try the next match.
-    def halt?(response)
-      return false unless response
-
-      cascade = cascade?(response)
-      close_body(response) if cascade
-      !cascade
+      close_body(response)
+      nil
     end
 
     # Releases a response the router has decided not to return. Rack requires
@@ -316,31 +306,30 @@ module Grape
       [404, DEFAULT_RESPONSE_HEADERS.dup, DEFAULT_RESPONSE_BODY.dup]
     end
 
-    # Which alternative of the union matched is answered by scanning one group
-    # per registered route, so on an API with many of them that scan is what a
-    # request costs. The groups are indexed by number rather than by name: a
-    # name sends MatchData through the pattern's name table on every lookup,
-    # a number indexes the match region directly.
-    def match?(input, method)
-      union, routes = @optimized_map[method]
-      union&.match(input) { |m| routes.detect { |route| m[route.regexp_capture_group] } }
+    def star_route_for(input)
+      union, routes = @optimized_map['*']
+      union&.match(input) { |m| matched_route(routes, m) }
     end
 
-    def greedy_match?(input)
-      @union.match(input) { |m| @neutral_map.detect { |route| m[route.regexp_capture_group] } }
+    def allowed_methods_route_for(input)
+      @union.match(input) { |m| matched_route(@neutral_map, m) }
     end
 
-    # The route of +routes+ whose alternative of their union produced +match+,
-    # found as #match? finds it.
+    # The route of +routes+ whose alternative of their union produced +match+.
+    # Which one that was is answered by scanning one group per registered route,
+    # so on an API with many of them that scan is what a request costs. The groups
+    # are indexed by number rather than by name: a name sends MatchData through
+    # the pattern's name table on every lookup, a number indexes the match region
+    # directly.
     def matched_route(routes, match)
       routes.detect { |route| match[route.regexp_capture_group] }
     end
 
-    # The greedy route for +input+ once the routes for +method+ have all missed
-    # it, from the ones #compile_neighbour_map left to try. A method with no
-    # routes of its own covers no path, so it still walks the whole of @union.
-    def neighbour_match?(input, method)
-      return greedy_match?(input) unless @map.key?(method)
+    # The allowed-methods route for +input+ once the routes for +method+ have all
+    # missed it, from the ones #compile_neighbour_map left to try. A method with
+    # no routes of its own covers no path, so it still walks the whole of @union.
+    def neighbour_route_for(input, method)
+      return allowed_methods_route_for(input) unless @map.key?(method)
 
       union, routes, groups = @neighbour_map[method]
       union&.match(input) do |m|
@@ -377,19 +366,20 @@ module Grape
       [union, routes, RouteBuckets.build(routes, regexps, bucket_unions), (static_routes unless static_routes.empty?)].freeze
     end
 
-    # After a miss, #neighbours looks for a greedy route to answer 405 with.
-    # Walking the whole of @union for it would cost a 404 a second walk over
-    # every path, and most of that walk cannot succeed: a greedy route shares
-    # its pattern with the routes it was collected from (see
+    # #after_miss looks for an allowed-methods route to answer 405 with. Walking
+    # the whole of @union for it would cost a 404 a second walk over every path,
+    # and most of that walk cannot succeed: an allowed-methods route shares its
+    # pattern with the routes it was collected from (see
     # API::Instance#collect_route_config_per_pattern), so once the union for
-    # +method+ has missed a path, the greedy route of every path +method+ has a
-    # route on has missed it too. What is left to try is the paths +method+ has
-    # no route on -- in an API where every path answers GET, none at all for a
-    # GET.
+    # +method+ has missed a path, the allowed-methods route of every path
+    # +method+ has a route on has missed it too. What is left to try is the paths
+    # +method+ has no route on -- in an API where every path answers GET, none at
+    # all for a GET.
     #
     # Built from the same members as @union, in the same order, so a path
-    # resolves to the same greedy route either way. Methods that leave the same
-    # paths uncovered -- PUT and DELETE on a member, say -- share one union.
+    # resolves to the same allowed-methods route either way. Methods that leave
+    # the same paths uncovered -- PUT and DELETE on a member, say -- share one
+    # union.
     def compile_neighbour_map
       unions = {}
       @map.each do |method, routes|
@@ -399,11 +389,11 @@ module Grape
       end
     end
 
-    # The union of the greedy routes at +indices+ of @neutral_map, those
+    # The union of the allowed-methods routes at +indices+ of @neutral_map, those
     # routes, and the group each of them occupies in the union: a subset of
     # @union numbers its groups differently, so the ones
     # #resolve_capture_groups recorded do not apply. Routes and groups are
-    # parallel Arrays for #neighbour_match? to walk with Array#index, as
+    # parallel Arrays for #neighbour_route_for to walk with Array#index, as
     # Enumerable#find over a Hash allocates on every call.
     def neighbour_union(indices)
       union = Regexp.union(@neutral_regexes.values_at(*indices))
@@ -414,7 +404,7 @@ module Grape
     end
 
     def cascade?(response)
-      response && response[1]['X-Cascade'] == 'pass'
+      response[1]['X-Cascade'] == 'pass'
     end
   end
 end

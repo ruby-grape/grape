@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Grape::Router::GreedyRoute do
+RSpec.describe Grape::Router::AllowedMethodsRoute do
   let(:instance) { described_class.new(pattern, endpoint:, allow_header:) }
   let(:pattern) { :pattern }
   let(:endpoint) { instance_double(Grape::Endpoint) }
@@ -36,9 +36,9 @@ RSpec.describe Grape::Router::GreedyRoute do
     it { is_expected.to be_nil }
   end
 
-  # A greedy route answers auto-OPTIONS and 405, and Router#process_route asks
-  # every route it dispatches for the params of the matched path. A greedy
-  # route captures nothing, so there are none.
+  # This route answers auto-OPTIONS and 405, and Router#process_route asks every
+  # route it dispatches for the params of the matched path. It captures nothing,
+  # so there are none.
   describe '#params_for' do
     subject { instance.params_for('/anything') }
 
