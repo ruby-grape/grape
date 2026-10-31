@@ -266,4 +266,100 @@ describe Grape::Validations::Validators::OneofValidator do
       expect(JSON.parse(last_response.body)['error']).to eq('value does not match any of the allowed schemas')
     end
   end
+
+  describe 'a variant that fails after changing the value' do
+    let(:app) do
+      Class.new(Grape::API) do
+        format :json
+
+        params do
+          requires :value, type: Hash, oneof: [
+            proc do
+              requires :nested, type: Hash do
+                requires :code, type: Integer
+                requires :other, type: Integer
+              end
+            end,
+            proc do
+              requires :nested, type: Hash do
+                requires :code, type: String
+              end
+            end
+          ]
+        end
+        post('/hash') { { code: params[:value][:nested][:code] } }
+
+        params do
+          requires :value, type: Hash, oneof: [
+            proc do
+              requires :list, type: Array do
+                requires :code, type: Integer
+                requires :other, type: Integer
+              end
+            end,
+            proc do
+              requires :list, type: Array do
+                requires :code, type: String
+              end
+            end
+          ]
+        end
+        post('/array') { { code: params[:value][:list].first[:code] } }
+
+        params do
+          requires :value, type: Hash, oneof: [
+            proc do
+              requires :nested, type: Hash do
+                optional :color, default: 'red'
+                requires :other, type: Integer
+              end
+            end,
+            proc do
+              requires :nested, type: Hash do
+                requires :code, type: String
+                optional :color
+              end
+            end
+          ]
+        end
+        post('/default') { { color: params[:value][:nested][:color] } }
+      end
+    end
+
+    it 'does not pass its coercion of a nested Hash on to the next variant' do
+      post '/hash', { value: { nested: { code: '007' } } }.to_json, 'CONTENT_TYPE' => 'application/json'
+      expect(last_response.status).to eq(201)
+      expect(JSON.parse(last_response.body)).to eq('code' => '007')
+    end
+
+    it 'does not pass its coercion of an Array element on to the next variant' do
+      post '/array', { value: { list: [{ code: '007' }] } }.to_json, 'CONTENT_TYPE' => 'application/json'
+      expect(last_response.status).to eq(201)
+      expect(JSON.parse(last_response.body)).to eq('code' => '007')
+    end
+
+    it 'does not pass its nested default on to the next variant' do
+      post '/default', { value: { nested: { code: 'x' } } }.to_json, 'CONTENT_TYPE' => 'application/json'
+      expect(last_response.status).to eq(201)
+      expect(JSON.parse(last_response.body)).to eq('color' => nil)
+    end
+  end
+
+  describe 'a File inside a variant' do
+    let(:app) do
+      Class.new(Grape::API) do
+        format :json
+        params do
+          requires :value, type: Hash, oneof: [proc { requires :upload, type: File }]
+        end
+        post('/') { { content: params[:value][:upload][:tempfile].read } }
+      end
+    end
+
+    it 'accepts an uploaded file and leaves it readable' do
+      post '/', value: { upload: Rack::Test::UploadedFile.new(__FILE__, 'text/plain') }
+      expect(last_response.status).to eq(201)
+      expect(JSON.parse(last_response.body)).to eq('content' => File.read(__FILE__))
+    end
+  end
 end

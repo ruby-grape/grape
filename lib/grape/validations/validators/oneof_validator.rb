@@ -7,7 +7,7 @@ module Grape
       # variant schemas. Each variant is a list of pre-built validators
       # captured by evaluating the variant's block in a {Grape::Validations::OneofCollector}-backed
       # {ParamsScope}. At request time we try each variant in order against
-      # a deep-dup of the value; the first variant that produces no errors
+      # its own copy of the value; the first variant that produces no errors
       # wins and its (possibly coerced) hash replaces the original.
       class OneofValidator < Base
         default_message_key :oneof
@@ -25,7 +25,7 @@ module Grape
 
           winning_candidate = nil
           @variants.each do |variant_validators|
-            candidate = value.deep_dup
+            candidate = copy_containers(value)
             if variant_matches?(variant_validators, candidate)
               winning_candidate = candidate
               break
@@ -38,6 +38,17 @@ module Grape
         end
 
         private
+
+        # Validators write into Hashes and Arrays, so a failed variant must not
+        # share them with the next one. The leaves stay shared: +deep_dup+ reaches
+        # a Tempfile by delegation and returns the File it wraps, which
+        # Types::File then rejects.
+        def copy_containers(value)
+          return value.map { |element| copy_containers(element) } if value.is_a?(Array)
+          return value unless value.is_a?(Hash)
+
+          value.dup.transform_values! { |element| copy_containers(element) }
+        end
 
         def variant_matches?(variant_validators, candidate)
           variant_validators.each { |v| v.validate!(candidate) }

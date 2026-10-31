@@ -13,7 +13,6 @@ require 'active_support/core_ext/hash/indifferent_access' # nested_under_indiffe
 require 'active_support/hash_with_indifferent_access'
 require 'active_support/core_ext/module/delegation' # delegate_missing_to
 require 'active_support/core_ext/object/blank'
-require 'active_support/core_ext/object/deep_dup'
 require 'active_support/core_ext/object/duplicable'
 require 'active_support/core_ext/string/inflections' # demodulize, underscore
 require 'active_support/deprecation'
