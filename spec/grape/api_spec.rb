@@ -273,9 +273,8 @@ describe Grape::API do
     end
 
     it 'cancels itself after the block is over' do
-      internal_namespace = nil
       subject.namespace :awesome do
-        internal_namespace = namespace
+        namespace
       end
       expect(subject.namespace).to eql('/')
     end

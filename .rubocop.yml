@@ -16,7 +16,7 @@ plugins:
 inherit_from: .rubocop_todo.yml
 
 Layout/LineLength:
-  Max: 215
+  Max: 213
 
 Lint/EmptyBlock:
   Exclude:
@@ -42,26 +42,21 @@ Style/RedundantArrayConstructor:
 
 Style/OptionalBooleanParameter:
   AllowedMethods:
-    - respond_to_missing?
     - respond_to?
 
 Style/Send:
   Enabled: true
 
-Metrics/BlockLength:
-  Max: 30
-  Exclude:
-    - spec/**/*_spec.rb
-
 Metrics/ClassLength:
-  Max: 430
+  Max: 365
 
 Metrics/ParameterLists:
   CountKeywordArgs: false
   MaxOptionalParameters: 4
 
 Metrics/MethodLength:
-  Max: 32
+  Max: 17
+  CountAsOne: [array, hash, heredoc, method_call]
 
 RSpec/ExampleLength:
   Max: 60
