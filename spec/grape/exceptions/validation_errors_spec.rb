@@ -46,10 +46,10 @@ describe Grape::Exceptions::ValidationErrors do
 
   describe '#full_messages' do
     context 'with errors' do
-      subject { described_class.new(exceptions: [validation_error_1, validation_error_2]).full_messages }
+      subject { described_class.new(exceptions: [id_error, name_error]).full_messages }
 
-      let(:validation_error_1) { Grape::Exceptions::Validation.new(params: ['id'], message: :presence) }
-      let(:validation_error_2) { Grape::Exceptions::Validation.new(params: ['name'], message: :presence) }
+      let(:id_error) { Grape::Exceptions::Validation.new(params: ['id'], message: :presence) }
+      let(:name_error) { Grape::Exceptions::Validation.new(params: ['name'], message: :presence) }
 
       it 'returns an array with each errors full message' do
         expect(subject).to contain_exactly('id is missing', 'name is missing')

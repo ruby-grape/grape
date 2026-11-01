@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 describe Grape::Middleware::Versioner::Header do
-  subject { described_class.new(app, **@options) }
+  subject { described_class.new(app, **options) }
 
   let(:app) { ->(env) { [200, env, env] } }
 
-  before do
-    @options = {
+  let(:options) do
+    {
       version_options: Grape::DSL::VersionOptions.new(using: :header, vendor: 'vendor')
     }
   end
@@ -50,7 +50,7 @@ describe Grape::Middleware::Versioner::Header do
     ['v1', :v1].each do |version|
       context "when version is set to #{version}" do
         before do
-          @options[:versions] = [version]
+          options[:versions] = [version]
         end
 
         it 'is set' do
@@ -93,7 +93,7 @@ describe Grape::Middleware::Versioner::Header do
 
     context 'when version is set' do
       before do
-        @options[:versions] = ['v1']
+        options[:versions] = ['v1']
       end
 
       it 'is set' do
@@ -121,8 +121,8 @@ describe Grape::Middleware::Versioner::Header do
 
     context 'when the vendor is declared with capitals' do
       before do
-        @options[:version_options] = Grape::DSL::VersionOptions.new(using: :header, vendor: 'MyCompany')
-        @options[:versions] = ['v1']
+        options[:version_options] = Grape::DSL::VersionOptions.new(using: :header, vendor: 'MyCompany')
+        options[:versions] = ['v1']
       end
 
       %w[application/vnd.MyCompany-v1+json application/vnd.mycompany-v1+json].each do |accept|
@@ -143,7 +143,7 @@ describe Grape::Middleware::Versioner::Header do
 
   context 'api.version' do
     before do
-      @options[:versions] = ['v1']
+      options[:versions] = ['v1']
     end
 
     it 'is set' do
@@ -180,7 +180,7 @@ describe Grape::Middleware::Versioner::Header do
 
     context 'when the version is declared with capitals' do
       before do
-        @options[:versions] = ['V1']
+        options[:versions] = ['V1']
       end
 
       %w[application/vnd.vendor-V1+json application/vnd.vendor-v1+json].each do |accept|
@@ -199,7 +199,7 @@ describe Grape::Middleware::Versioner::Header do
 
   context 'when a content type is declared with capitals' do
     before do
-      @options[:content_types] = { csv: 'Text/CSV' }
+      options[:content_types] = { csv: 'Text/CSV' }
     end
 
     it 'matches it' do
@@ -215,13 +215,13 @@ describe Grape::Middleware::Versioner::Header do
   end
 
   it 'succeeds if :strict is set to false' do
-    @options[:version_options] = @options[:version_options].with(strict: false)
+    options[:version_options] = options[:version_options].with(strict: false)
     expect(subject.call('HTTP_ACCEPT' => '').first).to eq(200)
     expect(subject.call({}).first).to eq(200)
   end
 
   it 'succeeds if :strict is set to false and given an invalid header' do
-    @options[:version_options] = @options[:version_options].with(strict: false)
+    options[:version_options] = options[:version_options].with(strict: false)
     expect(subject.call('HTTP_ACCEPT' => 'yaml').first).to eq(200)
     expect(subject.call({}).first).to eq(200)
   end
@@ -234,8 +234,8 @@ describe Grape::Middleware::Versioner::Header do
 
   context 'when :strict is set' do
     before do
-      @options[:versions] = ['v1']
-      @options[:version_options] = @options[:version_options].with(strict: true)
+      options[:versions] = ['v1']
+      options[:version_options] = options[:version_options].with(strict: true)
     end
 
     it 'fails with 406 Not Acceptable if header is not set' do
@@ -271,8 +271,8 @@ describe Grape::Middleware::Versioner::Header do
 
   context 'when :strict and cascade: false' do
     before do
-      @options[:versions] = ['v1']
-      @options[:version_options] = @options[:version_options].with(strict: true, cascade: false)
+      options[:versions] = ['v1']
+      options[:version_options] = options[:version_options].with(strict: true, cascade: false)
     end
 
     it 'fails with 406 Not Acceptable if header is not set' do
@@ -320,7 +320,7 @@ describe Grape::Middleware::Versioner::Header do
 
   context 'when multiple versions are specified' do
     before do
-      @options[:versions] = %w[v1 v2]
+      options[:versions] = %w[v1 v2]
     end
 
     it 'succeeds with v1' do
@@ -343,7 +343,7 @@ describe Grape::Middleware::Versioner::Header do
 
   context 'when a version holds a hyphen' do
     before do
-      @options[:versions] = %w[2024-01-01 2.0-beta]
+      options[:versions] = %w[2024-01-01 2.0-beta]
     end
 
     %w[2024-01-01 2.0-beta].each do |version|
@@ -381,8 +381,8 @@ describe Grape::Middleware::Versioner::Header do
 
   context 'when the vendor holds a hyphen' do
     before do
-      @options[:versions] = ['v1']
-      @options[:version_options] = Grape::DSL::VersionOptions.new(using: :header, vendor: 'my-vendor')
+      options[:versions] = ['v1']
+      options[:version_options] = Grape::DSL::VersionOptions.new(using: :header, vendor: 'my-vendor')
     end
 
     it 'sets the vendor and version' do

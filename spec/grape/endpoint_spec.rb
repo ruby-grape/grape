@@ -242,23 +242,6 @@ describe Grape::Endpoint do
       end
     end
 
-    context 'sets a value to params' do
-      it 'params' do
-        subject.params do
-          requires :a, type: String
-        end
-        subject.get '/foo' do
-          params[:a] = 'bar'
-        end
-
-        get '/foo', a: 'foo'
-        expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('bar')
-      end
-    end
-  end
-
-  describe '#params' do
     it 'is available to the caller' do
       subject.get('/hey') do
         params[:howdy]
@@ -368,24 +351,24 @@ describe Grape::Endpoint do
       end
 
       if Object.const_defined? :MultiXml
-        it 'converts XML bodies to params' do
+        it 'converts XML bodies to params on POST' do
           post '/request_body', '<user>Bobby T.</user>', 'CONTENT_TYPE' => 'application/xml'
           expect(last_response.body).to eq('Bobby T.')
         end
 
-        it 'converts XML bodies to params' do
+        it 'converts XML bodies to params on PUT' do
           put '/request_body', '<user>Bobby T.</user>', 'CONTENT_TYPE' => 'application/xml'
           expect(last_response.body).to eq('Bobby T.')
         end
       else
         let(:body) { '<user>Bobby T.</user>' }
 
-        it 'converts XML bodies to params' do
+        it 'converts XML bodies to params without MultiXml on POST' do
           post '/request_body', body, 'CONTENT_TYPE' => 'application/xml'
           expect(last_response.body).to eq(Grape::Xml.parse(body)['user'].to_s)
         end
 
-        it 'converts XML bodies to params' do
+        it 'converts XML bodies to params without MultiXml on PUT' do
           put '/request_body', body, 'CONTENT_TYPE' => 'application/xml'
           expect(last_response.body).to eq(Grape::Xml.parse(body)['user'].to_s)
         end
@@ -1167,6 +1150,13 @@ describe Grape::Endpoint do
   end
 
   context 'instrumentation' do
+    let(:events) { [] }
+    let!(:subscriber) do
+      ActiveSupport::Notifications.subscribe(/grape/) do |*args|
+        events << ActiveSupport::Notifications::Event.new(*args)
+      end
+    end
+
     before do
       subject.before do
         # Placeholder
@@ -1177,22 +1167,17 @@ describe Grape::Endpoint do
       subject.get do
         'hello'
       end
-
-      @events = []
-      @subscriber = ActiveSupport::Notifications.subscribe(/grape/) do |*args|
-        @events << ActiveSupport::Notifications::Event.new(*args)
-      end
     end
 
     after do
-      ActiveSupport::Notifications.unsubscribe(@subscriber)
+      ActiveSupport::Notifications.unsubscribe(subscriber)
     end
 
     it 'notifies AS::N' do
       get '/'
 
       # In order that the events finalized (time each block ended)
-      expect(@events).to contain_exactly(
+      expect(events).to contain_exactly(
         have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(described_class),
                                                                        filters: a_collection_containing_exactly(an_instance_of(Proc)),
                                                                        type: :before }),
@@ -1207,7 +1192,7 @@ describe Grape::Endpoint do
       )
 
       # In order that events were initialized
-      expect(@events.sort_by(&:time)).to contain_exactly(
+      expect(events.sort_by(&:time)).to contain_exactly(
         have_attributes(name: 'endpoint_run.grape', payload: { endpoint: a_kind_of(described_class),
                                                                env: an_instance_of(Hash) }),
         have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(described_class),

@@ -14,6 +14,8 @@ describe Grape::DSL::Routing do
         attr_reader :instance, :base
         attr_accessor :configuration
       end
+
+      @endpoints = []
     end
   end
 
@@ -62,19 +64,13 @@ describe Grape::DSL::Routing do
   end
 
   describe '.route' do
-    before do
-      allow(subject).to receive(:endpoints).and_return([])
-      allow(subject.inheritable_setting).to receive(:route_end)
-      allow(subject).to receive(:reset_validations!)
-    end
-
     it 'marks end of the route' do
       expect(subject.inheritable_setting).to receive(:route_end)
       subject.route(:any)
     end
 
     it 'resets validations' do
-      expect(subject).to receive(:reset_validations!)
+      expect(subject.inheritable_setting).to receive(:reset_validations!)
       subject.route(:any)
     end
 
@@ -117,50 +113,50 @@ describe Grape::DSL::Routing do
 
   describe '.get' do
     it 'delegates to .route' do
-      expect(subject).to receive(:route).with(Rack::GET, path, options)
       subject.get path, **options, &proc
+      expect(subject.routes.last).to have_attributes(request_method: Rack::GET, origin: path, options:)
     end
   end
 
   describe '.post' do
     it 'delegates to .route' do
-      expect(subject).to receive(:route).with(Rack::POST, path, options)
       subject.post path, **options, &proc
+      expect(subject.routes.last).to have_attributes(request_method: Rack::POST, origin: path, options:)
     end
   end
 
   describe '.put' do
     it 'delegates to .route' do
-      expect(subject).to receive(:route).with(Rack::PUT, path, options)
       subject.put path, **options, &proc
+      expect(subject.routes.last).to have_attributes(request_method: Rack::PUT, origin: path, options:)
     end
   end
 
   describe '.head' do
     it 'delegates to .route' do
-      expect(subject).to receive(:route).with(Rack::HEAD, path, options)
       subject.head path, **options, &proc
+      expect(subject.routes.last).to have_attributes(request_method: Rack::HEAD, origin: path, options:)
     end
   end
 
   describe '.delete' do
     it 'delegates to .route' do
-      expect(subject).to receive(:route).with(Rack::DELETE, path, options)
       subject.delete path, **options, &proc
+      expect(subject.routes.last).to have_attributes(request_method: Rack::DELETE, origin: path, options:)
     end
   end
 
   describe '.options' do
     it 'delegates to .route' do
-      expect(subject).to receive(:route).with(Rack::OPTIONS, path, options)
       subject.options path, **options, &proc
+      expect(subject.routes.last).to have_attributes(request_method: Rack::OPTIONS, origin: path, options:)
     end
   end
 
   describe '.patch' do
     it 'delegates to .route' do
-      expect(subject).to receive(:route).with(Rack::PATCH, path, options)
       subject.patch path, **options, &proc
+      expect(subject.routes.last).to have_attributes(request_method: Rack::PATCH, origin: path, options:)
     end
   end
 
@@ -234,31 +230,29 @@ describe Grape::DSL::Routing do
     let!(:options) { { requirements: regex } }
     let(:regex) { /(.*)/ }
 
-    it 'calls #namespace with given params' do
-      expect(subject).to receive(:namespace).with(':foo', requirements: nil).and_yield
-      subject.route_param('foo', &proc {})
+    it 'opens a namespace named after the param' do
+      inside_namespace = nil
+      subject.route_param('foo') { inside_namespace = namespace }
+      expect(inside_namespace).to eq('/:foo')
     end
 
     it 'nests requirements option under param name' do
-      expect(subject).to receive(:namespace) do |_param, options|
-        expect(options[:requirements][:foo]).to eq regex
-      end
-      subject.route_param('foo', **options, &proc {})
+      requirements = nil
+      subject.route_param('foo', **options) { requirements = inheritable_setting.namespaces.last.requirements }
+      expect(requirements).to eq(foo: regex)
     end
 
     it 'does not modify options parameter' do
-      allow(subject).to receive(:namespace)
-      expect { subject.route_param('foo', **options, &proc {}) }
+      expect { subject.route_param('foo', **options) {} }
         .not_to(change { options })
     end
 
     # The param is named here, so any lone constraint belongs to it — not just
     # a Regexp, which was the only one nested before.
     it 'nests a lone capture type under param name' do
-      expect(subject).to receive(:namespace) do |_param, options|
-        expect(options[:requirements]).to eq(foo: Integer)
-      end
-      subject.route_param('foo', requirements: Integer, &proc {})
+      requirements = nil
+      subject.route_param('foo', requirements: Integer) { requirements = inheritable_setting.namespaces.last.requirements }
+      expect(requirements).to eq(foo: Integer)
     end
 
     # A Hash would name the param twice, or constrain a capture this namespace

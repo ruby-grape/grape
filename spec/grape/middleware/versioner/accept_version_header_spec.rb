@@ -1,19 +1,19 @@
 # frozen_string_literal: true
 
 describe Grape::Middleware::Versioner::AcceptVersionHeader do
-  subject { described_class.new(app, **@options) }
+  subject { described_class.new(app, **options) }
 
   let(:app) { ->(env) { [200, env, env] } }
 
-  before do
-    @options = {
+  let(:options) do
+    {
       version_options: Grape::DSL::VersionOptions.new(using: :accept_version_header)
     }
   end
 
   describe '#bad encoding' do
     before do
-      @options[:versions] = %w[v1]
+      options[:versions] = %w[v1]
     end
 
     it 'does not raise an error' do
@@ -27,16 +27,10 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
 
   context 'api.version' do
     before do
-      @options[:versions] = ['v1']
+      options[:versions] = ['v1']
     end
 
     it 'is set' do
-      status, _, env = subject.call('HTTP_ACCEPT_VERSION' => 'v1')
-      expect(env[Grape::Env::API_VERSION]).to eql 'v1'
-      expect(status).to eq(200)
-    end
-
-    it 'is set if format provided' do
       status, _, env = subject.call('HTTP_ACCEPT_VERSION' => 'v1')
       expect(env[Grape::Env::API_VERSION]).to eql 'v1'
       expect(status).to eq(200)
@@ -57,15 +51,15 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
   end
 
   it 'succeeds if :strict is set to false' do
-    @options[:version_options] = @options[:version_options].with(strict: false)
+    options[:version_options] = options[:version_options].with(strict: false)
     expect(subject.call('HTTP_ACCEPT_VERSION' => '').first).to eq(200)
     expect(subject.call({}).first).to eq(200)
   end
 
   context 'when :strict is set' do
     before do
-      @options[:versions] = ['v1']
-      @options[:version_options] = @options[:version_options].with(strict: true)
+      options[:versions] = ['v1']
+      options[:version_options] = options[:version_options].with(strict: true)
     end
 
     it 'fails with 406 Not Acceptable if header is not set' do
@@ -91,8 +85,8 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
 
   context 'when :strict and cascade: false' do
     before do
-      @options[:versions] = ['v1']
-      @options[:version_options] = @options[:version_options].with(strict: true, cascade: false)
+      options[:versions] = ['v1']
+      options[:version_options] = options[:version_options].with(strict: true, cascade: false)
     end
 
     it 'fails with 406 Not Acceptable if header is not set' do

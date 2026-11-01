@@ -11,6 +11,7 @@
 * [#3046](https://github.com/ruby-grape/grape/pull/3046): Fix file uploads rejected inside `oneof` variants - [@ericproulx](https://github.com/ericproulx).
 * [#3047](https://github.com/ruby-grape/grape/pull/3047): Split the router's miss and cascade paths and name its methods for what they do - [@ericproulx](https://github.com/ericproulx).
 * [#3048](https://github.com/ruby-grape/grape/pull/3048): Update rubocop to 1.92.2 and tighten Metrics and line length limits - [@ericproulx](https://github.com/ericproulx).
+* [#3049](https://github.com/ruby-grape/grape/pull/3049): Clear the RuboCop todo and remove `.rubocop_todo.yml` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.1.0 (2026-10-31)

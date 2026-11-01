@@ -61,7 +61,7 @@ describe Grape::Middleware::Formatter do
   end
 
   context 'error handling' do
-    let(:formatter) { double(:formatter) }
+    let(:formatter) { instance_double(Proc) }
     let(:env) do
       { Rack::PATH_INFO => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json' }
     end
@@ -393,14 +393,10 @@ describe Grape::Middleware::Formatter do
       end
 
       context 'when body is nil' do
-        let(:io) { double }
-
-        before do
-          allow(io).to receive_message_chain(rewind: nil, read: nil)
-        end
+        let(:io) { instance_double(StringIO) }
 
         it 'does not read and parse the body' do
-          expect(subject).not_to receive(:read_rack_input)
+          expect(io).not_to receive(:read)
           subject.call(
             Rack::PATH_INFO => '/info',
             Rack::REQUEST_METHOD => method,
@@ -412,14 +408,10 @@ describe Grape::Middleware::Formatter do
       end
 
       context 'when body is empty' do
-        let(:io) { double }
-
-        before do
-          allow(io).to receive_messages(rewind: nil, read: '')
-        end
+        let(:io) { instance_double(StringIO) }
 
         it 'does not read and parse the body' do
-          expect(subject).not_to receive(:read_rack_input)
+          expect(io).not_to receive(:read)
           subject.call(
             Rack::PATH_INFO => '/info',
             Rack::REQUEST_METHOD => method,
@@ -562,7 +554,7 @@ describe Grape::Middleware::Formatter do
   end
 
   context 'send file' do
-    let(:file) { double(File) }
+    let(:file) { instance_double(File) }
     let(:file_body) { Grape::ServeStream::StreamResponse.new(file) }
     let(:app) { ->(_env) { [200, {}, file_body] } }
     let(:body) { 'data' }
@@ -578,7 +570,7 @@ describe Grape::Middleware::Formatter do
     end
 
     it 'returns a file response' do
-      expect(file).to receive(:each).and_yield(body)
+      allow(file).to receive(:each).and_yield(body)
       r = Rack::MockResponse[*subject.call(env)]
       expect(r).to be_successful
       expect(r.headers).to eq(headers)

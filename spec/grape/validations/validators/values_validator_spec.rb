@@ -979,16 +979,14 @@ describe Grape::Validations::Validators::ValuesValidator do
       subject
     end
 
-    before do
-      expect(SecureRandom).to receive(:uuid).and_return('foo').once
-    end
-
     it 'only evaluates values dynamically with each request' do
+      expect(SecureRandom).to receive(:uuid).and_return('foo').once
       get '/random_values', type: 'foo'
       expect(last_response.status).to eq 200
     end
 
     it 'chooses default' do
+      expect(SecureRandom).to receive(:uuid).and_return('foo').once
       get '/random_values'
       expect(last_response.status).to eq 200
     end

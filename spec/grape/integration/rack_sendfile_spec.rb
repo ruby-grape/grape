@@ -36,7 +36,7 @@ describe Rack::Sendfile do
 
   context 'when streaming non file content' do
     let(:file_object) do
-      double(:file_object, each: nil)
+      instance_double(Enumerator, each: nil)
     end
 
     it 'not contains Sendfile headers' do

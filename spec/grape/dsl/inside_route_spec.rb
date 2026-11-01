@@ -233,7 +233,7 @@ describe Grape::DSL::InsideRoute do
       end
 
       context 'as object' do
-        let(:file_object) { double('StreamerObject', each: nil) }
+        let(:file_object) { instance_double(Enumerator, each: nil) }
 
         it 'raises an error that only a file path is supported' do
           expect { subject.sendfile file_object }.to raise_error(ArgumentError, /argument must be a file path/)
@@ -273,7 +273,7 @@ describe Grape::DSL::InsideRoute do
       end
 
       context 'as a stream object' do
-        let(:stream_object) { double('StreamerObject', each: nil) }
+        let(:stream_object) { instance_double(Enumerator, each: nil) }
 
         let(:stream_response) do
           Grape::ServeStream::StreamResponse.new(stream_object)
@@ -296,7 +296,7 @@ describe Grape::DSL::InsideRoute do
       end
 
       context 'as a non-stream object' do
-        let(:non_stream_object) { double('NonStreamerObject') }
+        let(:non_stream_object) { Object.new }
 
         it 'raises an error that the object must implement :each' do
           expect { subject.stream non_stream_object }.to raise_error(ArgumentError, /:each/)

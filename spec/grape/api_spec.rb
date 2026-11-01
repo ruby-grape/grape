@@ -332,11 +332,15 @@ describe Grape::API do
   end
 
   describe '.call' do
-    context 'it does not add to the app setup' do
-      it 'calls the app' do
-        expect(subject).not_to receive(:add_setup)
-        subject.call(Rack::MockRequest.env_for('/'))
-      end
+    # Mounting replays the app's setup, so a recorded call would run again.
+    it 'does not add to the app setup' do
+      calls = 0
+      subject.get('/') { calls += 1 }
+
+      subject.call(Rack::MockRequest.env_for('/'))
+      Class.new(described_class).mount(subject)
+
+      expect(calls).to eq(1)
     end
   end
 
@@ -891,7 +895,7 @@ describe Grape::API do
     end
 
     verbs = %w[post get head delete put options patch]
-    verbs.each do |verb|
+    verbs.map { |verb| [verb, verbs - [verb]] }.each do |verb, other_verbs|
       it "allows and properly constrain a #{verb.upcase} method" do
         subject.__send__(verb, '/example') do
           verb
@@ -899,7 +903,7 @@ describe Grape::API do
         __send__(verb, '/example')
         expect(last_response.body).to eql verb == 'head' ? '' : verb
         # Call it with all methods other than the properly constrained one.
-        (verbs - [verb]).each do |other_verb|
+        other_verbs.each do |other_verb|
           __send__(other_verb, '/example')
           expected_rc = if other_verb == 'options' then 204
                         elsif other_verb == 'head' && verb == 'get' then 200
@@ -1300,7 +1304,7 @@ describe Grape::API do
         end
       end
 
-      context 'when HEAD is called for the defined GET' do
+      context 'when HEAD is called for the defined GET without the secret' do
         let(:response) { head('/example?id=504') }
 
         it 'responds with 401 because before expectations in before hooks are not met' do
@@ -1308,7 +1312,7 @@ describe Grape::API do
         end
       end
 
-      context 'when HEAD is called for the defined GET' do
+      context 'when HEAD is called for the defined GET with the secret' do
         let(:response) { head('/example?id=504&secret=password') }
 
         it 'responds with 200 because before hooks are not called' do
@@ -1448,159 +1452,140 @@ describe Grape::API do
 
   describe 'filters' do
     it 'adds a before filter' do
-      subject.before { @foo = 'first'  }
+      subject.before { @foo = 'first' }
       subject.before { @bar = 'second' }
-      subject.get '/' do
-        "#{@foo} #{@bar}"
-      end
+      subject.get('/') { "#{instance_variable_get(:@foo)} #{instance_variable_get(:@bar)}" }
 
       get '/'
       expect(last_response.body).to eql 'first second'
     end
 
-    it 'adds a before filter to current and child namespaces only' do
-      subject.get '/' do
-        "root - #{@foo if @foo}"
-      end
-      subject.namespace :blah do
-        before { @foo = 'foo' }
+    context 'with a before filter on a namespace' do
+      subject do
+        Class.new(described_class) do
+          get('/') { "root - #{@foo if @foo}" }
 
-        get '/' do
-          "blah - #{@foo}"
-        end
+          namespace :blah do
+            before { @foo = 'foo' }
 
-        namespace :bar do
-          get '/' do
-            "blah - bar - #{@foo}"
+            get('/') { "blah - #{@foo}" }
+
+            namespace :bar do
+              get('/') { "blah - bar - #{@foo}" }
+            end
           end
         end
       end
 
-      get '/'
-      expect(last_response.body).to eql 'root - '
-      get '/blah'
-      expect(last_response.body).to eql 'blah - foo'
-      get '/blah/bar'
-      expect(last_response.body).to eql 'blah - bar - foo'
+      it 'adds a before filter to current and child namespaces only' do
+        get '/'
+        expect(last_response.body).to eql 'root - '
+        get '/blah'
+        expect(last_response.body).to eql 'blah - foo'
+        get '/blah/bar'
+        expect(last_response.body).to eql 'blah - bar - foo'
+      end
     end
 
-    it 'adds a after_validation filter' do
-      subject.after_validation { @foo = "first #{params[:id]}:#{params[:id].class}" }
-      subject.after_validation { @bar = 'second' }
-      subject.params do
-        requires :id, type: Integer
-      end
-      subject.get '/' do
-        "#{@foo} #{@bar}"
+    context 'with after_validation filters setting instance variables' do
+      subject do
+        Class.new(described_class) do
+          after_validation { @foo = "first #{params[:id]}:#{params[:id].class}" }
+          after_validation { @bar = 'second' }
+          params do
+            requires :id, type: Integer
+          end
+          get('/') { "#{@foo} #{@bar}" }
+        end
       end
 
-      get '/', id: '32'
-      expect(last_response.body).to eql "first 32:#{integer_class_name} second"
+      it 'adds a after_validation filter' do
+        get '/', id: '32'
+        expect(last_response.body).to eql "first 32:#{integer_class_name} second"
+      end
     end
 
     it 'adds a after filter' do
-      m = double('after mock')
-      subject.after { m.do_something! }
-      subject.after { m.do_something! }
+      calls = []
+      subject.after { calls << :first }
+      subject.after { calls << :second }
       subject.get '/' do
         @var ||= 'default'
       end
 
-      expect(m).to receive(:do_something!).twice
       get '/'
+      expect(calls).to contain_exactly(:first, :second)
       expect(last_response.body).to eql 'default'
     end
 
     it 'calls all filters when validation passes' do
-      a = double('before mock')
-      b = double('before_validation mock')
-      c = double('after_validation mock')
-      d = double('after mock')
+      calls = []
 
       subject.params do
         requires :id, type: Integer
       end
       subject.resource ':id' do
-        before { a.do_something! }
+        before { calls << :before }
 
-        before_validation { b.do_something! }
-        after_validation { c.do_something! }
-        after { d.do_something! }
+        before_validation { calls << :before_validation }
+        after_validation { calls << :after_validation }
+        after { calls << :after }
 
         get do
           'got it'
         end
       end
 
-      expect(a).to receive(:do_something!).once
-      expect(b).to receive(:do_something!).once
-      expect(c).to receive(:do_something!).once
-      expect(d).to receive(:do_something!).once
-
       get '/123'
+      expect(calls).to contain_exactly(:before, :before_validation, :after_validation, :after)
       expect(last_response).to be_successful
       expect(last_response.body).to eql 'got it'
     end
 
     it 'calls only before filters when validation fails' do
-      a = double('before mock')
-      b = double('before_validation mock')
-      c = double('after_validation mock')
-      d = double('after mock')
+      calls = []
 
       subject.params do
         requires :id, type: Integer, values: [1, 2, 3]
       end
       subject.resource ':id' do
-        before { a.do_something! }
+        before { calls << :before }
 
-        before_validation { b.do_something! }
-        after_validation { c.do_something! }
-        after { d.do_something! }
+        before_validation { calls << :before_validation }
+        after_validation { calls << :after_validation }
+        after { calls << :after }
 
         get do
           'got it'
         end
       end
 
-      expect(a).to receive(:do_something!).once
-      expect(b).to receive(:do_something!).once
-      expect(c).to receive(:do_something!).exactly(0).times
-      expect(d).to receive(:do_something!).exactly(0).times
-
       get '/4'
+      expect(calls).to contain_exactly(:before, :before_validation)
       expect(last_response).to be_bad_request
       expect(last_response.body).to eql 'id does not have a valid value'
     end
 
     it 'calls filters in the correct order' do
-      i = 0
-      a = double('before mock')
-      b = double('before_validation mock')
-      c = double('after_validation mock')
-      d = double('after mock')
+      calls = []
 
       subject.params do
         requires :id, type: Integer
       end
       subject.resource ':id' do
-        before { a.here(i += 1) }
+        before { calls << :before }
 
-        before_validation { b.here(i += 1) }
-        after_validation { c.here(i += 1) }
-        after { d.here(i += 1) }
+        before_validation { calls << :before_validation }
+        after_validation { calls << :after_validation }
+        after { calls << :after }
 
         get do
           'got it'
         end
       end
 
-      expect(a).to receive(:here).with(1).once
-      expect(b).to receive(:here).with(2).once
-      expect(c).to receive(:here).with(3).once
-      expect(d).to receive(:here).with(4).once
-
       get '/123'
+      expect(calls).to eq(%i[before before_validation after_validation after])
       expect(last_response).to be_successful
       expect(last_response.body).to eql 'got it'
     end
@@ -2247,17 +2232,24 @@ describe Grape::API do
       expect(last_response).to be_unauthorized
     end
 
-    it 'can set instance variables accessible to routes' do
-      subject.http_basic do |u, _p|
-        @hello = 'Hello, world.'
+    context 'when the authenticator sets an instance variable' do
+      subject do
+        Class.new(described_class) do
+          http_basic do |u, _p|
+            @hello = 'Hello, world.'
 
-        u == 'allow'
+            u == 'allow'
+          end
+
+          get(:hello) { @hello }
+        end
       end
 
-      subject.get(:hello) { @hello }
-      get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow', 'whatever')
-      expect(last_response).to be_successful
-      expect(last_response.body).to eql 'Hello, world.'
+      it 'is accessible to routes' do
+        get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow', 'whatever')
+        expect(last_response).to be_successful
+        expect(last_response.body).to eql 'Hello, world.'
+      end
     end
   end
 
@@ -2797,7 +2789,7 @@ describe Grape::API do
     end
 
     it 'can rescue exceptions raised in the formatter' do
-      formatter = double(:formatter)
+      formatter = instance_double(Proc)
       allow(formatter).to receive(:call) { raise StandardError }
       allow(Grape::Formatter).to receive(:formatter_for) { formatter }
 
@@ -4003,11 +3995,11 @@ describe Grape::API do
   end
 
   context 'desc' do
-    it 'empty array of routes' do
+    it 'has an empty array of routes by default' do
       expect(subject.routes).to eq([])
     end
 
-    it 'empty array of routes' do
+    it 'has an empty array of routes with only a description' do
       subject.desc 'grape api'
       expect(subject.routes).to eq([])
     end
@@ -4925,7 +4917,7 @@ describe Grape::API do
     end
   end
 
-  describe '.route' do
+  describe '#route' do
     context 'plain' do
       before do
         subject.get '/' do
@@ -5536,7 +5528,7 @@ describe Grape::API do
     it 'is equal to itself' do
       expect(grape_api.itself).to eq grape_api
       expect(grape_api).to eq MyAPI
-      expect(grape_api.eql?(MyAPI))
+      expect(grape_api).to eql MyAPI
     end
   end
 
@@ -5574,7 +5566,7 @@ describe Grape::API do
         Module.new do
           def inherited(api)
             super
-            api.instance_variable_set(:@foo, @bar.dup)
+            api.instance_variable_set(:@foo, instance_variable_get(:@bar).dup)
           end
         end
       end
@@ -5694,55 +5686,48 @@ describe Grape::API do
 
   context 'instance variables' do
     context 'when setting instance variables in a before validation' do
+      subject do
+        Class.new(described_class) do
+          before { @my_var = 'wadus' }
+
+          get('/') { { my_var: @my_var }.to_json }
+        end
+      end
+
       it 'is accessible inside the endpoint' do
-        expected_instance_variable_value = 'wadus'
-
-        subject.before do
-          @my_var = expected_instance_variable_value
-        end
-
-        subject.get('/') do
-          { my_var: @my_var }.to_json
-        end
-
         get '/'
-        expect(last_response.body).to eq({ my_var: expected_instance_variable_value }.to_json)
+        expect(last_response.body).to eq({ my_var: 'wadus' }.to_json)
       end
     end
 
     context 'when setting instance variables inside the endpoint code' do
+      subject do
+        Class.new(described_class) do
+          rescue_from(:all) { error!({ my_var: @my_var }, 400) }
+
+          get('/raises') do
+            @my_var = 'wadus'
+            raise
+          end
+
+          get('/first') do
+            @my_var = 'wadus'
+            { my_var: @my_var }.to_json
+          end
+
+          get('/second') { { my_var: @my_var }.to_json }
+        end
+      end
+
       it 'is accessible inside the rescue_from handler' do
-        expected_instance_variable_value = 'wadus'
-
-        subject.rescue_from(:all) do
-          body = { my_var: @my_var }
-          error!(body, 400)
-        end
-
-        subject.get('/') do
-          @my_var = expected_instance_variable_value
-          raise
-        end
-
-        get '/'
+        get '/raises'
         expect(last_response).to be_bad_request
-        expect(last_response.body).to eq({ my_var: expected_instance_variable_value }.to_json)
+        expect(last_response.body).to eq({ my_var: 'wadus' }.to_json)
       end
 
       it 'is NOT available in other endpoints of the same api' do
-        expected_instance_variable_value = 'wadus'
-
-        subject.get('/first') do
-          @my_var = expected_instance_variable_value
-          { my_var: @my_var }.to_json
-        end
-
-        subject.get('/second') do
-          { my_var: @my_var }.to_json
-        end
-
         get '/first'
-        expect(last_response.body).to eq({ my_var: expected_instance_variable_value }.to_json)
+        expect(last_response.body).to eq({ my_var: 'wadus' }.to_json)
         get '/second'
         expect(last_response.body).to eq({ my_var: nil }.to_json)
       end
@@ -5817,11 +5802,11 @@ describe Grape::API do
     end
 
     around do |example|
-      @lint = Grape.config.lint
+      lint = Grape.config.lint
       Grape.config.lint = false
       example.run
     ensure
-      Grape.config.lint = @lint
+      Grape.config.lint = lint
     end
 
     it 'raises a Rack::Lint error' do
