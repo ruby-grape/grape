@@ -13,8 +13,6 @@ plugins:
   - rubocop-performance
   - rubocop-rspec
 
-inherit_from: .rubocop_todo.yml
-
 Layout/LineLength:
   Max: 213
 

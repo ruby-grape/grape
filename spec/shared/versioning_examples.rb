@@ -166,40 +166,24 @@ shared_examples_for 'versioning' do
 
   context 'with catch-all' do
     let(:options) { macro_options }
-    let(:v1) do
-      klass = Class.new(Grape::API)
-      klass.version 'v1', **options.except(:format)
-      klass.get 'version' do
-        'v1'
-      end
-      klass
-    end
-    let(:v2) do
-      klass = Class.new(Grape::API)
-      klass.version 'v2', **options.except(:format)
-      klass.get 'version' do
-        'v2'
-      end
-      klass
-    end
     # A third version makes v2 a *middle* version: reachable neither as the
     # first route matched nor as the last one, which is what regressed when a
     # cascading route handed straight over to the catch-all.
-    let(:v3) do
-      klass = Class.new(Grape::API)
-      klass.version 'v3', **options.except(:format)
-      klass.get 'version' do
-        'v3'
+    let(:version_apis) do
+      %w[v1 v2 v3].map do |version|
+        klass = Class.new(Grape::API)
+        klass.version version, **options.except(:format)
+        klass.get 'version' do
+          version
+        end
+        klass
       end
-      klass
     end
 
     before do
       subject.format :txt
 
-      subject.mount v1
-      subject.mount v2
-      subject.mount v3
+      version_apis.each { |api| subject.mount api }
 
       subject.route :any, '*path' do
         params[:path]

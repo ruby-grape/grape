@@ -62,14 +62,11 @@ describe Grape::Middleware::Error do
   let(:app) do
     opts = options
     app = running_app
+    error_middleware = described_class
     Rack::Builder.app do
       use Rack::Lint
       use Spec::Support::EndpointFaker
-      if opts.any?
-        use Grape::Middleware::Error, **opts
-      else
-        use Grape::Middleware::Error
-      end
+      use error_middleware, **opts
       run app
     end
   end
@@ -131,7 +128,7 @@ describe Grape::Middleware::Error do
     end
   end
 
-  context do
+  context 'with a default status' do
     let(:running_app) { exception_app }
     let(:options) { { rescue_all: true, default_status: 500 } }
 
@@ -141,7 +138,7 @@ describe Grape::Middleware::Error do
     end
   end
 
-  context do
+  context 'with the json format' do
     let(:running_app) { exception_app }
     let(:options) { { rescue_all: true, format: :json } }
 
@@ -151,18 +148,18 @@ describe Grape::Middleware::Error do
     end
   end
 
-  context do
+  context 'with the json format and a Hash error' do
     let(:running_app) { error_hash_app }
     let(:options) { { rescue_all: true, format: :json } }
 
     it 'is possible to return hash errors in json format' do
       get '/'
-      expect(['{"error":"rain!","detail":"missing widget"}',
-              '{"detail":"missing widget","error":"rain!"}']).to include(last_response.body)
+      expect(last_response.body).to eq('{"error":"rain!","detail":"missing widget"}')
+        .or eq('{"detail":"missing widget","error":"rain!"}')
     end
   end
 
-  context do
+  context 'with the xml format' do
     let(:running_app) { exception_app }
     let(:options) { { rescue_all: true, format: :xml } }
 
@@ -172,18 +169,18 @@ describe Grape::Middleware::Error do
     end
   end
 
-  context do
+  context 'with the xml format and a Hash error' do
     let(:running_app) { error_hash_app }
     let(:options) { { rescue_all: true, format: :xml } }
 
     it 'is possible to return hash errors in xml format' do
       get '/'
-      expect(["<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <detail>missing widget</detail>\n  <error>rain!</error>\n</error>\n",
-              "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <error>rain!</error>\n  <detail>missing widget</detail>\n</error>\n"]).to include(last_response.body)
+      expect(last_response.body).to eq("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <detail>missing widget</detail>\n  <error>rain!</error>\n</error>\n")
+        .or eq("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <error>rain!</error>\n  <detail>missing widget</detail>\n</error>\n")
     end
   end
 
-  context do
+  context 'with a custom error formatter' do
     let(:running_app) { exception_app }
     let(:options) do
       {
@@ -202,7 +199,7 @@ describe Grape::Middleware::Error do
     end
   end
 
-  context do
+  context 'when the error is thrown' do
     let(:running_app) { access_denied_app }
     let(:options) { {} }
 
@@ -212,7 +209,7 @@ describe Grape::Middleware::Error do
     end
   end
 
-  context do
+  context 'with a custom Grape exception' do
     let(:running_app) { custom_error_app }
     let(:options) { { rescue_all: false } }
 
@@ -239,7 +236,7 @@ describe Grape::Middleware::Error do
     end
   end
 
-  context do
+  context 'with rescue_options and the xml format' do
     let(:running_app) { exception_app }
     let(:options) do
       {
@@ -255,7 +252,7 @@ describe Grape::Middleware::Error do
     end
   end
 
-  context do
+  context 'with rescue_options and the txt format' do
     let(:running_app) { exception_app }
     let(:options) do
       {

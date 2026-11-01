@@ -34,7 +34,7 @@ describe Grape::DSL::Headers do
 
       describe 'set' do
         it 'returns value' do
-          expect(subject.header('third key', 'Third Value'))
+          expect(subject.header('third key', 'Third Value')).to eq 'Third Value'
           expect(subject.header['third key']).to eq 'Third Value'
         end
       end

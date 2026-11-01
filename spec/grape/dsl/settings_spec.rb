@@ -66,8 +66,8 @@ describe Grape::DSL::Settings do
         expect(subject.inheritable_setting.format).to eq :foo_bar
         subject.with_namespace do
           expect(subject.inheritable_setting.format).to eq :foo_bar
-          subject.inheritable_setting.format = :foo_bar_2
-          expect(subject.inheritable_setting.format).to eq :foo_bar_2
+          subject.inheritable_setting.format = :foo_baz
+          expect(subject.inheritable_setting.format).to eq :foo_baz
         end
         expect(subject.inheritable_setting.format).to eq :foo_bar
       end
@@ -80,8 +80,8 @@ describe Grape::DSL::Settings do
         subject.inheritable_setting.add_helper(:foo_bar)
         expect(subject.inheritable_setting.helpers).to eq [:foo_bar]
         subject.with_namespace do
-          subject.inheritable_setting.add_helper(:foo_bar_2)
-          expect(subject.inheritable_setting.helpers).to eq %i[foo_bar foo_bar_2]
+          subject.inheritable_setting.add_helper(:foo_baz)
+          expect(subject.inheritable_setting.helpers).to eq %i[foo_bar foo_baz]
         end
         expect(subject.inheritable_setting.helpers).to eq [:foo_bar]
       end

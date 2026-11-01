@@ -21,7 +21,7 @@ describe Grape::API do
   end
 
   context 'with a global namespace function' do
-    it 'works' do
+    it 'still answers the request' do
       get '/'
       expect(last_response.status).to eq 200
     end

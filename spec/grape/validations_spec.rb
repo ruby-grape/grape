@@ -1235,10 +1235,10 @@ describe Grape::Validations do
             subject.params do
               requires :top, type: Array do
                 requires :top_id, type: Integer, allow_blank: false
-                optional :middle_1, type: Array do
-                  requires :middle_1_id, type: Integer, allow_blank: false
-                  optional :middle_2, type: Array do
-                    requires :middle_2_id, type: String, allow_blank: false
+                optional :middle1, type: Array do
+                  requires :middle1_id, type: Integer, allow_blank: false
+                  optional :middle2, type: Array do
+                    requires :middle2_id, type: String, allow_blank: false
                     optional :bottom, type: Array do
                       requires :bottom_id, type: Integer, allow_blank: false
                     end
@@ -1255,18 +1255,18 @@ describe Grape::Validations do
           it 'with valid data' do
             data = {
               top: [
-                { top_id: 1, middle_1: [
-                  { middle_1_id: 11 }, { middle_1_id: 12, middle_2: [
-                    { middle_2_id: 121 }, { middle_2_id: 122, bottom: [{ bottom_id: 1221 }] }
+                { top_id: 1, middle1: [
+                  { middle1_id: 11 }, { middle1_id: 12, middle2: [
+                    { middle2_id: 121 }, { middle2_id: 122, bottom: [{ bottom_id: 1221 }] }
                   ] }
                 ] },
-                { top_id: 2, middle_1: [
-                  { middle_1_id: 21 }, { middle_1_id: 22, middle_2: [
-                    { middle_2_id: 221 }
+                { top_id: 2, middle1: [
+                  { middle1_id: 21 }, { middle1_id: 22, middle2: [
+                    { middle2_id: 221 }
                   ] }
                 ] },
-                { top_id: 3, middle_1: [
-                  { middle_1_id: 31 }, { middle_1_id: 32 }
+                { top_id: 3, middle1: [
+                  { middle1_id: 31 }, { middle1_id: 32 }
                 ] },
                 { top_id: 4 }
               ]
@@ -1280,16 +1280,16 @@ describe Grape::Validations do
           it 'with invalid data' do
             data = {
               top: [
-                { top_id: 1, middle_1: [
-                  { middle_1_id: 11 }, { middle_1_id: 12, middle_2: [
-                    { middle_2_id: 121 }, { middle_2_id: 122, bottom: [{ bottom_id: nil }] }
+                { top_id: 1, middle1: [
+                  { middle1_id: 11 }, { middle1_id: 12, middle2: [
+                    { middle2_id: 121 }, { middle2_id: 122, bottom: [{ bottom_id: nil }] }
                   ] }
                 ] },
-                { top_id: 2, middle_1: [
-                  { middle_1_id: 21 }, { middle_1_id: 22, middle_2: [{ middle_2_id: nil }] }
+                { top_id: 2, middle1: [
+                  { middle1_id: 21 }, { middle1_id: 22, middle2: [{ middle2_id: nil }] }
                 ] },
-                { top_id: 3, middle_1: [
-                  { middle_1_id: nil }, { middle_1_id: 32 }
+                { top_id: 3, middle1: [
+                  { middle1_id: nil }, { middle1_id: 32 }
                 ] },
                 { top_id: nil, missing_top_id: 4 }
               ]
@@ -1298,9 +1298,9 @@ describe Grape::Validations do
             get '/multi_level', data
             expect(last_response.body.split(', ')).to contain_exactly(
               'top[3][top_id] is empty',
-              'top[2][middle_1][0][middle_1_id] is empty',
-              'top[1][middle_1][1][middle_2][0][middle_2_id] is empty',
-              'top[0][middle_1][1][middle_2][1][bottom][0][bottom_id] is empty'
+              'top[2][middle1][0][middle1_id] is empty',
+              'top[1][middle1][1][middle2][0][middle2_id] is empty',
+              'top[0][middle1][1][middle2][1][bottom][0][bottom_id] is empty'
             )
             expect(last_response.status).to eq(400)
           end
@@ -1720,7 +1720,7 @@ describe Grape::Validations do
         end
       end
 
-      it 'works' do
+      it 'passes the keyword argument to the block' do
         get '/shared_params'
 
         expect(last_response.status).to eq(200)
@@ -1744,7 +1744,7 @@ describe Grape::Validations do
         end
       end
 
-      it 'works' do
+      it 'hands the block an empty Hash' do
         get '/shared_params'
 
         expect(last_response.status).to eq(200)

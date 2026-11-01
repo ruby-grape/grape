@@ -34,6 +34,14 @@ describe Grape::DSL::Parameters do
         @push_declared_params
       end
 
+      def require_required_and_optional_fields(context, **kwargs)
+        @required_and_optional_fields = [context, kwargs]
+      end
+
+      def required_and_optional_fields_reader
+        @required_and_optional_fields
+      end
+
       def new_scope(element, **_opts, &)
         nested_scope = self.class.new
         nested_scope.new_group_scope(element, &)
@@ -51,13 +59,13 @@ describe Grape::DSL::Parameters do
 
   describe '#use' do
     let(:options) { { option: 'value' } }
-    let(:named_params) { { params_group: proc {} } }
+    let(:named_params) { { params_group: proc { |option:| optional :id, desc: option } } }
 
     it 'calls processes associated with named params' do
       subject.api = Class.new { include Grape::DSL::Settings }.new
       subject.api.inheritable_setting.add_named_params(named_params)
-      expect(subject).to receive(:instance_exec).with(options).and_yield
       subject.use :params_group, **options
+      expect(subject.validates_reader).to eq([[:id], { desc: 'value' }])
     end
 
     it 'raises error when non-existent named param is called' do
@@ -269,13 +277,13 @@ describe Grape::DSL::Parameters do
 
     it 'deprecates a positional Hash for `use` but still works when silenced' do
       subject.api = Class.new { include Grape::DSL::Settings }.new
-      subject.api.inheritable_setting.add_named_params(params_group: proc {})
+      subject.api.inheritable_setting.add_named_params(params_group: proc { |option:| optional :id, desc: option })
 
       expect { subject.use :params_group, { option: 'value' } }
         .to raise_error(ActiveSupport::DeprecationException, /positional options Hash to `use`/)
 
-      expect(subject).to receive(:instance_exec).with(option: 'value').and_yield
       Grape.deprecator.silence { subject.use :params_group, { option: 'value' } }
+      expect(subject.validates_reader).to eq([[:id], { desc: 'value' }])
     end
 
     it 'keeps the options of the positional Hash applying to every attribute' do
@@ -288,9 +296,9 @@ describe Grape::DSL::Parameters do
 
     it 'routes :using out of the positional Hash to the keyword argument' do
       documentation = { id: { type: Integer } }
-      expect(subject).to receive(:require_required_and_optional_fields).with(:all, using: documentation, except: nil)
 
       Grape.deprecator.silence { subject.requires :all, { using: documentation } }
+      expect(subject.required_and_optional_fields_reader).to eq([:all, { using: documentation, except: nil }])
     end
 
     it 'does not deprecate keyword arguments' do

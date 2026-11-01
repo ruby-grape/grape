@@ -151,9 +151,9 @@ describe Grape::Middleware::Stack do
       expect { subject.concat others }.to change(subject, :others).from([]).to([[others.last]])
     end
 
-    it 'calls +merge_with+ with the :use specs' do
-      expect(subject).to receive(:merge_with).with [[:use, bar_middleware, nil]]
-      subject.concat others
+    it 'adds the :use specs to the stack right away' do
+      expect { subject.concat others }.to change(subject, :size).by(1)
+      expect(subject.last).to eq(bar_middleware)
     end
   end
 

@@ -5,11 +5,6 @@ describe Grape::Middleware::Base do
 
   let(:blank_app) { ->(_) { [200, {}, 'Hi there.'] } }
 
-  before do
-    # Keep it one object for testing.
-    allow(subject).to receive(:dup).and_return(subject)
-  end
-
   it 'has the app as an accessor' do
     expect(subject.app).to eq(blank_app)
   end
@@ -19,57 +14,66 @@ describe Grape::Middleware::Base do
   end
 
   context 'callbacks' do
-    after { subject.call!({}) }
-
-    it 'calls #before' do
-      expect(subject).to receive(:before)
+    subject do
+      recorded = calls
+      Class.new(described_class) do
+        define_method(:before) { recorded << :before }
+        define_method(:after) do
+          recorded << :after
+          nil
+        end
+      end.new(blank_app)
     end
 
-    it 'calls #after' do
-      expect(subject).to receive(:after)
+    let(:calls) { [] }
+
+    it 'calls #before and #after' do
+      subject.call({})
+      expect(calls).to eq(%i[before after])
     end
-  end
 
-  context 'callbacks on error' do
-    let(:blank_app) { ->(_) { raise StandardError } }
+    context 'when the app raises' do
+      let(:blank_app) { ->(_) { raise StandardError } }
 
-    it 'calls #after' do
-      expect(subject).to receive(:after)
-      expect { subject.call({}) }.to raise_error(StandardError)
+      it 'still calls #after' do
+        expect { subject.call({}) }.to raise_error(StandardError)
+        expect(calls).to eq(%i[before after])
+      end
     end
   end
 
   context 'after callback' do
-    before do
-      allow(subject).to receive(:after).and_return([200, {}, 'Hello from after callback'])
+    subject do
+      Class.new(described_class) do
+        def after
+          [200, {}, 'Hello from after callback']
+        end
+      end.new(blank_app)
     end
 
     it 'overwrites application response' do
-      expect(subject.call!({}).last).to eq('Hello from after callback')
+      expect(subject.call({}).last).to eq('Hello from after callback')
     end
   end
 
   context 'after callback with errors' do
-    it 'does not overwrite the application response' do
-      expect(subject.call({})).to eq([200, {}, 'Hi there.'])
+    subject do
+      Class.new(described_class) do
+        def after
+          raise StandardError, 'boom'
+        end
+      end.new(blank_app)
     end
 
-    context 'with patched warnings' do
-      before do
-        @warnings = warnings = []
-        allow(subject).to receive(:warn) { |m| warnings << m }
-        allow(subject).to receive(:after).and_raise(StandardError)
-      end
-
-      it 'does show a warning' do
-        expect { subject.call({}) }.to raise_error(StandardError)
-        expect(@warnings).not_to be_empty
-      end
+    it 'reraises the error after showing a warning' do
+      expect { subject.call({}) }
+        .to raise_error(StandardError, 'boom')
+        .and output(/caught error of type StandardError in after callback/).to_stderr
     end
   end
 
   it 'is able to access the response' do
-    subject.call({})
+    subject.call!({})
     expect(subject.response).to be_a(Rack::Response)
   end
 
@@ -78,7 +82,7 @@ describe Grape::Middleware::Base do
       described_class.new(response)
     end
 
-    before { subject.call({}) }
+    before { subject.call!({}) }
 
     context 'when Array' do
       let(:rack_response) { Rack::Response.new('test', 204, abc: 1) }
@@ -128,7 +132,7 @@ describe Grape::Middleware::Base do
     subject { described_class.new(blank_app) }
 
     it 'allows access to response context' do
-      subject.call(Grape::Env::API_ENDPOINT => { header: 'some header' })
+      subject.call!(Grape::Env::API_ENDPOINT => { header: 'some header' })
       expect(subject.context).to eq(header: 'some header')
     end
   end

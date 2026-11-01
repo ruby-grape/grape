@@ -43,23 +43,23 @@ describe Grape::Presenters::Presenter do
     end
 
     describe 'multiple presenter' do
-      let(:hash_mock1) do
+      let(:first_hash_mock) do
         { key1: :value1 }
       end
 
-      let(:hash_mock2) do
+      let(:second_hash_mock) do
         { key2: :value2 }
       end
 
       describe 'instance' do
         before do
-          subject.present hash_mock1, with: described_class
-          subject.present hash_mock2, with: described_class
+          subject.present first_hash_mock, with: described_class
+          subject.present second_hash_mock, with: described_class
         end
 
         it 'presents both dummy presenter' do
-          expect(subject.body[:key1]).to eq hash_mock1[:key1]
-          expect(subject.body[:key2]).to eq hash_mock2[:key2]
+          expect(subject.body[:key1]).to eq first_hash_mock[:key1]
+          expect(subject.body[:key2]).to eq second_hash_mock[:key2]
         end
       end
     end
