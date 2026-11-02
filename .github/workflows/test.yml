@@ -30,7 +30,7 @@ jobs:
           - gemfiles/rack_3_2.gemfile
           - gemfiles/rails_8_0.gemfile
           - gemfiles/rails_8_1.gemfile
-        specs: ['spec --exclude-pattern=spec/integration/{grape_entity,grape_swagger,hashie,dry_validation,multi_*}/*_spec.rb']
+        specs: ['spec --exclude-pattern=spec/integration/{grape_entity,grape_swagger,hashie,dry_validation,multi_*,falcon}/*_spec.rb']
         include:
           - ruby: '4.0'
             gemfile: gemfiles/grape_entity.gemfile
@@ -56,6 +56,15 @@ jobs:
           - ruby: '4.0'
             gemfile: gemfiles/multi_xml_0_8.gemfile
             specs: 'spec/integration/multi_xml'
+          - ruby: '3.3'
+            gemfile: gemfiles/falcon.gemfile
+            specs: 'spec/integration/falcon'
+          - ruby: '3.4'
+            gemfile: gemfiles/falcon.gemfile
+            specs: 'spec/integration/falcon'
+          - ruby: '4.0'
+            gemfile: gemfiles/falcon.gemfile
+            specs: 'spec/integration/falcon'
     runs-on: ubuntu-latest
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/${{ matrix.gemfile }}

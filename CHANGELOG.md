@@ -5,6 +5,7 @@
 * [#3019](https://github.com/ruby-grape/grape/pull/3019): Add `API.eager_load!` to compile an API and load its I18n translations at boot - [@ericproulx](https://github.com/ericproulx).
 * [#3022](https://github.com/ruby-grape/grape/pull/3022): Compile the APIs mounted in a Rails application's routes at boot when it eager loads - [@ericproulx](https://github.com/ericproulx).
 * [#3052](https://github.com/ruby-grape/grape/pull/3052): Add `Grape::ErrorFormatter::ProblemJson` to answer errors as RFC 9457 problem details - [@ericproulx](https://github.com/ericproulx).
+* [#3053](https://github.com/ruby-grape/grape/pull/3053): Run Grape behind Falcon in CI - [@ericproulx](https://github.com/ericproulx).
 * [#3054](https://github.com/ruby-grape/grape/pull/3054): Add `Grape.config.allow_undeclared_params`, answering 400 to undeclared params when `false`, the Grape 5.0 default - [@ericproulx](https://github.com/ericproulx).
 * [#3056](https://github.com/ruby-grape/grape/pull/3056): Drop support for Rails 7.2 and require ActiveSupport 8.0 - [@ericproulx](https://github.com/ericproulx).
 * [#3062](https://github.com/ruby-grape/grape/pull/3062): Use the reusable Danger workflow with a separate Gemfile - [@dblock](https://github.com/dblock).
