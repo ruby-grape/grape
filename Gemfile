@@ -17,7 +17,10 @@ end
 group :development do
   gem 'benchmark-ips'
   gem 'benchmark-memory'
+  # Duel requires Ruby 3.4 or later
+  gem 'duel', '~> 0.1.8' if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('3.4')
   gem 'irb'
+  gem 'stackprof', platforms: :mri
 end
 
 group :test do

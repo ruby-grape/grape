@@ -1,0 +1,122 @@
+name: Perf
+
+on:
+  pull_request:
+  merge_group: # (a merge queue's)
+  push:
+    branches: [master] # (and any other branch to guard, a stable one, say)
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+
+# A pull request's newer push cancels its run, if that's still going, as
+# only its newest commit's result counts. Every other run (a push's, say)
+# runs to the end, so that each push is compared.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# The Duel job runs the branch's code (its benchmarks too), so it only
+# reads. Commenting on a commit is the Comment on the commit job's, which
+# runs none of it, and commenting on a pull request is the Perf comment
+# workflow's.
+permissions:
+  contents: read
+  pull-requests: read # for the pull request's labels (see c.accept_label)
+
+jobs:
+  duel:
+    name: Duel
+    runs-on: ubuntu-latest
+    # Whether to comment (post, change or none), the run's status (passed,
+    # failed or neutral), and whether to mark a push passed (true, or
+    # nothing), from Duel.
+    outputs:
+      comment: ${{ steps.compare.outputs.comment }}
+      status: ${{ steps.compare.outputs.status }}
+      passed: ${{ steps.compare.outputs.passed }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # the baseline comes from history, tags included
+          persist-credentials: false
+      # The labels of the pull request (or for a push, of the one that
+      # merged it), for c.accept_label in .duel.rb, as a JSON array. They're
+      # read as the job runs, and adding the label (or taking it off) runs
+      # the job again: see the Perf comment workflow.
+      # On a schedule, the last commit since the last release that merged a
+      # pull request with the label (ACCEPT_LABEL, as .duel.rb names it):
+      # what that slowed down was accepted, so it's compared with instead.
+      - name: Find the pull request's labels
+        id: labels
+        if: github.event_name == 'pull_request' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule'
+        continue-on-error: true # (without them, nothing's accepted)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          QUEUED: ${{ github.event.merge_group.head_ref }}
+          ACCEPT_LABEL: 'duel: accept'
+          RELEASE_TAGS: "v*"
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = schedule ]; then
+            tag=$(git describe --tags --abbrev=0 --match "$RELEASE_TAGS" HEAD^ 2>/dev/null) || exit 0
+            since=$(TZ=UTC git log -1 --date=format-local:%Y-%m-%dT%H:%M:%SZ --format=%cd "$tag")
+            merged=$(gh pr list --repo "$GITHUB_REPOSITORY" --state merged --label "$ACCEPT_LABEL" --search "merged:>=$since" --limit 1000 \
+              --json mergeCommit --jq '.[].mergeCommit.oid')
+            accepted=$(git rev-list "$tag..HEAD" | grep -Fx -m 1 -f <(echo "$merged")) || accepted=
+            echo "accepted=$accepted" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # (In a merge queue, the last pull request queued, which the queue's
+          # branch names: gh-readonly-queue/master/pr-123-<sha>.)
+          if [ -n "$QUEUED" ]; then
+            PR=${QUEUED##*/pr-}
+            PR=${PR%%-*}
+          fi
+          if [ -n "$PR" ]; then
+            labels=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/labels" --jq '[.[].name]')
+          else
+            labels=$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" --jq '[.[0].labels[]?.name]')
+          fi
+          echo "labels=$labels" >> "$GITHUB_OUTPUT"
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "4.0" # the newest Ruby, which those who care most about speed run
+          bundler-cache: true
+      # Against the branch it targets for a pull request, the queue's base
+      # for a merge queue, what was there before for a push (or as
+      # c.push_base in .duel.rb says, the last commit Duel passed), and the
+      # last release on a schedule (slow creep). Duel adds its report to
+      # the job's summary, writes it to duel.md for the comment, and sets
+      # the step's outputs to say whether to comment, as c.comment in
+      # .duel.rb says, whatever the outcome.
+      - name: Compare
+        id: compare
+        env:
+          DUEL_BASE: ${{ github.event_name == 'schedule' && 'last-release' || github.event_name == 'push' && github.event.before || github.event_name == 'merge_group' && github.event.merge_group.base_sha || '' }}
+          # (Run by hand, it compares anyway: with nothing changed, the code
+          # with itself, which checks the setup.)
+          DUEL_FORCE: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
+          DUEL_LABELS: ${{ steps.labels.outputs.labels }}
+          DUEL_ACCEPTED: ${{ steps.labels.outputs.accepted }}
+        run: bundle exec duel --markdown "$RUNNER_TEMP/duel/duel.md"
+      # For a pull request, what Duel said, for the Perf comment workflow,
+      # which can't see this job's outputs.
+      - name: Say whether to comment
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          COMMENT: ${{ steps.compare.outputs.comment }}
+          STATUS: ${{ steps.compare.outputs.status }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/duel"
+          printf 'pr=%s\ncomment=%s\nstatus=%s\n' "$PR" "$COMMENT" "$STATUS" > "$RUNNER_TEMP/duel/comment.env"
+      # The report, for the comments.
+      - name: Keep the report
+        if: ${{ !cancelled() && (github.event_name == 'pull_request' || github.event_name == 'push') }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: duel-report
+          path: ${{ runner.temp }}/duel/
+          if-no-files-found: ignore # none when Duel didn't get to compare
+          retention-days: 1
