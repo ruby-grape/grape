@@ -48,6 +48,7 @@ en:
         presence: 'is missing'
         regexp: 'is invalid'
         same_as: 'is not the same as %{parameter}'
+        undeclared: 'is not allowed'
         unknown_auth_strategy: 'unknown auth strategy: %{strategy}'
         unknown_error_formatter: 'unknown error formatter: %{error_formatter_type}'
         unknown_options: 'unknown options: %{options}'

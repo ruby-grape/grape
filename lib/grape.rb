@@ -64,6 +64,10 @@ module Grape
   # Let an exception raised inside a `rescue_from` block propagate out of the
   # middleware stack instead of being redispatched.
   setting :raise_rescue_handler_errors, default: false
+  # Hand an endpoint the params a request carries that it did not declare.
+  # When false, such a request is answered 400. Grape 5.0 makes false the
+  # default.
+  setting :allow_undeclared_params, default: true
 
   # The HTTP QUERY method (RFC 10008): a safe, idempotent request whose content
   # carries the query. Rack has no constant for it yet, hence the literal.

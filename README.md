@@ -595,6 +595,7 @@ Currently the configurable settings are:
 * `warn_on_helper_overrides`: Warns when a helper method masks a `Grape::Endpoint` instance method, defaults to `false`.
 * `raise_rendering_errors`: Lets an error response that cannot be rendered propagate out of the middleware stack instead of being answered with a failsafe `500`, defaults to `false`. See [When the error response itself cannot be rendered](#when-the-error-response-itself-cannot-be-rendered).
 * `raise_rescue_handler_errors`: Lets an exception raised inside a `rescue_from` block propagate out of the middleware stack instead of being redispatched, defaults to `false`. See [Re-raising from inside a `rescue_from` block](#re-raising-from-inside-a-rescue_from-block).
+* `allow_undeclared_params`: Hands an endpoint the params a request carries that it did not declare, defaults to `true` and to `false` from Grape 5.0. Set to `false`, such a request is answered `400`. See [Rejecting Undeclared Parameters](#rejecting-undeclared-parameters).
 
 To change a setting value make sure that at some point during load time the following code runs
 
@@ -713,6 +714,8 @@ Grape allows you to access only the parameters that have been declared by your `
   * Filter out the params that have been passed, but are not allowed.
   * Include any optional params that are declared but not passed.
   * Perform any parameter renaming on the resulting hash.
+
+To answer `400` to a request that passes params the endpoint did not declare, see [Rejecting Undeclared Parameters](#rejecting-undeclared-parameters).
 
 Consider the following API endpoint:
 
@@ -2004,6 +2007,50 @@ params do
   requires :blah, allow_blank: false, regexp: /blah/, fail_fast: true
 end
 ```
+
+### Rejecting Undeclared Parameters
+
+By default, an endpoint gets every param a request carries, declared or not, and [`declared(params)`](#declared) is how it keeps to the ones it declared. With `allow_undeclared_params` set to `false`, a request that carries a param its endpoint did not declare is answered with a `400` instead, the param reported along with any other [validation error](#validation-errors). Grape 5.0 makes `false` the default.
+
+```ruby
+Grape.configure do |config|
+  config.allow_undeclared_params = false
+end
+```
+
+```ruby
+format :json
+
+params do
+  requires :name, type: String
+  optional :address, type: Hash do
+    requires :street, type: String
+  end
+end
+post '/users' do
+  params
+end
+```
+
+```bash
+curl -X POST -H 'Content-Type: application/json' localhost:9292/users -d '{"name":"Bob","admin":true,"address":{"street":"Main","zip":"1"}}'
+# {"error":"admin is not allowed, address[zip] is not allowed"}
+```
+
+A param counts as declared when it is:
+
+* declared with `requires` or `optional`, in the endpoint's `params` block or in that of a namespace around it, `given` blocks included. A param renamed with `as:` is sent under the name it is declared with.
+* a key of the endpoint's [contract](#using-dry-validation-or-dry-schema).
+* a segment of the endpoint's path, such as `:id`.
+* `format`, which Grape reads to [choose the response format](#api-formats).
+
+The keys of a `Hash` or `JSON` param declared with a block, and those of each element of an `Array` param, are checked against the block, and an undeclared one is named by its path, such as `items[1][price]`. A param declared without a block, such as a `File`, a `Hash` or `JSON` param without one, or a [`oneof:`](#multiple-hash-schemas-with-oneof) param, takes whatever it is sent.
+
+* An endpoint that declares no params accepts none. A param that only a `before` filter or a helper reads, such as an access token, has to be declared as well. Declaring it in a namespace's `params` block, or in a [reusable params](#helpers) block, declares it for every endpoint that block applies to.
+* The params are parsed to be checked, so an endpoint that never reads `params` answers `400` to a request whose query string or body cannot be parsed.
+* The version a client sends with [`using: :param`](#param) is a param like any other on an endpoint that its API does not version.
+
+The message is the `undeclared` key of [en.yml](lib/grape/locale/en.yml).
 
 ### I18n
 

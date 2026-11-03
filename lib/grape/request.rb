@@ -100,6 +100,13 @@ module Grape
       !@cookies.nil?
     end
 
+    # Whether the client sent params, in a query string or a body. Without
+    # either, +params+ holds the route's captures alone, and finding that out
+    # does not need them built.
+    def params_sent?
+      !query_string.empty? || form_params?
+    end
+
     private
 
     # Resolved on first use rather than in the constructor: a request that never
