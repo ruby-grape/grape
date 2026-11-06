@@ -3,6 +3,20 @@ Upgrading Grape
 
 ### Upgrading to >= 4.2.0
 
+#### `version` raises `ArgumentError` on a positional options Hash
+
+Since 3.0.0 ([#2618](https://github.com/ruby-grape/grape/pull/2618)), Ruby turns a trailing Hash into keyword arguments only when it is written without braces. A braced options Hash given to `version` landed among the version names instead. The API got a version named after the Hash and stayed on the default `:path` strategy, with no warning. `version` now raises `ArgumentError` when it boots instead ([#3060](https://github.com/ruby-grape/grape/pull/3060)), as `auth`, `http_basic` and `desc` have since 4.0.0:
+
+```ruby
+# Before: path versioning, with `/v1/...` routes
+version 'v1', { using: :header, vendor: 'acme' }
+
+# After
+version 'v1', using: :header, vendor: 'acme'
+```
+
+Writing the options as keywords also applies them. If clients reached such an API through `/v1/...`, they have been using path versioning. To keep it, drop the options (`version 'v1'`), or pass `using: :path`.
+
 #### A request every route declines answers 404, however many routes declined
 
 A route declines a request by answering with `X-Cascade: pass`, as a version declared with `cascade: true` does for a version it does not serve. As the [README](README.md#header) documents, the router then answers its own `404` if no other route takes the request. It only did so when one route had declined: with two or more routes on the path, the last one's response came back instead, and so did that of an ANY route (since 4.0.0). So a request for an unknown version answered `404` from an API with one version and `406` from an API with several.
