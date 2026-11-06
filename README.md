@@ -116,9 +116,9 @@ module Twitter
 end
 ```
 
-## Rails 7.1
+## Rails Deprecator
 
-Grape's [deprecator](https://api.rubyonrails.org/v7.1.0/classes/ActiveSupport/Deprecation.html) will be added to your application's deprecators [automatically](lib/grape/railtie.rb) as `:grape`, so that your application's configuration can be applied to it.
+Grape's [deprecator](https://api.rubyonrails.org/classes/ActiveSupport/Deprecation.html) will be added to your application's deprecators [automatically](lib/grape/railtie.rb) as `:grape`, so that your application's configuration can be applied to it.
 
 ## Mounting
 
@@ -1548,7 +1548,7 @@ params do
 end
 ```
 
-Note endless ranges are also supported with ActiveSupport >= 6.0, but they require that the type be provided.
+Endless ranges are also supported, but they require that the type be provided.
 
 ```ruby
 params do
@@ -4413,9 +4413,7 @@ Use [grape-reload](https://github.com/AlexYankee/grape-reload).
 
 ### Reloading in Rails Applications
 
-#### Rails 7+ (Zeitwerk)
-
-Rails 7+ uses [Zeitwerk](https://github.com/fxn/zeitwerk) as the default autoloader, which automatically handles reloading of code in development mode without any additional configuration.
+Rails uses [Zeitwerk](https://github.com/fxn/zeitwerk) as the default autoloader, which automatically handles reloading of code in development mode without any additional configuration.
 
 If your API files are in `app/api`, Zeitwerk will automatically autoload and reload them. No additional configuration is needed.
 
@@ -4427,36 +4425,6 @@ If you encounter issues with reloading, ensure that:
 For troubleshooting autoloading issues, have a look at the [Rails documentation](https://guides.rubyonrails.org/autoloading_and_reloading_constants.html#troubleshooting).
 
 See the [Rails Autoloading and Reloading Constants guide](https://guides.rubyonrails.org/autoloading_and_reloading_constants.html) for more information.
-
-#### Rails 6 and Earlier
-
-For Rails versions before 7, you need to configure reloading manually.
-
-Add API paths to `config/application.rb`.
-
-```ruby
-# Auto-load API and its subdirectories
-config.paths.add File.join('app', 'api'), glob: File.join('**', '*.rb')
-config.autoload_paths += Dir[Rails.root.join('app', 'api', '*')]
-```
-
-Create `config/initializers/reload_api.rb`.
-
-```ruby
-if Rails.env.development?
-  ActiveSupport::Dependencies.explicitly_unloadable_constants << 'Twitter::API'
-
-  api_files = Dir[Rails.root.join('app', 'api', '**', '*.rb')]
-  api_reloader = ActiveSupport::FileUpdateChecker.new(api_files) do
-    Rails.application.reload_routes!
-  end
-  ActiveSupport::Reloader.to_prepare do
-    api_reloader.execute_if_updated
-  end
-end
-```
-
-See [StackOverflow #3282655](http://stackoverflow.com/questions/3282655/ruby-on-rails-3-reload-lib-directory-for-each-request/4368838#4368838) for more information.
 
 ## Performance Monitoring
 
