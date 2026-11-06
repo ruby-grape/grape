@@ -56,8 +56,14 @@ module Grape
       # @return [String, nil] the most recently declared version.
       # @raise [Grape::Exceptions::MissingVendorOption] when +using: :header+
       #   is supplied without a +:vendor+.
+      # @raise [ArgumentError] when the options are given as a positional Hash
+      #   rather than as keyword arguments.
       def version(*args, using: :path, cascade: true, parameter: 'apiver', strict: false, vendor: nil, &block)
         return @versions&.last if args.empty?
+
+        # Since Ruby 3 a braced options Hash lands in the splat, where it
+        # became a version named after the Hash on the default +:path+ strategy.
+        raise ArgumentError, '`version` takes its options as keyword arguments, not as a positional Hash' if args.any?(Hash)
 
         options = build_version_options(using:, cascade:, parameter:, strict:, vendor:)
         requested_versions = args.flatten.map(&:to_s)

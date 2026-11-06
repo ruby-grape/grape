@@ -121,6 +121,25 @@ describe Grape::API do
         expect(subject.version).to be_nil
       end
     end
+
+    context 'when the options are given as a positional Hash' do
+      it 'raises an ArgumentError and registers no version' do
+        expect { subject.version 'v1', { using: :header, vendor: 'mycompany' } }
+          .to raise_error(ArgumentError, '`version` takes its options as keyword arguments, not as a positional Hash')
+        expect(subject.version).to be_nil
+      end
+
+      it 'raises an ArgumentError with a block' do
+        expect { subject.version('v1', { using: :param }) { get('/hello') { 'hello' } } }
+          .to raise_error(ArgumentError, /not as a positional Hash/)
+        expect(subject.routes).to be_empty
+      end
+
+      it 'raises an ArgumentError when the Hash is the only argument' do
+        expect { subject.version({ using: :header, vendor: 'mycompany' }) }
+          .to raise_error(ArgumentError, /not as a positional Hash/)
+      end
+    end
   end
 
   describe '.version using path' do
