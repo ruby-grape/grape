@@ -2518,6 +2518,114 @@ describe Grape::API do
       end
       expect { get '/howdy' }.not_to raise_error
     end
+
+    context 'when declared after a route of the same scope' do
+      it 'is accessible from that route' do
+        subject.get '/howdy' do
+          hello
+        end
+
+        subject.helpers do
+          def hello
+            'Hello, world.'
+          end
+        end
+
+        get '/howdy'
+        expect(last_response.body).to eql 'Hello, world.'
+      end
+
+      it 'is accessible from that route in a namespace' do
+        subject.namespace :foo do
+          get :howdy do
+            hello
+          end
+
+          helpers do
+            def hello
+              'Hello, world.'
+            end
+          end
+        end
+
+        get '/foo/howdy'
+        expect(last_response.body).to eql 'Hello, world.'
+      end
+    end
+
+    it 'answers every route of its scope with the last definition of a helper' do
+      subject.helpers do
+        def greeting
+          'first'
+        end
+      end
+
+      subject.get '/before' do
+        greeting
+      end
+
+      subject.helpers do
+        def greeting
+          'second'
+        end
+      end
+
+      subject.get '/after' do
+        greeting
+      end
+
+      expect { get '/before' }.to output(
+        'Grape: helper `greeting` is defined again below GET /before in the same scope, so since 4.2.0 ' \
+        "that route answers with the later definition (see UPGRADING.md). Rename one of them, or declare the route in its own namespace.\n"
+      ).to_stderr
+      expect(last_response.body).to eql 'second'
+      get '/after'
+      expect(last_response.body).to eql 'second'
+    end
+
+    it 'does not warn for a helper declared below a route that only adds methods' do
+      subject.helpers do
+        def greeting
+          'Hello'
+        end
+      end
+
+      subject.get '/howdy' do
+        [greeting, audience].join(', ')
+      end
+
+      subject.helpers do
+        def audience
+          'world.'
+        end
+      end
+
+      expect { get '/howdy' }.not_to output.to_stderr
+      expect(last_response.body).to eql 'Hello, world.'
+    end
+
+    it 'does not warn for a helper redefined in an enclosing scope, which already reached the route' do
+      subject.helpers do
+        def greeting
+          'first'
+        end
+      end
+
+      subject.namespace :nested do
+        get '/howdy' do
+          greeting
+        end
+      end
+
+      subject.helpers do
+        def greeting
+          'second'
+        end
+      end
+
+      expect { get '/nested/howdy' }.not_to output.to_stderr
+      expect(last_response.body).to eql 'second'
+    end
   end
 
   describe '.scope' do

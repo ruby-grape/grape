@@ -113,6 +113,10 @@ module Grape
         source: self.class.block_to_unbound_method(block)
       )
       @endpoints = app.endpoints if app.respond_to?(:endpoints)
+      # The live settings of the scope the route is declared in. The copy in
+      # the State holds that scope's helpers as they were at this line; these
+      # also hold the ones declared further down, read once the API compiles.
+      @scope_setting = new_settings
     end
 
     # Update our settings from a given parent settings instance. Used when
@@ -372,7 +376,7 @@ module Grape
     # sets, which fits an 80-byte slot until a route block or a helper sets one
     # of its own; carrying the route-building state as well, it took 320. The
     # endpoint itself counts too when there are no helpers, both being a
-    # Grape::Endpoint, and it holds at most five.
+    # Grape::Endpoint, and it holds at most six.
     #
     # Helpers reach an endpoint by module inclusion, and +Object#dup+ does not
     # carry a singleton class over — so including them on the per-request copy
@@ -536,11 +540,15 @@ module Grape
       }
     end
 
+    # Every helper of the route's scope, wherever it was declared in it, and
+    # of the scopes around it.
     def build_helpers
-      helpers = inheritable_setting.helpers
+      helpers = @scope_setting.helpers
       return if helpers.empty?
 
-      Module.new { helpers.each { |mod_to_include| include mod_to_include } }
+      composed = Module.new { helpers.each { |mod_to_include| include mod_to_include } }
+      RedefinedHelpersWarning.call(routes:, above: inheritable_setting.helpers, helpers:, composed:)
+      composed
     end
 
     # A bare Rack app mounted with +mount+ is called directly (see +compile!+):
