@@ -54,6 +54,13 @@ Grape: helper `greeting` is defined again below GET /before in the same scope, s
 
 To keep a different method per route, give the methods different names, or declare the routes in separate namespaces, each with its own `helpers`. `use`, `rescue_from` and the `before`/`after` callbacks still apply only to the routes declared below them.
 
+#### A path opening with an optional segment answers without it under a namespace
+
+A route path opening with an optional segment, such as `get '(:type)'` inside `namespace :root`, now also answers `/root` ([#3065](https://github.com/ruby-grape/grape/pull/3065)). Before, the slash Grape put between the namespace and the path was required, and a request path is never matched with a trailing slash, so `/root` answered `404`. The same goes for a mount path, a prefix, a path version, and a slash written in front of the segment, as in `get 'users/(:id)'`.
+
+* The route's `path` and `origin` move the slash into the segment: `/root(/:type)` instead of `/root/(:type)`. Anything reading them, such as API documentation, sees the new spelling.
+* A route declared after it for the path itself, such as `get` in the same namespace, no longer answers that path, as the earlier route now matches it first. Declare that route first, or drop it.
+
 #### A request every route declines answers 404, however many routes declined
 
 A route declines a request by answering with `X-Cascade: pass`, as a version declared with `cascade: true` does for a version it does not serve. As the [README](README.md#header) documents, the router then answers its own `404` if no other route takes the request. It only did so when one route had declined: with two or more routes on the path, the last one's response came back instead, and so did that of an ANY route (since 4.0.0). So a request for an unknown version answered `404` from an API with one version and `406` from an API with several.

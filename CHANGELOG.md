@@ -25,6 +25,7 @@
 * [#3058](https://github.com/ruby-grape/grape/pull/3058): Declare `rexml` in the test bundle instead of relying on Danger to bring it in - [@ericproulx](https://github.com/ericproulx).
 * [#3061](https://github.com/ruby-grape/grape/pull/3061): Make a helper reach the routes declared above it in its scope - [@ericproulx](https://github.com/ericproulx).
 * [#3064](https://github.com/ruby-grape/grape/pull/3064): Cascade past a mounted Rack app that declines with a lowercase `x-cascade` - [@ericproulx](https://github.com/ericproulx).
+* [#3065](https://github.com/ruby-grape/grape/pull/3065): Answer a route opening with an optional segment without it under a namespace, prefix or mount path - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.1.0 (2026-10-31)
