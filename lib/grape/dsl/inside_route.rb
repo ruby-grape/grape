@@ -57,7 +57,7 @@ module Grape
                  302
                end
         status code
-        header 'Location', url
+        header 'location', url
         # A caller-supplied body keeps the API's format, and the content type
         # that goes with it: it may be structured, and the txt formatter would
         # render a Hash through `to_s`.
@@ -159,7 +159,7 @@ module Grape
         return if value.nil? && @stream.nil?
 
         header Rack::CONTENT_LENGTH, nil
-        header 'Transfer-Encoding', nil
+        header Rack::TRANSFER_ENCODING, nil
         header Rack::CACHE_CONTROL, 'no-cache' # Skips ETag generation (reading the response up front)
 
         return @stream if value.nil?

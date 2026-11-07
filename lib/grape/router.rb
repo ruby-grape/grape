@@ -69,7 +69,7 @@ module Grape
       any.endpoint
     end
 
-    DEFAULT_RESPONSE_HEADERS = Grape::Util::Header.new.merge('X-Cascade' => 'pass').freeze
+    DEFAULT_RESPONSE_HEADERS = { 'x-cascade' => 'pass' }.freeze
     DEFAULT_RESPONSE_BODY = ['404 Not Found'].freeze
 
     private
@@ -416,14 +416,10 @@ module Grape
       [union, routes, groups].freeze
     end
 
-    # Grape's own responses fold the case of a header name. A mounted Rack app
-    # answers in a Hash of its own, which does not: x-cascade on Rack 3, as the
-    # SPEC requires, X-Cascade on Rack 2.
+    # A mounted Rack app answers in a plain Hash, where the case of a name
+    # matters, so this relies on the lowercase name the Rack 3 SPEC requires.
     def cascade?(response)
-      headers = response[1]
-      value = headers['x-cascade']
-      value = headers['X-Cascade'] if value.nil? && !headers.is_a?(Grape::Util::Header)
-      value == 'pass'
+      response[1]['x-cascade'] == 'pass'
     end
   end
 end

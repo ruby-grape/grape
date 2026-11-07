@@ -5,6 +5,7 @@
 * [#3052](https://github.com/ruby-grape/grape/pull/3052): Add `Grape::ErrorFormatter::ProblemJson` to answer errors as RFC 9457 problem details - [@ericproulx](https://github.com/ericproulx).
 * [#3056](https://github.com/ruby-grape/grape/pull/3056): Drop support for Rails 7.2 and require ActiveSupport 8.0 - [@ericproulx](https://github.com/ericproulx).
 * [#3062](https://github.com/ruby-grape/grape/pull/3062): Use the reusable Danger workflow with a separate Gemfile - [@dblock](https://github.com/dblock).
+* [#3063](https://github.com/ruby-grape/grape/pull/3063): Drop support for Rack 2.2 and 3.0 and require Rack 3.1 - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

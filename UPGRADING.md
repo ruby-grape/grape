@@ -7,6 +7,14 @@ Upgrading Grape
 
 Grape no longer supports Rails 7.2, which reached end of life on 2026-08-09. ActiveSupport 8.0 is now the minimum (`add_dependency 'activesupport', '>= 8.0'`) ([#3056](https://github.com/ruby-grape/grape/pull/3056)). Upgrade to Rails 8.0 or newer before bumping Grape, or to ActiveSupport 8.0 or newer if you run Grape without Rails.
 
+#### Minimum required Rack is now 3.1
+
+Grape no longer supports Rack 2.2 or 3.0. Rack 3.1 is now the minimum (`add_dependency 'rack', '>= 3.1'`) ([#3063](https://github.com/ruby-grape/grape/pull/3063)). Rack's [security policy](https://github.com/rack/rack/security/policy) covers its current release series and the one before it, now 3.2 and 3.1. Rack 3.0 has had no release since 3.0.18, so it is still affected by [GHSA-2j8w-xcrc-x985](https://github.com/rack/rack/security/advisories/GHSA-2j8w-xcrc-x985), which was fixed only in 3.1.23 and 3.2.8. Upgrade to Rack 3.1 or newer before bumping Grape. Coming from Rack 2.2, the header names Grape sets are lower case (see [Headers](#headers)), and Rack's [upgrade guide](https://github.com/rack/rack/blob/main/UPGRADE-GUIDE.md) covers the rest.
+
+`Grape::Util::Header`, which stood for `Rack::Headers` on Rack 3 and `Rack::Utils::HeaderHash` on Rack 2, is removed. Use `Rack::Headers`.
+
+A mounted Rack app declines a request with `x-cascade: pass`, the lowercase name the Rack 3 SPEC requires. Grape no longer reads `X-Cascade`, the Rack 2 spelling, from the plain Hash such an app answers with ([#3064](https://github.com/ruby-grape/grape/pull/3064) read both).
+
 #### A request every route declines answers 404, however many routes declined
 
 A route declines a request by answering with `X-Cascade: pass`, as a version declared with `cascade: true` does for a version it does not serve. As the [README](README.md#header) documents, the router then answers its own `404` if no other route takes the request. It only did so when one route had declined: with two or more routes on the path, the last one's response came back instead, and so did that of an ANY route (since 4.0.0). So a request for an unknown version answered `404` from an API with one version and `406` from an API with several.

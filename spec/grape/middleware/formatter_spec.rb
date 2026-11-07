@@ -320,13 +320,7 @@ describe Grape::Middleware::Formatter do
   context 'no content responses' do
     let(:no_content_response) { ->(status) { [status, {}, []] } }
 
-    statuses_without_body = if Gem::Version.new(Rack.release) >= Gem::Version.new('2.1.0')
-                              Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.keys
-                            else
-                              Rack::Utils::STATUS_WITH_NO_ENTITY_BODY
-                            end
-
-    statuses_without_body.each do |status|
+    Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.each_key do |status|
       it "does not modify a #{status} response" do
         expected_response = no_content_response[status]
         allow(app).to receive(:call).and_return(expected_response)
@@ -561,13 +555,7 @@ describe Grape::Middleware::Formatter do
     let(:env) do
       { Rack::PATH_INFO => '/somewhere', 'HTTP_ACCEPT' => 'application/json' }
     end
-    let(:headers) do
-      if Gem::Version.new(Rack.release) < Gem::Version.new('3.1')
-        { Rack::CONTENT_TYPE => 'application/json', Rack::CONTENT_LENGTH => body.bytesize.to_s }
-      else
-        { Rack::CONTENT_TYPE => 'application/json' }
-      end
-    end
+    let(:headers) { { Rack::CONTENT_TYPE => 'application/json' } }
 
     it 'returns a file response' do
       allow(file).to receive(:each).and_yield(body)

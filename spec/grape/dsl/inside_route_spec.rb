@@ -19,7 +19,7 @@ describe Grape::DSL::InsideRoute do
         if key
           val ? header[key] = val : header.delete(key)
         else
-          @header ||= Grape::Util::Header.new
+          @header ||= Rack::Headers.new
         end
       end
     end
@@ -77,7 +77,7 @@ describe Grape::DSL::InsideRoute do
       end
 
       it 'sets location header' do
-        expect(subject.header['Location']).to eq '/'
+        expect(subject.header['location']).to eq '/'
       end
     end
 
@@ -91,7 +91,7 @@ describe Grape::DSL::InsideRoute do
       end
 
       it 'sets location header' do
-        expect(subject.header['Location']).to eq '/'
+        expect(subject.header['location']).to eq '/'
       end
     end
   end
@@ -215,7 +215,7 @@ describe Grape::DSL::InsideRoute do
         before do
           subject.header Rack::CACHE_CONTROL, 'cache'
           subject.header Rack::CONTENT_LENGTH, 123
-          subject.header 'Transfer-Encoding', 'base64'
+          subject.header Rack::TRANSFER_ENCODING, 'base64'
           subject.sendfile file_path
         end
 
@@ -227,7 +227,7 @@ describe Grape::DSL::InsideRoute do
           expect(subject.header).to match(
             Rack::CACHE_CONTROL => 'cache',
             Rack::CONTENT_LENGTH => 123,
-            'Transfer-Encoding' => 'base64'
+            Rack::TRANSFER_ENCODING => 'base64'
           )
         end
       end
@@ -259,7 +259,7 @@ describe Grape::DSL::InsideRoute do
         before do
           subject.header Rack::CACHE_CONTROL, 'cache'
           subject.header Rack::CONTENT_LENGTH, 123
-          subject.header 'Transfer-Encoding', 'base64'
+          subject.header Rack::TRANSFER_ENCODING, 'base64'
           subject.stream file_path
         end
 
@@ -282,7 +282,7 @@ describe Grape::DSL::InsideRoute do
         before do
           subject.header Rack::CACHE_CONTROL, 'cache'
           subject.header Rack::CONTENT_LENGTH, 123
-          subject.header 'Transfer-Encoding', 'base64'
+          subject.header Rack::TRANSFER_ENCODING, 'base64'
           subject.stream stream_object
         end
 

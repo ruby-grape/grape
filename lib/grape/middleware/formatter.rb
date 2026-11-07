@@ -132,9 +132,9 @@ module Grape
         return stream_response(status, headers, bodymap.first) if bodymap.first.is_a?(Grape::ServeStream::StreamResponse)
 
         # A bare Rack tuple rather than a Rack::Response: +headers+ is already
-        # a Grape::Util::Header (a Rack::Headers on Rack 3), so wrapping only
-        # re-normalizes the same keys into a second Headers hash that
-        # +Middleware::Base#call+ unwraps again with +to_a+ on the way out.
+        # a Rack::Headers, so wrapping only re-normalizes the same keys into a
+        # second Headers hash that +Middleware::Base#call+ unwraps again with
+        # +to_a+ on the way out.
         # The 204/304 bodies Rack::Response#finish would blank are returned
         # by #format_response, before this point.
         [status, headers, bodymap]

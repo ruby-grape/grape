@@ -124,7 +124,7 @@ describe Grape::Endpoint do
     end
 
     let(:headers) do
-      Grape::Util::Header.new.tap do |h|
+      Rack::Headers.new.tap do |h|
         h['Cookie'] = ''
         h['Host'] = 'example.org'
       end
@@ -384,8 +384,7 @@ describe Grape::Endpoint do
         expect(last_response.body).to eq('Bob')
       end
 
-      # Rack swallowed this error until v2.2.0
-      it 'returns a 400 if given an invalid multipart body', if: Gem::Version.new(Rack.release) >= Gem::Version.new('2.2.0') do
+      it 'returns a 400 if given an invalid multipart body' do
         subject.params do
           requires :file, type: Rack::Multipart::UploadedFile
         end

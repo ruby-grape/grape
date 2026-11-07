@@ -524,8 +524,8 @@ end
 Grape.config.lint = true
 ```
 
-### Bug in Rack::ETag under Rack 3.X
-If you're using Rack 3.X and the `Rack::ETag` middleware (used by [Rails](https://guides.rubyonrails.org/rails_on_rack.html#inspecting-middleware-stack)), a [bug](https://github.com/rack/rack/pull/2324) related to linting has been fixed in [3.1.13](https://github.com/rack/rack/blob/v3.1.13/CHANGELOG.md#3113---2025-04-13) and [3.0.15](https://github.com/rack/rack/blob/v3.1.13/CHANGELOG.md#3015---2025-04-13) respectively.
+### Bug in Rack::ETag before Rack 3.1.13
+If you're using the `Rack::ETag` middleware (used by [Rails](https://guides.rubyonrails.org/rails_on_rack.html#inspecting-middleware-stack)), a [bug](https://github.com/rack/rack/pull/2324) related to linting has been fixed in [3.1.13](https://github.com/rack/rack/blob/v3.1.13/CHANGELOG.md#3113---2025-04-13).
 
 ## Describing Methods
 
@@ -2222,7 +2222,7 @@ curl -H "secret_PassWord: swordfish" ...
 
 The header name will have been normalized for you.
 
-- In the `headers` helper names will be coerced into a downcased kebab case as `secret-password`, and looked up case-insensitively, so `headers['Secret-Password']` finds it too. On Rack < 3, a standard header such as `User-Agent` keeps its usual capitalization.
+- In the `headers` helper names will be coerced into a downcased kebab case as `secret-password`, and looked up case-insensitively, so `headers['Secret-Password']` finds it too.
 - In the `env` collection they appear in all uppercase, in snake case, and prefixed with 'HTTP_' as `HTTP_SECRET_PASSWORD`
 
 The header name will have been normalized per HTTP standards defined in [RFC2616 Section 4.2](https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2) regardless of what is being sent by a client.
