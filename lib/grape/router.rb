@@ -416,8 +416,14 @@ module Grape
       [union, routes, groups].freeze
     end
 
+    # Grape's own responses fold the case of a header name. A mounted Rack app
+    # answers in a Hash of its own, which does not: x-cascade on Rack 3, as the
+    # SPEC requires, X-Cascade on Rack 2.
     def cascade?(response)
-      response[1]['X-Cascade'] == 'pass'
+      headers = response[1]
+      value = headers['x-cascade']
+      value = headers['X-Cascade'] if value.nil? && !headers.is_a?(Grape::Util::Header)
+      value == 'pass'
     end
   end
 end
