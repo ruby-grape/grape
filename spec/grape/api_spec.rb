@@ -4276,7 +4276,7 @@ describe Grape::API do
       it 'is able to cascade' do
         subject.mount lambda { |env|
           headers = {}
-          headers['X-Cascade'] == 'pass' unless env[Rack::PATH_INFO].include?('boo')
+          headers['x-cascade'] = 'pass' unless env[Rack::PATH_INFO].include?('boo')
           [200, headers, ['Farfegnugen']]
         } => '/'
 
@@ -4284,6 +4284,13 @@ describe Grape::API do
         expect(last_response.body).to eq('Farfegnugen')
         get '/mounty'
         expect(last_response.body).to eq('MOUNTED')
+      end
+
+      it 'answers 404 when the app declines with x-cascade' do
+        subject.mount ->(_env) { [404, { 'x-cascade' => 'pass' }, ['declined']] } => '/declining'
+        get '/declining'
+        expect(last_response.status).to eq(404)
+        expect(last_response.body).to eq('404 Not Found')
       end
 
       it 'is routed for any method' do

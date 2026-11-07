@@ -142,6 +142,16 @@ describe Grape::Router do
       expect(response_body).to eq('served')
     end
 
+    # A mounted Rack app answers in a plain Hash, where the case of a name
+    # matters: x-cascade is the Rack 3 spelling, X-Cascade the Rack 2 one.
+    it 'hands over past a route declining with the Rack 3 spelling' do
+      append_route(->(_env) { [404, { 'x-cascade' => 'pass' }, []] })
+      append_route(serving)
+      router.compile!
+
+      expect(response_body).to eq('served')
+    end
+
     it 'prefers a sibling of the same method over an ANY route' do
       append_route(cascading)
       append_route(serving)
