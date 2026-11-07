@@ -1,0 +1,14 @@
+# frozen_string_literal: true
+
+# Danger's own bundle, used only by .github/workflows/danger.yml, so that its
+# gems stay out of the bundle every other Gemfile evaluates. To run it locally:
+#
+#   BUNDLE_GEMFILE=gemfiles/danger.gemfile bundle exec danger local
+
+source 'https://rubygems.org'
+
+gem 'danger'
+gem 'danger-changelog'
+gem 'danger-pr-comment'
+# danger 9.6.1 fails to load with git 6: https://github.com/danger/danger/issues/1560
+gem 'git', '< 6'

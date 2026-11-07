@@ -4,10 +4,45 @@ on:
   pull_request:
     types: [opened, reopened, edited, synchronize]
 
+permissions:
+  contents: read
+
+# The steps of numbata/danger-pr-comment's danger-run.yml, which has no way to
+# pick a Gemfile. The report artifact keeps that workflow's names, which
+# danger-comment.yml downloads.
 jobs:
   danger:
-    uses: numbata/danger-pr-comment/.github/workflows/danger-run.yml@v0.1.0
-    secrets: inherit
-    with:
-      ruby-version: '3.4'
-      bundler-cache: true
+    runs-on: ubuntu-latest
+    env:
+      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/danger.gemfile
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.4
+        bundler-cache: true
+
+    - name: Run Danger
+      id: danger
+      continue-on-error: true
+      env:
+        DANGER_GITHUB_API_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ github.token }}
+        DANGER_REPORT_PATH: ${{ runner.temp }}/danger-report.json
+      run: bundle exec danger dry_run
+
+    - name: Upload Danger report
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: danger-report
+        path: ${{ runner.temp }}/danger-report.json
+        if-no-files-found: error
+
+    - name: Fail if Danger failed
+      if: ${{ steps.danger.outcome == 'failure' }}
+      run: exit 1

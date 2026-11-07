@@ -16,6 +16,7 @@
 * [#3050](https://github.com/ruby-grape/grape/pull/3050): Remove the unused `ParamsScope#root?` and cover the placeholder skip in `validate_elements!` - [@ericproulx](https://github.com/ericproulx).
 * [#3051](https://github.com/ruby-grape/grape/pull/3051): Look up the validation error format once per response instead of once per message - [@ericproulx](https://github.com/ericproulx).
 * [#3055](https://github.com/ruby-grape/grape/pull/3055): Stop a 405 behind `Rack::Cascade` from making the next app answer 405 too - [@ericproulx](https://github.com/ericproulx).
+* [#3057](https://github.com/ruby-grape/grape/pull/3057): Move Danger into its own Gemfile, loaded only by its workflow - [@ericproulx](https://github.com/ericproulx).
 * [#3058](https://github.com/ruby-grape/grape/pull/3058): Declare `rexml` in the test bundle instead of relying on Danger to bring it in - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
