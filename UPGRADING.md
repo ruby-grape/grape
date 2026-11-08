@@ -33,6 +33,27 @@ Grape.config.allow_undeclared_params = false
 
 To keep accepting undeclared params from 5.0, set it to `true`. See [Rejecting Undeclared Parameters](README.md#rejecting-undeclared-parameters).
 
+#### A helper reaches every route of its scope, wherever it is declared
+
+A `helpers` block or module used to reach only the routes declared below it in the same scope. A route declared above it raised `NameError` when it called the helper ([#34](https://github.com/ruby-grape/grape/issues/34)). Since [#3061](https://github.com/ruby-grape/grape/pull/3061) it reaches every route of its scope, as it already did from an enclosing scope and through `mount`.
+
+So a helper method defined twice in one scope now answers with its last definition in every route of that scope, including the routes declared between the two definitions:
+
+```ruby
+helpers { def greeting = 'first' }
+get('/before') { greeting } # was 'first', now 'second'
+helpers { def greeting = 'second' }
+get('/after') { greeting }  # 'second'
+```
+
+Until 5.0, Grape warns about each such route when the API compiles:
+
+```
+Grape: helper `greeting` is defined again below GET /before in the same scope, so since 4.2.0 that route answers with the later definition (see UPGRADING.md). Rename one of them, or declare the route in its own namespace.
+```
+
+To keep a different method per route, give the methods different names, or declare the routes in separate namespaces, each with its own `helpers`. `use`, `rescue_from` and the `before`/`after` callbacks still apply only to the routes declared below them.
+
 #### A request every route declines answers 404, however many routes declined
 
 A route declines a request by answering with `X-Cascade: pass`, as a version declared with `cascade: true` does for a version it does not serve. As the [README](README.md#header) documents, the router then answers its own `404` if no other route takes the request. It only did so when one route had declined: with two or more routes on the path, the last one's response came back instead, and so did that of an ANY route (since 4.0.0). So a request for an unknown version answered `404` from an API with one version and `406` from an API with several.

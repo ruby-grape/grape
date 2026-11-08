@@ -2940,7 +2940,7 @@ class Twitter::API < Grape::API
 end
 ```
 
-The same goes for `use`, `helpers` and the `before`/`after` callbacks.
+The same goes for `use` and the `before`/`after` callbacks. `helpers` are the exception: they reach every route of their scope, wherever they are declared in it.
 
 Notice that you could combine these two approaches (rescuing custom errors takes precedence). For example, it's useful for handling all exceptions except Grape validation errors.
 
