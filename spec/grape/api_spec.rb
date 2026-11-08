@@ -7,6 +7,106 @@ describe Grape::API do
 
   let(:app) { subject }
 
+  describe '.eager_load!' do
+    around do |example|
+      backend = I18n.backend
+      I18n.backend = I18n::Backend::Simple.new
+      example.run
+    ensure
+      I18n.backend = backend
+    end
+
+    it 'compiles the API that serves its requests' do
+      subject.get('/x') { 'x' }
+
+      compiled = subject.eager_load!
+
+      expect(subject.compile!).to be(compiled)
+    end
+
+    # Mounting replays the app's setup, so a recorded call would run again.
+    it 'does not add to the app setup' do
+      subject.get('/x') { 'x' }
+      subject.eager_load!
+      I18n.reload!
+
+      Class.new(described_class).mount(subject)
+
+      expect(I18n.backend).not_to be_initialized
+    end
+
+    it 'reads the translations rather than leaving them to the first error' do
+      subject.get('/x') { 'x' }
+
+      subject.eager_load!
+
+      expect(I18n.backend).to be_initialized
+    end
+
+    it 'is left out of compiling, so a first request that succeeds reads no translations' do
+      subject.get('/x') { 'x' }
+
+      get '/x'
+
+      expect(last_response.status).to eq 200
+      expect(I18n.backend).not_to be_initialized
+    end
+
+    it 'leaves the translations dropped by a later reload to the next lookup' do
+      subject.get('/x') { 'x' }
+      subject.eager_load!
+
+      I18n.reload!
+
+      expect(I18n.backend).not_to be_initialized
+    end
+
+    it 'reads the current locale of a backend that loads one locale at a time' do
+      I18n.backend = I18n::Backend::LazyLoadable.new(lazy_load: true)
+      subject.get('/x') { 'x' }
+
+      subject.eager_load!
+
+      expect(I18n.backend).to be_initialized
+    end
+
+    it 'eager loads a backend that is not a Simple one' do
+      I18n.backend = I18n::Backend::Chain.new(I18n::Backend::Simple.new)
+      subject.get('/x') { 'x' }
+
+      subject.eager_load!
+
+      expect(I18n.backend).to be_initialized
+    end
+
+    it 'still answers the first error in the message it is translated to' do
+      subject.params { requires :id }
+      subject.get('/x') { 'x' }
+      subject.eager_load!
+
+      get '/x'
+
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq 'id is missing'
+    end
+
+    it 'answers through a backend that cannot load eagerly' do
+      simple = I18n.backend
+      I18n.backend = Class.new do
+        define_method(:translate) { |*args, **options| simple.translate(*args, **options) }
+        define_method(:available_locales) { simple.available_locales }
+      end.new
+      subject.params { requires :id }
+      subject.get('/x') { 'x' }
+      subject.eager_load!
+
+      get '/x'
+
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq 'id is missing'
+    end
+  end
+
   describe 'thread-safe (re)compilation' do
     # Regression: building the HEAD/OPTIONS/405 helper routes used to delete the
     # root-prefix/versioning keys from the shared class-level settings and
