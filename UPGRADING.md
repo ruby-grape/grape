@@ -15,6 +15,12 @@ Grape no longer supports Rack 2.2 or 3.0. Rack 3.1 is now the minimum (`add_depe
 
 A mounted Rack app declines a request with `x-cascade: pass`, the lowercase name the Rack 3 SPEC requires. Grape no longer reads `X-Cascade`, the Rack 2 spelling, from the plain Hash such an app answers with ([#3064](https://github.com/ruby-grape/grape/pull/3064) read both).
 
+#### APIs mounted in a Rails application's routes are compiled at boot
+
+When `config.eager_load` is on, as it is in production, Grape's Railtie now compiles the APIs mounted in the application's routes, and in the routes of the engines it mounts, as soon as the routes are loaded, rather than leaving it to the first request each process answers ([#3022](https://github.com/ruby-grape/grape/pull/3022)). A `compile!` call the application already makes can stay: an API is compiled once.
+
+Compiling builds each endpoint's middleware stack, so a middleware's `initialize` now runs at boot, and before the workers fork under a server that preloads the application, such as Puma with `preload_app!`. A middleware that opens a connection or starts a thread in `initialize` should do it on its first request instead. An API that fails to compile now fails the boot rather than its first request.
+
 #### A request every route declines answers 404, however many routes declined
 
 A route declines a request by answering with `X-Cascade: pass`, as a version declared with `cascade: true` does for a version it does not serve. As the [README](README.md#header) documents, the router then answers its own `404` if no other route takes the request. It only did so when one route had declined: with two or more routes on the path, the last one's response came back instead, and so did that of an ANY route (since 4.0.0). So a request for an unknown version answered `404` from an API with one version and `406` from an API with several.
