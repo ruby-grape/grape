@@ -64,11 +64,22 @@ module Grape
           part&.match?(/\A\S/) && not_slash?(part)
         end
 
+        # The parts are joined by slashes, so a path opening with an optional
+        # group under a namespace, mount path, prefix or version --
+        # +get '(:type)'+ in +namespace :root+ -- compiled to +/root/(:type)+.
+        # The slash outside the group is required, and a request path never
+        # ends in one, as it is normalized the way this one is: +/root+ matched
+        # nothing. Inside the group, the slash goes with the segment it
+        # separates, and +/root(/:type)+ answers +/root+ and +/root/x+ alike.
+        # A slash opening the path stays where it is, for +/+ to match
+        # +/(:type)+.
         class PartsCache < Grape::Util::Cache
+          SLASH_BEFORE_OPTIONAL_GROUP = %r{(?<=.)/\(/?}
+
           def initialize
             super
             @cache = Hash.new do |h, parts|
-              h[parts] = Grape::Util::PathNormalizer.call(parts.join('/'))
+              h[parts] = Grape::Util::PathNormalizer.call(parts.join('/')).gsub(SLASH_BEFORE_OPTIONAL_GROUP, '(/')
             end
           end
         end

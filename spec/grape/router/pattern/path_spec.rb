@@ -56,6 +56,11 @@ RSpec.describe Grape::Router::Pattern::Path do
 
       expect(path.origin).to eql('/foo/hello/namespace/raw_path')
     end
+
+    it 'moves the slash in front of an optional group into it' do
+      path = described_class.new('(:type)', 'namespace', path_settings)
+      expect(path.origin).to eql('/namespace(/:type)')
+    end
   end
 
   describe '#suffix' do
