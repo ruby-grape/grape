@@ -3,6 +3,10 @@ Upgrading Grape
 
 ### Upgrading to >= 4.2.0
 
+#### Minimum required ActiveSupport is now 8.0
+
+Grape no longer supports Rails 7.2, which reached end of life on 2026-08-09. ActiveSupport 8.0 is now the minimum (`add_dependency 'activesupport', '>= 8.0'`) ([#3056](https://github.com/ruby-grape/grape/pull/3056)). Upgrade to Rails 8.0 or newer before bumping Grape, or to ActiveSupport 8.0 or newer if you run Grape without Rails.
+
 #### A request every route declines answers 404, however many routes declined
 
 A route declines a request by answering with `X-Cascade: pass`, as a version declared with `cascade: true` does for a version it does not serve. As the [README](README.md#header) documents, the router then answers its own `404` if no other route takes the request. It only did so when one route had declined: with two or more routes on the path, the last one's response came back instead, and so did that of an ANY route (since 4.0.0). So a request for an unknown version answered `404` from an API with one version and `406` from an API with several.

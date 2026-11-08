@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
     'rubygems_mfa_required' => 'true'
   }
 
-  s.add_dependency 'activesupport', '>= 7.2'
+  s.add_dependency 'activesupport', '>= 8.0'
   s.add_dependency 'dry-configurable', '>= 1.0'
   s.add_dependency 'dry-types', '>= 1.1'
   s.add_dependency 'mustermann', '>= 4.0'
