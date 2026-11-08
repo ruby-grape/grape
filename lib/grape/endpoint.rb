@@ -215,22 +215,13 @@ module Grape
       end
     end
 
+    # Undeclared params are looked for once the validators have run, so that a
+    # +JSON+ param sent as a String is looked into as the Hash it is coerced to.
     def run_validators(request:)
       validators = @state.inheritable_setting.route_validations
-      return if validators.empty?
-
-      validation_exceptions = nil
-
-      Grape::Validations::ParamScopeTracker.track do
-        instrument_run_validators(validators, request) do
-          validators.each do |validator|
-            validator.validate(request)
-          rescue Grape::Exceptions::Validation, Grape::Exceptions::ValidationArrayErrors => e
-            (validation_exceptions ||= []) << e
-            break if validator.fail_fast?
-          end
-        end
-      end
+      validation_exceptions = validation_exceptions_from(validators, request) unless validators.empty?
+      undeclared = @state.undeclared_params&.errors(request)
+      validation_exceptions = [*validation_exceptions, *undeclared] if undeclared
 
       raise Grape::Exceptions::ValidationErrors.new(exceptions: validation_exceptions, headers: header) if validation_exceptions
     end
@@ -279,6 +270,23 @@ module Grape
 
       status 204
       ''
+    end
+
+    def validation_exceptions_from(validators, request)
+      validation_exceptions = nil
+
+      Grape::Validations::ParamScopeTracker.track do
+        instrument_run_validators(validators, request) do
+          validators.each do |validator|
+            validator.validate(request)
+          rescue Grape::Exceptions::Validation, Grape::Exceptions::ValidationArrayErrors => e
+            (validation_exceptions ||= []) << e
+            break if validator.fail_fast?
+          end
+        end
+      end
+
+      validation_exceptions
     end
 
     # The route block's value, run once the params are validated between the
@@ -339,9 +347,20 @@ module Grape
       @state = @state.with(
         app:,
         callbacks: callbacks.each_value.all?(&:empty?) ? nil : callbacks.freeze,
-        build_params_with: inheritable_setting.build_params_with
+        build_params_with: inheritable_setting.build_params_with,
+        undeclared_params: build_undeclared_params
       )
       @prototype = build_prototype(build_helpers)
+    end
+
+    def build_undeclared_params
+      return if Grape.config.allow_undeclared_params
+
+      Grape::Validations::UndeclaredParams.new(
+        declared_params: inheritable_setting.route_declared_params,
+        contract_key_maps: inheritable_setting.contract_key_maps,
+        path_params: routes.flat_map { |route| route.pattern.to_regexp.names }
+      )
     end
 
     # The object each request is copied from: this endpoint's State, and none

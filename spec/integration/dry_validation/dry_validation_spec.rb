@@ -196,5 +196,51 @@ describe 'Dry::Schema', if: defined?(Dry::Schema) do
         expect(last_response.body).to eq('foo_id is not allowed')
       end
     end
+
+    context 'when Grape.config.allow_undeclared_params is false' do
+      around do |example|
+        Grape.config.allow_undeclared_params = false
+        example.run
+      ensure
+        Grape.config.allow_undeclared_params = true
+      end
+
+      before do
+        app.resource :foos do
+          route_param :foo_id, type: Integer do
+            contract do
+              required(:number).filled(:integer)
+              optional(:address).hash do
+                required(:street).filled(:string)
+              end
+              optional(:items).array(:hash) do
+                required(:sku).filled(:string)
+              end
+              optional(:metadata).filled(:hash)
+            end
+            post('/required')
+          end
+        end
+      end
+
+      it 'accepts the keys of the contract' do
+        post '/foos/123/required', number: '1', address: { street: 'Main' }, items: [{ sku: 'a' }], metadata: { any: 'thing' }
+        expect(last_response).to be_created
+      end
+
+      it 'rejects the keys the contract does not hold' do
+        post '/foos/123/required', number: '1', address: { street: 'Main', zip: '1' }, admin: true
+        expect(last_response).to be_bad_request
+        expect(last_response.body).to eq('address[zip] is not allowed, admin is not allowed')
+      end
+
+      # A contract that passes replaces each Array it coerces with its own
+      # output, which holds only its keys; one that fails leaves the request's.
+      it 'rejects the keys an element of an Array does not hold' do
+        post '/foos/123/required', items: [{ sku: 'a', price: 1 }]
+        expect(last_response).to be_bad_request
+        expect(last_response.body).to eq('number is missing, items[0][price] is not allowed')
+      end
+    end
   end
 end
