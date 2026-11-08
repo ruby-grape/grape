@@ -274,7 +274,7 @@ module Grape
     # for a method its path has no route for: the Allow header, with a 204 to an
     # auto-OPTIONS and a 405 to anything else.
     def answer_allowed_methods
-      header['Allow'] = env[Grape::Env::GRAPE_ALLOWED_METHODS].join(', ')
+      header['allow'] = env[Grape::Env::GRAPE_ALLOWED_METHODS].join(', ')
       raise Grape::Exceptions::MethodNotAllowed.new(header) unless options?
 
       status 204

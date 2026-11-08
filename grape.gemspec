@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'dry-configurable', '>= 1.0'
   s.add_dependency 'dry-types', '>= 1.1'
   s.add_dependency 'mustermann', '>= 4.0'
-  s.add_dependency 'rack', '>= 2.2.4'
+  s.add_dependency 'rack', '>= 3.1'
   s.add_dependency 'zeitwerk', '>= 2.6'
 
   s.files = Dir['lib/**/*', 'CHANGELOG.md', 'CONTRIBUTING.md', 'README.md', 'grape.png', 'UPGRADING.md', 'LICENSE', 'grape.gemspec']

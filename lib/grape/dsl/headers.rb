@@ -12,7 +12,7 @@ module Grape
         if key
           val ? header[key] = val : header.delete(key)
         else
-          @header ||= Grape::Util::Header.new
+          @header ||= Rack::Headers.new
         end
       end
       alias headers header

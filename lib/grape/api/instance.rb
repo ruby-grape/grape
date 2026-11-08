@@ -127,17 +127,17 @@ module Grape
         return response if @cascade
 
         headers = response[1]
-        # A Grape::Util::Header folds case the way the copy below does, so it can
+        # A Rack::Headers folds case the way the copy below does, so it can
         # answer for it; any other Hash cannot, and still goes through the copy.
-        return response if headers.is_a?(Grape::Util::Header) && !headers.key?('X-Cascade')
+        return response if headers.is_a?(Rack::Headers) && !headers.key?('x-cascade')
 
         # +merge!+, not +merge+: the latter is a `dup` plus a `merge!`, so the
         # Header built on this line would be allocated only to be discarded.
         # The copy stays because +headers+ can come from a mounted Rack app,
         # which is free to hand back a frozen or shared Hash that the delete
         # below must not reach into.
-        headers = Grape::Util::Header.new.merge!(headers)
-        headers.delete('X-Cascade')
+        headers = Rack::Headers.new.merge!(headers)
+        headers.delete('x-cascade')
         [response[0], headers, response[2]]
       end
 

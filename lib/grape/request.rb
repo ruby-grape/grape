@@ -2,137 +2,69 @@
 
 module Grape
   class Request < Rack::Request
-    # Based on rack 3 KNOWN_HEADERS
-    # https://github.com/rack/rack/blob/4f15e7b814922af79605be4b02c5b7c3044ba206/lib/rack/headers.rb#L10
+    # Rack::Headers::KNOWN_HEADERS covers response headers only. Without the
+    # request headers every client sends, #build_headers would build each of
+    # their names from the env key, and Rack::Headers#[]= would downcase it again.
+    REQUEST_HEADERS = %w[
+      accept
+      accept-encoding
+      accept-language
+      accept-version
+      authorization
+      client-ip
+      cookie
+      dnt
+      forwarded
+      host
+      if-modified-since
+      if-none-match
+      range
+      referer
+      sec-fetch-dest
+      sec-fetch-mode
+      sec-fetch-site
+      sec-fetch-user
+      upgrade-insecure-requests
+      user-agent
+      version
+      x-accel-buffering
+      x-accel-charset
+      x-accel-expires
+      x-accel-limit-rate
+      x-accel-mapping
+      x-accel-redirect
+      x-access-token
+      x-auth-request-access-token
+      x-auth-request-email
+      x-auth-request-groups
+      x-auth-request-preferred-username
+      x-auth-request-redirect
+      x-auth-request-token
+      x-auth-request-user
+      x-client-ip
+      x-forwarded-access-token
+      x-forwarded-email
+      x-forwarded-for
+      x-forwarded-groups
+      x-forwarded-host
+      x-forwarded-port
+      x-forwarded-preferred-username
+      x-forwarded-proto
+      x-forwarded-scheme
+      x-forwarded-ssl
+      x-forwarded-uri
+      x-forwarded-user
+      x-http-method-override
+      x-real-ip
+      x-requested-with
+      x-sendfile
+      x-sendfile-type
+    ].freeze
+    private_constant :REQUEST_HEADERS
 
-    KNOWN_HEADERS = %w[
-      Accept
-      Accept-CH
-      Accept-Encoding
-      Accept-Language
-      Accept-Patch
-      Accept-Ranges
-      Accept-Version
-      Access-Control-Allow-Credentials
-      Access-Control-Allow-Headers
-      Access-Control-Allow-Methods
-      Access-Control-Allow-Origin
-      Access-Control-Expose-Headers
-      Access-Control-Max-Age
-      Age
-      Allow
-      Alt-Svc
-      Authorization
-      Cache-Control
-      Client-Ip
-      Connection
-      Content-Disposition
-      Content-Encoding
-      Content-Language
-      Content-Length
-      Content-Location
-      Content-MD5
-      Content-Range
-      Content-Security-Policy
-      Content-Security-Policy-Report-Only
-      Content-Type
-      Cookie
-      Date
-      Delta-Base
-      Dnt
-      ETag
-      Expect-CT
-      Expires
-      Feature-Policy
-      Forwarded
-      Host
-      If-Modified-Since
-      If-None-Match
-      IM
-      Last-Modified
-      Link
-      Location
-      NEL
-      P3P
-      Permissions-Policy
-      Pragma
-      Preference-Applied
-      Proxy-Authenticate
-      Public-Key-Pins
-      Range
-      Referer
-      Referrer-Policy
-      Refresh
-      Report-To
-      Retry-After
-      Sec-Fetch-Dest
-      Sec-Fetch-Mode
-      Sec-Fetch-Site
-      Sec-Fetch-User
-      Server
-      Set-Cookie
-      Status
-      Strict-Transport-Security
-      Timing-Allow-Origin
-      Tk
-      Trailer
-      Transfer-Encoding
-      Upgrade
-      Upgrade-Insecure-Requests
-      User-Agent
-      Vary
-      Version
-      Via
-      Warning
-      WWW-Authenticate
-      X-Accel-Buffering
-      X-Accel-Charset
-      X-Accel-Expires
-      X-Accel-Limit-Rate
-      X-Accel-Mapping
-      X-Accel-Redirect
-      X-Access-Token
-      X-Auth-Request-Access-Token
-      X-Auth-Request-Email
-      X-Auth-Request-Groups
-      X-Auth-Request-Preferred-Username
-      X-Auth-Request-Redirect
-      X-Auth-Request-Token
-      X-Auth-Request-User
-      X-Cascade
-      X-Client-Ip
-      X-Content-Duration
-      X-Content-Security-Policy
-      X-Content-Type-Options
-      X-Correlation-Id
-      X-Download-Options
-      X-Forwarded-Access-Token
-      X-Forwarded-Email
-      X-Forwarded-For
-      X-Forwarded-Groups
-      X-Forwarded-Host
-      X-Forwarded-Port
-      X-Forwarded-Preferred-Username
-      X-Forwarded-Proto
-      X-Forwarded-Scheme
-      X-Forwarded-Ssl
-      X-Forwarded-Uri
-      X-Forwarded-User
-      X-Frame-Options
-      X-HTTP-Method-Override
-      X-Permitted-Cross-Domain-Policies
-      X-Powered-By
-      X-Real-IP
-      X-Redirect-By
-      X-Request-Id
-      X-Requested-With
-      X-Runtime
-      X-Sendfile
-      X-Sendfile-Type
-      X-UA-Compatible
-      X-WebKit-CS
-      X-XSS-Protection
-    ].to_h do |header|
+    # Env key => header name. Rack's names are the frozen Strings
+    # Rack::Headers#[]= looks up, so a known header is stored without copying.
+    KNOWN_HEADERS = (Rack::Headers::KNOWN_HEADERS.values.uniq + REQUEST_HEADERS).to_h do |header|
       ["HTTP_#{header.upcase.tr('-', '_')}", header]
     end.freeze
 
@@ -252,7 +184,7 @@ module Grape
     # `k, v` pair would be boxed into a throwaway Array on every header. A
     # two-arg block receives `k`/`v` directly and allocates nothing extra.
     def build_headers
-      headers = Grape::Util::Header.new
+      headers = Rack::Headers.new
       each_header do |k, v|
         next unless k.start_with? 'HTTP_'
 

@@ -26,8 +26,6 @@ jobs:
         ruby: ['3.3', '3.4', '4.0']
         gemfile:
           - Gemfile
-          - gemfiles/rack_2_2.gemfile
-          - gemfiles/rack_3_0.gemfile
           - gemfiles/rack_3_1.gemfile
           - gemfiles/rack_3_2.gemfile
           - gemfiles/rails_8_0.gemfile

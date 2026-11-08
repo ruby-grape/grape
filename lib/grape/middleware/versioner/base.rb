@@ -18,7 +18,7 @@ module Grape
           end
         end
 
-        CASCADE_PASS_HEADER = { 'X-Cascade' => 'pass' }.freeze
+        CASCADE_PASS_HEADER = { 'x-cascade' => 'pass' }.freeze
 
         def self.inherited(klass)
           super

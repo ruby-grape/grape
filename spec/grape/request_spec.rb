@@ -157,71 +157,16 @@ describe Grape::Request do
       end
     end
 
-    # Rack 3 introduced Rack::BadRequest as a marker module included by all bad request
-    # exception classes, so a single `rescue Rack::BadRequest` covers them all.
-    # On Rack 2, there is no such module and each exception class must be tested individually.
-    if defined?(Rack::BadRequest)
-      context 'when rack_params raises a custom error that includes Rack::BadRequest' do
-        let(:method) { Rack::POST }
-        let(:custom_rack_error) do
-          Class.new(StandardError) { include Rack::BadRequest }
-        end
-
-        before { allow(request).to receive(:rack_params).and_raise(custom_rack_error) }
-
-        it 'raises a Grape::Exceptions::RequestError' do
-          expect { request.params }.to raise_error(Grape::Exceptions::RequestError)
-        end
-      end
-    else
-      context 'when rack_params raises a Rack::Multipart::MultipartPartLimitError' do
-        let(:method) { Rack::POST }
-
-        before { allow(request).to receive(:rack_params).and_raise(Rack::Multipart::MultipartPartLimitError) }
-
-        it 'raises a Grape::Exceptions::RequestError' do
-          expect { request.params }.to raise_error(Grape::Exceptions::RequestError)
-        end
+    context 'when rack_params raises a custom error that includes Rack::BadRequest' do
+      let(:method) { Rack::POST }
+      let(:custom_rack_error) do
+        Class.new(StandardError) { include Rack::BadRequest }
       end
 
-      context 'when rack_params raises a Rack::Multipart::MultipartTotalPartLimitError' do
-        let(:method) { Rack::POST }
+      before { allow(request).to receive(:rack_params).and_raise(custom_rack_error) }
 
-        before { allow(request).to receive(:rack_params).and_raise(Rack::Multipart::MultipartTotalPartLimitError) }
-
-        it 'raises a Grape::Exceptions::RequestError' do
-          expect { request.params }.to raise_error(Grape::Exceptions::RequestError)
-        end
-      end
-
-      context 'when rack_params raises a Rack::Utils::ParameterTypeError' do
-        let(:method) { Rack::POST }
-
-        before { allow(request).to receive(:rack_params).and_raise(Rack::Utils::ParameterTypeError) }
-
-        it 'raises a Grape::Exceptions::RequestError' do
-          expect { request.params }.to raise_error(Grape::Exceptions::RequestError)
-        end
-      end
-
-      context 'when rack_params raises a Rack::Utils::InvalidParameterError' do
-        let(:method) { Rack::POST }
-
-        before { allow(request).to receive(:rack_params).and_raise(Rack::Utils::InvalidParameterError) }
-
-        it 'raises a Grape::Exceptions::RequestError' do
-          expect { request.params }.to raise_error(Grape::Exceptions::RequestError)
-        end
-      end
-
-      context 'when rack_params raises a Rack::QueryParser::ParamsTooDeepError' do
-        let(:method) { Rack::POST }
-
-        before { allow(request).to receive(:rack_params).and_raise(Rack::QueryParser::ParamsTooDeepError) }
-
-        it 'raises a Grape::Exceptions::RequestError' do
-          expect { request.params }.to raise_error(Grape::Exceptions::RequestError)
-        end
+      it 'raises a Grape::Exceptions::RequestError' do
+        expect { request.params }.to raise_error(Grape::Exceptions::RequestError)
       end
     end
   end

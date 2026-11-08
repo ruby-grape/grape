@@ -32,6 +32,7 @@ require 'rack'
 require 'rack/auth/basic'
 require 'rack/builder'
 require 'rack/head'
+require 'rack/headers'
 require 'singleton'
 require 'zeitwerk'
 
@@ -80,22 +81,8 @@ module Grape
   ].freeze
 
   # Rack errors that should be rescued and wrapped as Grape::Exceptions::RequestError.
-  # Rack 3.1.0 introduced Rack::BadRequest as a marker module included by all bad request
-  # exception classes, allowing a single rescue entry to cover them all.
-  # Before, these errors are raised as individual exception classes.
-  RACK_ERRORS =
-    if Gem::Version.new(Rack.release) >= Gem::Version.new('3.1.0')
-      [EOFError, Rack::BadRequest]
-    else
-      [
-        EOFError,
-        Rack::Multipart::MultipartPartLimitError,
-        Rack::Multipart::MultipartTotalPartLimitError,
-        Rack::Utils::ParameterTypeError,
-        Rack::Utils::InvalidParameterError,
-        Rack::QueryParser::ParamsTooDeepError
-      ]
-    end.freeze
+  # Rack::BadRequest is a marker module every Rack bad-request exception includes.
+  RACK_ERRORS = [EOFError, Rack::BadRequest].freeze
 
   # The deprecation horizon is the version a deprecation announces as its
   # removal point, so it is the *next* major rather than the current one, and

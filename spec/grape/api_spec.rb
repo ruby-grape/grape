@@ -1657,7 +1657,7 @@ describe Grape::API do
         blk.yield ' file content'
       end
 
-      subject.use Gem::Version.new(Rack.release) < Gem::Version.new('3') ? Rack::Chunked : ChunkedResponse
+      subject.use ChunkedResponse
       subject.get('/stream') { stream test_stream }
       get '/stream', {}, 'HTTP_VERSION' => 'HTTP/1.1', Rack::SERVER_PROTOCOL => 'HTTP/1.1'
 

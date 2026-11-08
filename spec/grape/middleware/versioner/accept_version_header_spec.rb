@@ -20,7 +20,7 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
       payload = catch(:error) { subject.call('HTTP_ACCEPT_VERSION' => "\x80") }
       expect(payload).to be_a(Grape::Exceptions::ErrorResponse)
       expect(payload.status).to eq(406)
-      expect(payload.headers).to eq('X-Cascade' => 'pass')
+      expect(payload.headers).to eq('x-cascade' => 'pass')
       expect(payload.message).to eq('The requested version is not supported.')
     end
   end
@@ -40,7 +40,7 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
       payload = catch(:error) { subject.call('HTTP_ACCEPT_VERSION' => 'v2').last }
       expect(payload).to be_a(Grape::Exceptions::ErrorResponse)
       expect(payload.status).to eq(406)
-      expect(payload.headers).to eq('X-Cascade' => 'pass')
+      expect(payload.headers).to eq('x-cascade' => 'pass')
       expect(payload.message).to eq('The requested version is not supported.')
     end
   end
@@ -66,7 +66,7 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
       payload = catch(:error) { subject.call({}).last }
       expect(payload).to be_a(Grape::Exceptions::ErrorResponse)
       expect(payload.status).to eq(406)
-      expect(payload.headers).to eq('X-Cascade' => 'pass')
+      expect(payload.headers).to eq('x-cascade' => 'pass')
       expect(payload.message).to eq('Accept-Version header must be set.')
     end
 
@@ -74,7 +74,7 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
       payload = catch(:error) { subject.call('HTTP_ACCEPT_VERSION' => '').last }
       expect(payload).to be_a(Grape::Exceptions::ErrorResponse)
       expect(payload.status).to eq(406)
-      expect(payload.headers).to eq('X-Cascade' => 'pass')
+      expect(payload.headers).to eq('x-cascade' => 'pass')
       expect(payload.message).to eq('Accept-Version header must be set.')
     end
 
