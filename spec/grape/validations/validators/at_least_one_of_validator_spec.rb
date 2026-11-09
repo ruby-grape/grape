@@ -359,5 +359,62 @@ describe Grape::Validations::Validators::AtLeastOneOfValidator do
         )
       end
     end
+
+    describe 'string group attrs under build_with :hash' do
+      let(:app) do
+        Class.new(Grape::API) do
+          build_with :hash
+
+          rescue_from Grape::Exceptions::ValidationErrors do |e|
+            error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
+          end
+
+          params do
+            optional :beer
+            optional :wine
+            at_least_one_of 'beer', 'wine'
+          end
+          post do
+          end
+        end
+      end
+
+      let(:path) { '/' }
+      let(:params) { { beer: true } }
+
+      it 'does not return a validation error' do
+        validate
+        expect(last_response.status).to eq 201
+      end
+    end
+
+    describe 'when the same attr is named twice in the group' do
+      let(:app) do
+        Class.new(Grape::API) do
+          rescue_from Grape::Exceptions::ValidationErrors do |e|
+            error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
+          end
+
+          params do
+            optional :beer
+            optional :wine
+            at_least_one_of(*%i[beer beer wine])
+          end
+          post do
+          end
+        end
+      end
+
+      let(:path) { '/' }
+      let(:params) { {} }
+
+      it 'returns a validation error with deduplicated names' do
+        validate
+        expect(last_response.status).to eq 400
+        expect(JSON.parse(last_response.body)).to eq(
+          'beer,wine' => ['are missing, at least one parameter must be provided']
+        )
+      end
+    end
   end
 end

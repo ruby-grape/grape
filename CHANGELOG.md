@@ -13,6 +13,7 @@
 
 #### Fixes
 
+* [#2981](https://github.com/ruby-grape/grape/pull/2981): Speed up group validators inside large Array scopes by only inspecting declared attrs - [@braktar](https://github.com/braktar).
 * [#3043](https://github.com/ruby-grape/grape/pull/3043): Answer 404 when every route on a path cascades, however many there are - [@ericproulx](https://github.com/ericproulx).
 * [#3045](https://github.com/ruby-grape/grape/pull/3045): Pin `git` below 6 so Danger can load - [@ericproulx](https://github.com/ericproulx).
 * [#3046](https://github.com/ruby-grape/grape/pull/3046): Fix file uploads rejected inside `oneof` variants - [@ericproulx](https://github.com/ericproulx).
