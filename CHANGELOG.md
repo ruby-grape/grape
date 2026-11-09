@@ -27,6 +27,7 @@
 * [#3061](https://github.com/ruby-grape/grape/pull/3061): Make a helper reach the routes declared above it in its scope - [@ericproulx](https://github.com/ericproulx).
 * [#3064](https://github.com/ruby-grape/grape/pull/3064): Cascade past a mounted Rack app that declines with a lowercase `x-cascade` - [@ericproulx](https://github.com/ericproulx).
 * [#3065](https://github.com/ruby-grape/grape/pull/3065): Answer a route opening with an optional segment without it under a namespace, prefix or mount path - [@ericproulx](https://github.com/ericproulx).
+* [#3066](https://github.com/ruby-grape/grape/pull/3066): Honour `given` and empty optional Hash scopes in group validators - [@braktar](https://github.com/braktar).
 * [#3067](https://github.com/ruby-grape/grape/pull/3067): Stop a `given` in an Array from passing over elements sent empty - [@ericproulx](https://github.com/ericproulx).
 * [#3068](https://github.com/ruby-grape/grape/pull/3068): Name the element a request sent in errors from a scope under a `given` in an Array - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
