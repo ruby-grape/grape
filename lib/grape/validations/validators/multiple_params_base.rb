@@ -4,6 +4,11 @@ module Grape
   module Validations
     module Validators
       class MultipleParamsBase < Base
+        def initialize(attrs, options, required, scope, opts)
+          super
+          @group = @attrs.uniq.freeze
+        end
+
         # Group rules check their attributes together, so they cannot take
         # Base's per-attribute fast paths (@direct / @direct_elements).
         def validate!(params)
@@ -11,6 +16,8 @@ module Grape
         end
 
         private
+
+        attr_reader :group
 
         def validate_element_attributes(element, array_errors)
           begin
@@ -21,15 +28,15 @@ module Grape
           array_errors
         end
 
-        def keys_in_common(resource_params, known_keys = all_keys)
-          return [] unless hash_like?(resource_params)
+        def present_attrs(params)
+          return [] unless hash_like?(params)
 
-          known_keys & resource_params.keys.map! { |attr| scope.full_name(attr) }
+          group.select { |name| params.key?(name) }
         end
 
-        def all_keys
-          attrs.map { |attr| scope.full_name(attr) }
-        end
+        def full_names(names) = names.map { |name| scope.full_name(name) }
+
+        def all_keys = full_names(group)
       end
     end
   end

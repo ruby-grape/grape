@@ -3,8 +3,7 @@
 # gem 'grape', '=1.0.1'
 
 require 'grape'
-require 'ruby-prof'
-require 'hashie'
+require 'json'
 
 class API < Grape::API
   # include Grape::Extensions::Hash::ParamBuilder
@@ -230,20 +229,17 @@ class API < Grape::API
     }
   end
 end
-puts Grape::VERSION
+warn "grape #{Grape::VERSION}"
 
 options = {
   method: Rack::POST,
   params: JSON.parse(File.read('benchmark/resource/vrp_example.json'))
 }
-
 env = Rack::MockRequest.env_for('/api/v1', options)
 
-start = Time.now
-result = RubyProf.profile do
-  response = API.call env
-  puts response.last
-end
-puts Time.now - start
-printer = RubyProf::FlatPrinter.new(result)
-File.open('test_prof.out', 'w+') { |f| printer.print(f, {}) }
+2.times { API.call(env) }
+iterations = 3
+t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+iterations.times { API.call(env) }
+dt = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0) / iterations
+puts format('%<seconds>.6f', seconds: dt)
