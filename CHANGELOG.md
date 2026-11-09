@@ -34,6 +34,7 @@
 * [#3069](https://github.com/ruby-grape/grape/pull/3069): Find params declared with String names under `build_with :hash` - [@ericproulx](https://github.com/ericproulx).
 * [#3070](https://github.com/ruby-grape/grape/pull/3070): Speed up auto-`OPTIONS`, 405 and 404 answers on APIs with many paths - [@ericproulx](https://github.com/ericproulx).
 * [#3071](https://github.com/ruby-grape/grape/pull/3071): Skip the query parse when building the params of a request with no query string - [@ericproulx](https://github.com/ericproulx).
+* [#3072](https://github.com/ruby-grape/grape/pull/3072): Answer the `Accept` lists axios, jQuery and HTTPie send without negotiating them on every request - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.1.0 (2026-10-31)

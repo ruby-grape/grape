@@ -263,6 +263,36 @@ describe Grape::Middleware::Formatter do
       subject.call(env)
       expect(env[:system_time]).to eq('091293')
     end
+
+    # The answers to the lists common HTTP clients send are worked out when
+    # the formatter is built, and are the ones a request would negotiate.
+    described_class::COMMON_ACCEPT_HEADERS.each do |accept|
+      context "with the common header #{accept}" do
+        subject { described_class.new(app, content_types:) }
+
+        let(:content_types) { { txt: 'text/plain', json: 'application/json', xml: 'application/xml' } }
+        let(:negotiated) { described_class.format_for_accept(accept, content_types.invert) }
+
+        it 'answers what matching it against the media types does' do
+          expect(format_negotiated(Rack::PATH_INFO => '/info', 'HTTP_ACCEPT' => accept)).to eq(negotiated)
+        end
+
+        it 'does not match it against the media types again' do
+          subject
+          expect(Rack::Utils).not_to receive(:best_q_match)
+
+          format_negotiated(Rack::PATH_INFO => '/info', 'HTTP_ACCEPT' => accept)
+        end
+
+        context 'when the media types are declared in another order' do
+          let(:content_types) { { xml: 'application/xml', json: 'application/json', txt: 'text/plain' } }
+
+          it 'answers what matching it against them in that order does' do
+            expect(format_negotiated(Rack::PATH_INFO => '/info', 'HTTP_ACCEPT' => accept)).to eq(negotiated)
+          end
+        end
+      end
+    end
   end
 
   context 'content-type' do

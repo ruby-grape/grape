@@ -31,22 +31,38 @@ module Grape
         mime_types[media_type] if media_type
       end
 
+      # The Accept header an HTTP client sends with every request unless it
+      # is told otherwise, for the clients that send a list: axios and
+      # Angular's HttpClient, jQuery asked for JSON, and HTTPie. Matching a
+      # list against the registered media types costs more than the rest of
+      # a small request does.
+      COMMON_ACCEPT_HEADERS = [
+        'application/json, text/plain, */*',
+        'application/json, text/javascript, */*; q=0.01',
+        'application/json, */*;q=0.5'
+      ].freeze
+
       # +format_for_accept+ answers from the header and +mime_types+ alone. A
       # client that names the format it wants sends one of those media types as
-      # it is registered (+application/json+), and most others send +*/*+ or
-      # nothing, so those answers are worked out once instead of re-running
-      # Rack's q-value match on every request. Any other header misses and is
-      # negotiated as before; only registered media types are keys, so a client
-      # cannot grow a table.
+      # it is registered (+application/json+), and most others send +*/*+,
+      # nothing or one of COMMON_ACCEPT_HEADERS, so those answers are worked
+      # out once instead of re-running Rack's q-value match on every request.
+      # Any other header misses and is negotiated as before; a request never
+      # adds a key, so a client cannot grow a table.
       #
       # Shared per +mime_types+, which Grape::ContentTypes already shares per
-      # content-type registry: every endpoint builds its own formatter.
+      # content-type registry: every endpoint builds its own formatter. Keyed
+      # by identity: two APIs declaring the same media types in another order
+      # have tables that are equal as Hashes, and a header naming several
+      # media types is answered by the one declared first.
       class FormatForAcceptCache < Grape::Util::Cache
         def initialize
           super
           @cache = Hash.new do |h, mime_types|
-            h[mime_types] = [*mime_types.keys, ALL_MEDIA_TYPES, nil].to_h { |accept| [accept, Formatter.format_for_accept(accept, mime_types)] }.freeze
-          end
+            h[mime_types] = [*mime_types.keys, *COMMON_ACCEPT_HEADERS, ALL_MEDIA_TYPES, nil].to_h do |accept|
+              [accept, Formatter.format_for_accept(accept, mime_types)]
+            end.freeze
+          end.compare_by_identity
         end
       end
 
@@ -367,8 +383,8 @@ module Grape
         raise Grape::Exceptions::RequestError
       end
 
-      # The keys are registered media types -- valid strings, which scrubbing
-      # leaves alone -- so only a miss needs the header scrubbed.
+      # The keys are valid strings, which scrubbing leaves alone, so only a
+      # miss needs the header scrubbed.
       def format_from_header(env)
         accept_header = env['HTTP_ACCEPT']
         @format_for_accept.fetch(accept_header) { Formatter.format_for_accept(try_scrub(accept_header), mime_types) }
