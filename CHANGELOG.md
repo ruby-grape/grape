@@ -28,6 +28,7 @@
 * [#3064](https://github.com/ruby-grape/grape/pull/3064): Cascade past a mounted Rack app that declines with a lowercase `x-cascade` - [@ericproulx](https://github.com/ericproulx).
 * [#3065](https://github.com/ruby-grape/grape/pull/3065): Answer a route opening with an optional segment without it under a namespace, prefix or mount path - [@ericproulx](https://github.com/ericproulx).
 * [#3067](https://github.com/ruby-grape/grape/pull/3067): Stop a `given` in an Array from passing over elements sent empty - [@ericproulx](https://github.com/ericproulx).
+* [#3068](https://github.com/ruby-grape/grape/pull/3068): Name the element a request sent in errors from a scope under a `given` in an Array - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.1.0 (2026-10-31)

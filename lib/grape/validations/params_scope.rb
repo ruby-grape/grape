@@ -164,9 +164,9 @@ module Grape
         return false if @parent && !@parent.meets_dependency?(@parent.params(request_params), request_params)
 
         if params.is_a?(Array)
-          filtered = params.flatten.filter { |param| meets_dependency?(param, request_params) }
-          ParamScopeTracker.current&.store_qualifying_params(self, filtered)
-          return !filtered.empty?
+          qualifying = qualifying_elements(params, request_params)
+          ParamScopeTracker.current&.store_qualifying_params(self, qualifying)
+          return qualifying.flatten.any? { |param| !EmptyOptionalValue.equal?(param) }
         end
 
         meets_hash_dependency?(params)
@@ -322,6 +322,19 @@ module Grape
       # and an empty Hash otherwise.
       def missing_element(is_array)
         @optional && is_array ? EmptyOptionalValue : {}
+      end
+
+      # The scopes below a +given+ read its Array params from here (see
+      # #params). An element that does not meet the dependency becomes
+      # EmptyOptionalValue, which they pass over, rather than being dropped:
+      # the ones that do then keep the index the request sent them at, which
+      # is the one their errors name.
+      def qualifying_elements(params, request_params)
+        params.map do |param|
+          next qualifying_elements(param, request_params) if param.is_a?(Array)
+
+          meets_dependency?(param, request_params) ? param : EmptyOptionalValue
+        end
       end
 
       def build_full_path

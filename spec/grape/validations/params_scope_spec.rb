@@ -1214,6 +1214,87 @@ describe Grape::Validations::ParamsScope do
       end
     end
 
+    # A scope declared under a given reads only the elements that meet its
+    # dependency. They keep their place among the others, so an error names
+    # the element the request sent.
+    context 'array with a scope declared under given' do
+      it 'names the element of a Hash scope' do
+        subject.params do
+          requires :items, type: Array do
+            optional :kind
+            given kind: ->(val) { val == 'x' } do
+              requires :meta, type: Hash do
+                requires :beer
+              end
+            end
+          end
+        end
+        subject.post('/hash_under_given') { 'ok' }
+
+        params = { items: [{ kind: 'x', meta: {} }, { kind: 'y' }, { kind: 'x', meta: {} }] }
+        post '/hash_under_given', params.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.body).to eq('items[0][meta][beer] is missing, items[2][meta][beer] is missing')
+        expect(last_response.status).to eq(400)
+      end
+
+      it 'names the element of an Array scope' do
+        subject.params do
+          requires :items, type: Array do
+            optional :kind
+            given kind: ->(val) { val == 'x' } do
+              requires :subs, type: Array do
+                requires :n
+              end
+            end
+          end
+        end
+        subject.post('/array_under_given') { 'ok' }
+
+        params = { items: [{ kind: 'y' }, { kind: 'x', subs: [{ n: 1 }, {}] }] }
+        post '/array_under_given', params.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.body).to eq('items[1][subs][1][n] is missing')
+        expect(last_response.status).to eq(400)
+      end
+
+      it 'names the element of a scope under a given in nested arrays' do
+        subject.params do
+          requires :orders, type: Array do
+            requires :items, type: Array do
+              optional :kind
+              given kind: ->(val) { val == 'x' } do
+                requires :meta, type: Hash do
+                  requires :beer
+                end
+              end
+            end
+          end
+        end
+        subject.post('/nested_under_given') { 'ok' }
+
+        params = { orders: [{ items: [{ kind: 'y' }] }, { items: [{ kind: 'y' }, { kind: 'x', meta: {} }] }] }
+        post '/nested_under_given', params.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.body).to eq('orders[1][items][1][meta][beer] is missing')
+        expect(last_response.status).to eq(400)
+      end
+
+      it 'does not validate the given when no element meets its dependency' do
+        subject.params do
+          requires :items, type: Array do
+            optional :kind
+            given kind: ->(val) { val == 'x' } do
+              optional :beer
+              optional :wine
+              exactly_one_of :beer, :wine
+            end
+          end
+        end
+        subject.post('/none_meets_given') { 'ok' }
+
+        post '/none_meets_given', { items: [{ kind: 'y' }, { kind: 'z' }] }.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(201)
+      end
+    end
+
     # An element sent empty meets a dependency its absent key satisfies, so the
     # given scope validates it, as it does one sent with that key set to null.
     context 'optional array with given' do
