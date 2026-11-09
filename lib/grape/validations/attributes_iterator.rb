@@ -19,7 +19,8 @@ module Grape
       def initialize(scope)
         @scope = scope
         # How many times #do_each may descend into a nested array. The
-        # declaration allows one level per Array-typed scope on the chain, less
+        # declaration allows one level per Array scope nesting on the chain (see
+        # ParamsScope#find_array_depth), less
         # the one +Array.wrap+ already consumes in #each. Anything deeper was
         # put there by the request, not by the declaration.
         @max_nesting = [scope.array_depth - 1, 0].max

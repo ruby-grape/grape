@@ -1214,6 +1214,59 @@ describe Grape::Validations::ParamsScope do
       end
     end
 
+    # An element sent empty meets a dependency its absent key satisfies, so the
+    # given scope validates it, as it does one sent with that key set to null.
+    context 'optional array with given' do
+      before do
+        subject.params do
+          optional :array, type: Array do
+            optional :a
+            given a: ->(val) { val != 'skip' } do
+              requires :b
+            end
+          end
+        end
+
+        subject.post '/optional_array_with_given'
+      end
+
+      it 'validates an element sent empty' do
+        post '/optional_array_with_given', { array: [{ a: 'x', b: 1 }, {}] }.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.body).to eq('array[1][b] is missing')
+        expect(last_response.status).to eq(400)
+      end
+
+      it 'passes over an array whose elements are all empty' do
+        post '/optional_array_with_given', { array: [{}] }.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(201)
+      end
+    end
+
+    # A given scope reads its array's elements where the array scope does, so
+    # an element wrapped in an extra array is not unwrapped for it either.
+    context 'array with given, nested deeper than the declaration' do
+      before do
+        subject.params do
+          requires :array, type: Array do
+            optional :a
+            given :a do
+              optional :b
+              optional :c
+              mutually_exclusive :b, :c
+            end
+          end
+        end
+
+        subject.post '/array_with_given_nested'
+      end
+
+      it 'does not validate inside the extra array' do
+        post '/array_with_given_nested', { array: [[{ a: 1, b: 1, c: 1 }]] }.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.body).to eq('array[0] is invalid')
+        expect(last_response.status).to eq(400)
+      end
+    end
+
     # A with group inside an array scope is a lateral scope whose params are
     # the array itself, so each element's index is recorded against the array
     # scope. Failing a first element as well as the last shows it was: a stale
