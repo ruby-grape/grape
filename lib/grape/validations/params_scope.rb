@@ -459,7 +459,14 @@ module Grape
       # what {#params} returns, because +map_params+ maps over the array it
       # resolved from the parent. Counting them tells {AttributesIterator} how
       # deep the declaration says the params for this scope may legitimately be.
+      #
+      # A lateral scope adds none: it has no element to map, so its params are
+      # its parent's. A +given+ in an Array scope still iterates their elements
+      # (see #new_lateral_scope), but counting it put every element it reads one
+      # level short of where the iterator looks for the elements a request sent.
       def find_array_depth
+        return @parent.array_depth if lateral?
+
         (iterates_elements? ? 1 : 0) + (@parent&.array_depth || 0)
       end
 
