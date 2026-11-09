@@ -785,6 +785,31 @@ describe Grape::Validations::ParamsScope do
       end.to raise_error(Grape::Exceptions::UnknownParameter)
     end
 
+    it 'depends on a parameter named as a String that was declared as a Symbol' do
+      subject.params do
+        optional :a
+        given 'a' do
+          requires :b
+        end
+      end
+      subject.get('/given-string') { 'ok' }
+
+      get '/given-string', a: 'x'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('b is missing')
+    end
+
+    it 'knows a parameter declared as a String or a Symbol by either name' do
+      answers = nil
+      subject.params do
+        optional 'a'
+        optional :b
+        answers = [declared_param?(:a), declared_param?('b')]
+      end
+
+      expect(answers).to eq([true, true])
+    end
+
     it 'does not raise an error if the dependent parameter is a Hash' do
       expect do
         subject.params do

@@ -130,7 +130,7 @@ module Grape
         define_method(method_name) do |*attrs, using: nil, except: nil, as: nil, **opts, &block|
           return redispatch_legacy_options(method_name, attrs, { using:, except:, as: }.compact.merge(opts), &block) if legacy_options?(attrs)
 
-          declare(attrs, opts, required:, using:, except:, as:, &block)
+          declare(param_names(attrs), opts, required:, using:, except:, as:, &block)
         end
       end
 
@@ -143,7 +143,7 @@ module Grape
 
       %i[mutually_exclusive exactly_one_of at_least_one_of all_or_none_of].each do |validator|
         define_method validator do |*attrs, message: nil|
-          validates(attrs, { validator => { value: true, message: } })
+          validates(param_names(attrs), { validator => { value: true, message: } })
         end
       end
 
@@ -155,11 +155,12 @@ module Grape
       #   defined in this scope yet
       # @yield a parameter definition DSL
       def given(*attrs, &)
-        attrs.each do |attr|
+        dependent_on = param_names(attrs)
+        dependent_on.each do |attr|
           proxy_attr = first_hash_key_or_param(attr)
           raise Grape::Exceptions::UnknownParameter.new(proxy_attr) unless declared_param?(proxy_attr)
         end
-        new_lateral_scope(dependent_on: attrs, &)
+        new_lateral_scope(dependent_on:, &)
       end
 
       # Test for whether a certain parameter has been defined in this params
@@ -169,9 +170,10 @@ module Grape
         # Elements of @declared_params of lateral scope are pushed in @parent. So check them in @parent.
         return @parent.declared_param?(param) if lateral?
 
+        name = param_name(param)
         # A nested scope is recorded as an Attr keyed by { element => children }.
         @declared_params.flatten.any? do |declared_param_attr|
-          first_hash_key_or_param(declared_param_attr.key) == param
+          first_hash_key_or_param(declared_param_attr.key) == name
         end
       end
 
@@ -227,6 +229,19 @@ module Grape
 
       def first_hash_key_or_param(parameter)
         parameter.is_a?(Hash) ? parameter.keys.first : parameter
+      end
+
+      # Every params builder finds a param by a Symbol, and +build_with :hash+
+      # only by a Symbol: a name declared as a String found nothing there. So
+      # a String name becomes a Symbol. Anything else is left as it is: a name
+      # read from +configuration+ is nil until the API is mounted with one. A
+      # +given+ may map a name to a Proc.
+      def param_names(attrs)
+        attrs.map { |attr| attr.is_a?(Hash) ? attr.transform_keys { |key| param_name(key) } : param_name(attr) }
+      end
+
+      def param_name(name)
+        name.is_a?(String) ? name.to_sym : name
       end
     end
   end

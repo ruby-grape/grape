@@ -6,7 +6,9 @@ module Grape
       class SameAsValidator < Base
         def initialize(attrs, options, required, scope, opts)
           super
-          @value = option_value
+          # Names a param: a String becomes a Symbol, as in a declaration (see
+          # Grape::DSL::Parameters#param_names).
+          @value = option_value.is_a?(String) ? option_value.to_sym : option_value
         end
 
         def validate_param!(attr_name, params)
