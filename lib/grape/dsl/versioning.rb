@@ -40,7 +40,8 @@ module Grape
       #     end
       #   end
       #
-      # @param args [Array<String, Symbol>] one or more version identifiers.
+      # @param args [Array<String, Symbol, Integer, Array>] one or more versions,
+      #   or Arrays of them.
       # @param using [Symbol] versioning strategy — one of +:path+ (default),
       #   +:header+, +:param+, or +:accept_version_header+.
       # @param cascade [Boolean] forward to subsequent routes via the
@@ -56,11 +57,14 @@ module Grape
       # @return [String, nil] the most recently declared version.
       # @raise [Grape::Exceptions::MissingVendorOption] when +using: :header+
       #   is supplied without a +:vendor+.
+      # @raise [ArgumentError] when no version is given, or one is not a
+      #   non-empty String, Symbol or Integer, such as options given as a
+      #   positional Hash rather than as keyword arguments.
       def version(*args, using: :path, cascade: true, parameter: 'apiver', strict: false, vendor: nil, &block)
         return @versions&.last if args.empty?
 
+        requested_versions = version_names(args)
         options = build_version_options(using:, cascade:, parameter:, strict:, vendor:)
-        requested_versions = args.flatten.map(&:to_s)
 
         @versions = versions | requested_versions
 
@@ -82,6 +86,28 @@ module Grape
       end
 
       private
+
+      def version_names(args)
+        names = args.flatten
+        raise ArgumentError, '`version` needs at least one version' if names.empty?
+
+        names.map { |name| version_name(name) }
+      end
+
+      # Every strategy matches a version as a String, in a path segment, a
+      # media type or a parameter. Since Ruby 3 a braced options Hash lands
+      # here rather than in the keywords; a Float drops its trailing zeros
+      # (1.10 becomes "1.1"); and nil, an empty name or any other object
+      # becomes a version no request can reach.
+      def version_name(name)
+        raise ArgumentError, '`version` takes its options as keyword arguments, not as a positional Hash' if name.is_a?(Hash)
+
+        string = name.to_s
+        valid = (name in String | Symbol | Integer) && !string.empty?
+        raise ArgumentError, "`version` takes non-empty String, Symbol or Integer versions, not `#{name.inspect}`" unless valid
+
+        string
+      end
 
       def build_version_options(using:, vendor:, **)
         raise Grape::Exceptions::MissingVendorOption.new if using == :header && vendor.nil?

@@ -221,6 +221,74 @@ describe Grape::API do
         expect(subject.version).to be_nil
       end
     end
+
+    context 'when the options are given as a positional Hash' do
+      it 'raises an ArgumentError and registers no version' do
+        expect { subject.version 'v1', { using: :header, vendor: 'mycompany' } }
+          .to raise_error(ArgumentError, '`version` takes its options as keyword arguments, not as a positional Hash')
+        expect(subject.version).to be_nil
+      end
+
+      it 'raises an ArgumentError with a block' do
+        expect { subject.version('v1', { using: :param }) { get('/hello') { 'hello' } } }
+          .to raise_error(ArgumentError, /not as a positional Hash/)
+        expect(subject.routes).to be_empty
+      end
+
+      it 'raises an ArgumentError when the Hash is the only argument' do
+        expect { subject.version({ using: :header, vendor: 'mycompany' }) }
+          .to raise_error(ArgumentError, /not as a positional Hash/)
+      end
+
+      it 'raises an ArgumentError when the Hash is in an Array of versions' do
+        expect { subject.version ['v1', { using: :header, vendor: 'mycompany' }] }
+          .to raise_error(ArgumentError, /not as a positional Hash/)
+        expect(subject.version).to be_nil
+      end
+    end
+
+    context 'with String, Symbol and Integer versions' do
+      it 'registers each of them, Arrays of them included' do
+        subject.version 'v1', :v2, [3, ['v4']]
+        expect(subject.versions).to eq(%w[v1 v2 3 v4])
+      end
+
+      it 'serves an Integer version' do
+        subject.version 2
+        subject.get(:hello) { version }
+        get '/2/hello'
+        expect(last_response.body).to eq('2')
+      end
+    end
+
+    {
+      'nil' => nil,
+      'a boolean' => true,
+      'a Float, which drops its trailing zeros' => 1.10,
+      'an empty String' => '',
+      'an empty Symbol' => :'',
+      'any other object' => Object.new
+    }.each do |description, name|
+      context "with #{description} as a version" do
+        it 'raises an ArgumentError and registers no version' do
+          expect { subject.version 'v1', name }
+            .to raise_error(ArgumentError, "`version` takes non-empty String, Symbol or Integer versions, not `#{name.inspect}`")
+          expect(subject.version).to be_nil
+        end
+
+        it 'raises an ArgumentError in an Array of versions' do
+          expect { subject.version ['v1', [name]] }
+            .to raise_error(ArgumentError, /not `#{Regexp.escape(name.inspect)}`\z/)
+        end
+      end
+    end
+
+    context 'with an empty Array of versions' do
+      it 'raises an ArgumentError and registers no version' do
+        expect { subject.version [[]] }.to raise_error(ArgumentError, '`version` needs at least one version')
+        expect(subject.version).to be_nil
+      end
+    end
   end
 
   describe '.version using path' do

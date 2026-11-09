@@ -446,6 +446,8 @@ GET /v3/other # => Same behavior as v1 and v2
 GET /v3/var # => Same behavior as v2
 ```
 
+A version is a String, a Symbol or an Integer (`version 2` serves `/2/...`), and `version` takes one or more of them, or Arrays of them. It raises `ArgumentError` on anything else, such as a Float, which would lose its trailing zeros: write `version '1.10'`.
+
 There are four strategies in which clients can reach your API's endpoints: `:path`, `:header`, `:accept_version_header` and `:param`. The default strategy is `:path`.
 
 ### Strategies
