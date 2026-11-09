@@ -279,5 +279,104 @@ describe Grape::Validations::Validators::ExactlyOneOfValidator do
         )
       end
     end
+
+    describe 'when the group sits in a given under an Array' do
+      let(:app) do
+        Class.new(Grape::API) do
+          rescue_from Grape::Exceptions::ValidationErrors do |e|
+            error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
+          end
+
+          params do
+            requires :items, type: Array do
+              optional :kind
+              given kind: ->(v) { v == 'x' } do
+                optional :beer
+                optional :wine
+                exactly_one_of :beer, :wine
+              end
+            end
+          end
+          post '/given-array' do
+          end
+        end
+      end
+
+      let(:path) { '/given-array' }
+
+      context 'when a later element does not meet the dependency' do
+        let(:params) { { items: [{ kind: 'x', beer: true }, { kind: 'y' }] } }
+
+        it 'does not return a validation error' do
+          validate
+          expect(last_response.status).to eq 201
+        end
+      end
+
+      context 'when an element meets the dependency and violates the rule' do
+        let(:params) { { items: [{ kind: 'x', beer: true, wine: true }, { kind: 'y' }] } }
+
+        it 'returns a validation error for that element only' do
+          validate
+          expect(last_response.status).to eq 400
+          expect(JSON.parse(last_response.body)).to eq(
+            'items[0][beer],items[0][wine]' => ['are mutually exclusive']
+          )
+        end
+      end
+    end
+
+    describe 'when the group sits in an optional Hash under an Array' do
+      subject(:validate) { post path, params.to_json, 'CONTENT_TYPE' => 'application/json' }
+
+      let(:app) do
+        Class.new(Grape::API) do
+          rescue_from Grape::Exceptions::ValidationErrors do |e|
+            error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
+          end
+
+          params do
+            requires :items, type: Array do
+              optional :meta, type: Hash do
+                optional :beer
+                optional :wine
+                exactly_one_of :beer, :wine
+              end
+            end
+          end
+          post '/optional-hash-array' do
+          end
+        end
+      end
+
+      let(:path) { '/optional-hash-array' }
+
+      context 'when meta is empty' do
+        let(:params) { { items: [{ meta: {} }] } }
+
+        it 'does not return a validation error' do
+          validate
+          expect(last_response.status).to eq 201
+        end
+      end
+
+      context 'when meta is omitted' do
+        let(:params) { { items: [{}] } }
+
+        it 'does not return a validation error' do
+          validate
+          expect(last_response.status).to eq 201
+        end
+      end
+
+      context 'when one element sends meta and another sends it empty' do
+        let(:params) { { items: [{ meta: { beer: true } }, { meta: {} }] } }
+
+        it 'does not return a validation error' do
+          validate
+          expect(last_response.status).to eq 201
+        end
+      end
+    end
   end
 end
