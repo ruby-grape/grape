@@ -30,6 +30,7 @@
 * [#3066](https://github.com/ruby-grape/grape/pull/3066): Honour `given` and empty optional Hash scopes in group validators - [@braktar](https://github.com/braktar).
 * [#3067](https://github.com/ruby-grape/grape/pull/3067): Stop a `given` in an Array from passing over elements sent empty - [@ericproulx](https://github.com/ericproulx).
 * [#3068](https://github.com/ruby-grape/grape/pull/3068): Name the element a request sent in errors from a scope under a `given` in an Array - [@ericproulx](https://github.com/ericproulx).
+* [#3069](https://github.com/ruby-grape/grape/pull/3069): Find params declared with String names under `build_with :hash` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.1.0 (2026-10-31)

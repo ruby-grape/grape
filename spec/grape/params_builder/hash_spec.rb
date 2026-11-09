@@ -80,6 +80,95 @@ describe Grape::ParamsBuilder::Hash do
       expect(last_response.body).to eq('["bar", nil]')
     end
 
+    describe 'params declared with String names' do
+      it 'finds a required one' do
+        subject.params do
+          requires 'a'
+        end
+        subject.get('/foo') { params[:a] }
+
+        get '/foo', a: 'bar'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('bar')
+      end
+
+      it 'validates an optional one' do
+        subject.params do
+          optional 'a', type: Integer
+        end
+        subject.get('/foo') { params[:a].inspect }
+
+        get '/foo', a: 'x'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('a is invalid')
+      end
+
+      it 'declares their values' do
+        subject.params do
+          optional 'a', type: Integer
+        end
+        subject.get('/foo') { declared(params).inspect }
+
+        get '/foo', a: '1'
+        expect(last_response.body).to eq({ a: 1 }.inspect)
+      end
+
+      it 'finds the params of a Hash scope' do
+        subject.params do
+          requires 'a', type: Hash do
+            requires 'b'
+          end
+        end
+        subject.get('/foo') { params[:a][:b] }
+
+        get '/foo', a: { b: 'bar' }
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('bar')
+      end
+
+      it 'finds the params of an Array scope' do
+        subject.params do
+          requires 'items', type: Array do
+            requires 'b'
+          end
+        end
+        subject.get('/foo') { params[:items].map { |item| item[:b] }.join(',') }
+
+        get '/foo', items: [{ b: 'x' }, { b: 'y' }]
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('x,y')
+      end
+
+      it 'validates the params under a given' do
+        subject.params do
+          optional 'a'
+          given 'a' => ->(val) { val == 'x' } do
+            requires 'b'
+          end
+        end
+        subject.get('/foo') { 'ok' }
+
+        get '/foo', a: 'x'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('b is missing')
+      end
+
+      it 'compares the param a same_as names' do
+        subject.params do
+          optional 'a'
+          optional 'b', same_as: 'a'
+        end
+        subject.get('/foo') { 'ok' }
+
+        get '/foo', a: 'x', b: 'x'
+        expect(last_response.status).to eq(200)
+
+        get '/foo', a: 'x', b: 'y'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('b is not the same as a')
+      end
+    end
+
     it 'does not overwrite route_param with a regular param if they have same name' do
       subject.namespace :route_param do
         route_param :foo do

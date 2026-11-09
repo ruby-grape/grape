@@ -87,6 +87,13 @@ Every such request now answers the router's `404`, with `X-Cascade: pass` still 
 * The status, headers and body of a declined response are dropped, so a response you want a client to see must not set `X-Cascade: pass`. The same goes for a Rack app mounted on a path other routes share.
 * Behind `Rack::Cascade`, which looks only at the status, such a request now reaches the next app instead of stopping at the `406`.
 
+#### A parameter name written as a String is kept as a Symbol
+
+`requires`, `optional`, `given`, the group rules such as `mutually_exclusive`, and `same_as:` now keep a parameter name written as a String as a Symbol ([#3069](https://github.com/ruby-grape/grape/pull/3069)). Under `build_with :hash`, whose params have Symbol keys, a String name found nothing: `requires 'name'` answered `name is missing` to a request that sent it, and an optional one was not validated and came back from `declared` as `nil`. Every params builder answers a Symbol, so such names now work as Symbol names do.
+
+* A custom validator receives such a name as a Symbol in `validate_param!(attr_name, params)`. Compare `attr_name.to_s` if it checked the name against a String. Error messages and `declared(params)` name it as before.
+* `given 'name'` finds a parameter declared as `:name`, and `given :name` one declared as `'name'`, where both raised `Grape::Exceptions::UnknownParameter`.
+
 ### Upgrading to >= 4.1.0
 
 #### `Rack::Head` wraps the router instead of each endpoint's stack
