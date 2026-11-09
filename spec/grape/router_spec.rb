@@ -558,4 +558,102 @@ describe Grape::Router do
       end
     end
   end
+
+  # The allowed-methods routes are narrowed like a method's own: a table of
+  # the paths they spell out in full, then buckets by a literal segment. This
+  # API has enough paths for both, and each answer is the one walking every
+  # allowed-methods route in registration order gives.
+  describe 'answering a method a path has no route for on an API with many paths' do
+    let(:app) do
+      Class.new(Grape::API) do
+        format :json
+        %w[alpha beta gamma delta epsilon eta].each do |name|
+          get("/#{name}") { name }
+          post("/#{name}") { name }
+          get("/#{name}/:id") { name }
+          put("/#{name}/:id") { name }
+        end
+        get('/zeta/:id', requirements: { id: /\d+/ }) { 'zeta' }
+        delete('/zeta/special') { 'special' }
+        get('/theta/:id') { 'theta' }
+        post('/theta/new') { 'new' }
+        get('/café/:id') { 'café' }
+        get('/:slug') { 'slug' }
+      end
+    end
+
+    def allow_for(http_method, path)
+      public_send(http_method, path)
+      [last_response.status, last_response.headers['Allow']]
+    end
+
+    it 'answers OPTIONS for a path spelled out in full' do
+      expect(allow_for(:options, '/gamma')).to eq([204, 'OPTIONS, GET, POST, HEAD'])
+    end
+
+    it 'answers OPTIONS for a path with a param' do
+      expect(allow_for(:options, '/gamma/7')).to eq([204, 'OPTIONS, GET, PUT, HEAD'])
+    end
+
+    it 'answers OPTIONS for a path with a format extension' do
+      expect(allow_for(:options, '/gamma.json')).to eq([204, 'OPTIONS, GET, POST, HEAD'])
+      expect(allow_for(:options, '/gamma/7.json')).to eq([204, 'OPTIONS, GET, PUT, HEAD'])
+    end
+
+    it 'answers OPTIONS for a path spelled with a percent-encoding' do
+      expect(allow_for(:options, '/g%61mma/7')).to eq([204, 'OPTIONS, GET, PUT, HEAD'])
+    end
+
+    it 'answers OPTIONS for a path only the route with no literal segment matches' do
+      expect(allow_for(:options, '/other')).to eq([204, 'OPTIONS, GET, HEAD'])
+    end
+
+    it 'answers OPTIONS from the earlier of two routes matching a path spelled out in full' do
+      expect(allow_for(:options, '/theta/new')).to eq([204, 'OPTIONS, GET, HEAD'])
+    end
+
+    it 'answers OPTIONS from the later route when the earlier one misses the path' do
+      expect(allow_for(:options, '/zeta/special')).to eq([204, 'OPTIONS, DELETE'])
+      expect(allow_for(:options, '/zeta/7')).to eq([204, 'OPTIONS, GET, HEAD'])
+    end
+
+    it 'answers 404 to OPTIONS for a path no route matches' do
+      expect(allow_for(:options, '/nothing/here/at/all')).to eq([404, nil])
+      expect(allow_for(:options, '/gamma/7/more')).to eq([404, nil])
+    end
+
+    it 'answers 405 from a path spelled out in full' do
+      expect(allow_for(:put, '/gamma')).to eq([405, 'OPTIONS, GET, POST, HEAD'])
+      expect(allow_for(:get, '/zeta/special')).to eq([405, 'OPTIONS, DELETE'])
+    end
+
+    it 'answers 405 from a path with a param' do
+      expect(allow_for(:post, '/gamma/7')).to eq([405, 'OPTIONS, GET, PUT, HEAD'])
+      expect(allow_for(:delete, '/gamma/7.json')).to eq([405, 'OPTIONS, GET, PUT, HEAD'])
+      expect(allow_for(:delete, '/g%61mma/7')).to eq([405, 'OPTIONS, GET, PUT, HEAD'])
+    end
+
+    it 'answers 405 from a path only the route with no literal segment matches' do
+      expect(allow_for(:post, '/other')).to eq([405, 'OPTIONS, GET, HEAD'])
+    end
+
+    it 'answers 405 to a method that has no routes at all' do
+      expect(allow_for(:patch, '/gamma')).to eq([405, 'OPTIONS, GET, POST, HEAD'])
+      expect(allow_for(:patch, '/gamma/7')).to eq([405, 'OPTIONS, GET, PUT, HEAD'])
+    end
+
+    it 'answers 404 to a path no route matches' do
+      expect(allow_for(:put, '/nothing/here/at/all')).to eq([404, nil])
+      expect(allow_for(:delete, '/gamma/7/more')).to eq([404, nil])
+      expect(allow_for(:patch, '/nothing/here/at/all')).to eq([404, nil])
+    end
+
+    it 'does not recognize a path whose bytes are not UTF-8' do
+      expect(app.recognize_path("/gamma/\xFF".b)).to be_nil
+    end
+
+    it 'recognizes a path with a param' do
+      expect(app.recognize_path('/gamma/7')).to be_a(Grape::Endpoint)
+    end
+  end
 end
