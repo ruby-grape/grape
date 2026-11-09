@@ -32,6 +32,7 @@
 * [#3067](https://github.com/ruby-grape/grape/pull/3067): Stop a `given` in an Array from passing over elements sent empty - [@ericproulx](https://github.com/ericproulx).
 * [#3068](https://github.com/ruby-grape/grape/pull/3068): Name the element a request sent in errors from a scope under a `given` in an Array - [@ericproulx](https://github.com/ericproulx).
 * [#3069](https://github.com/ruby-grape/grape/pull/3069): Find params declared with String names under `build_with :hash` - [@ericproulx](https://github.com/ericproulx).
+* [#3070](https://github.com/ruby-grape/grape/pull/3070): Speed up auto-`OPTIONS`, 405 and 404 answers on APIs with many paths - [@ericproulx](https://github.com/ericproulx).
 * [#3071](https://github.com/ruby-grape/grape/pull/3071): Skip the query parse when building the params of a request with no query string - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 

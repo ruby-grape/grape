@@ -19,8 +19,13 @@ module Grape
       return if @compiled
 
       @union = resolve_capture_groups(Regexp.union(@neutral_regexes), @neutral_map)
-      compile_optimized_map
-      compile_neighbour_map
+      # Shared by everything compiled below: HEAD's routes mirror GET's, and
+      # where every path answers GET the allowed-methods routes do too, so
+      # their buckets compile to the same unions.
+      bucket_unions = {}
+      compile_optimized_map(bucket_unions)
+      compile_allowed_methods_lookup(bucket_unions)
+      compile_neighbour_map(bucket_unions)
       @neutral_regexes = nil
       @map.freeze
       @optimized_map.freeze
@@ -62,7 +67,7 @@ module Grape
       any = with_optimization do
         input = utf8_path(input) if @utf8_patterns && !input.ascii_only?
         # A path that is not valid UTF-8 comes back nil and matches nothing.
-        allowed_methods_route_for(input)
+        allowed_methods_route_for(input) if input
       end
       return if any == default_response
 
@@ -324,7 +329,17 @@ module Grape
       union&.match(input) { |m| matched_route(routes, m) }
     end
 
+    # The allowed-methods route for +input+ out of all of them, narrowed the
+    # way #dispatch narrows a method's routes: an auto-OPTIONS is a request
+    # like any other, and walking the whole of @union for it cost more the
+    # more paths the API had.
     def allowed_methods_route_for(input)
+      static = @allowed_methods_static_routes[input]
+      return static if static
+
+      bucket = @allowed_methods_buckets&.bucket_for(input)
+      return bucket.match(input) { |route| route } if bucket
+
       @union.match(input) { |m| matched_route(@neutral_map, m) }
     end
 
@@ -340,14 +355,24 @@ module Grape
 
     # The allowed-methods route for +input+ once the routes for +method+ have all
     # missed it, from the ones #compile_neighbour_map left to try. A method with
-    # no routes of its own covers no path, so it still walks the whole of @union.
+    # no routes of its own covers no path, so it is left every one of them.
+    #
+    # The table of static paths is the one built for all the allowed-methods
+    # routes: an entry of it matches +input+, and no route that does is among
+    # the ones +method+ covers, or +method+ would not have missed.
     def neighbour_route_for(input, method)
       return allowed_methods_route_for(input) unless @map.key?(method)
 
-      union, routes, groups = @neighbour_map[method]
-      union&.match(input) do |m|
-        routes[groups.index { |group| m[group] }]
-      end
+      union, routes, groups, buckets = @neighbour_map[method]
+      return unless union
+
+      static = @allowed_methods_static_routes[input]
+      return static if static
+
+      bucket = buckets&.bucket_for(input)
+      return bucket.match(input) { |route| route } if bucket
+
+      union.match(input) { |m| routes[groups.index { |group| m[group] }] }
     end
 
     # Compiled from the routes actually registered rather than from
@@ -357,10 +382,7 @@ module Grape
     # left it in @map but out of @optimized_map — the only map #match? reads.
     # The resource then advertised a method that could never be matched and
     # answered every request for it with 405.
-    def compile_optimized_map
-      # Shared by the methods below: HEAD's routes mirror GET's, so their
-      # buckets compile to the same unions.
-      bucket_unions = {}
+    def compile_optimized_map(bucket_unions)
       @map.each do |method, routes|
         @optimized_map[method] = optimized_routes(routes, bucket_unions)
       end
@@ -393,13 +415,22 @@ module Grape
     # resolves to the same allowed-methods route either way. Methods that leave
     # the same paths uncovered -- PUT and DELETE on a member, say -- share one
     # union.
-    def compile_neighbour_map
+    def compile_neighbour_map(bucket_unions)
       unions = {}
       @map.each do |method, routes|
         covered = routes.to_set(&:pattern_regexp)
         uncovered = @neutral_map.each_index.reject { |index| covered.include?(@neutral_map[index].pattern_regexp) }
-        @neighbour_map[method] = unions[uncovered] ||= neighbour_union(uncovered) unless uncovered.empty?
+        @neighbour_map[method] = unions[uncovered] ||= neighbour_union(uncovered, bucket_unions) unless uncovered.empty?
       end
+    end
+
+    # What #allowed_methods_route_for narrows the allowed-methods routes
+    # with, as #optimized_routes does a method's: the table of the paths
+    # they spell out in full, and their buckets (nil when no segment splits
+    # them well).
+    def compile_allowed_methods_lookup(bucket_unions)
+      @allowed_methods_static_routes = static_routes_for(@union, @neutral_map).transform_values(&:first).freeze
+      @allowed_methods_buckets = RouteBuckets.build(@neutral_map, @neutral_regexes, bucket_unions)
     end
 
     # The union of the allowed-methods routes at +indices+ of @neutral_map, those
@@ -407,13 +438,15 @@ module Grape
     # @union numbers its groups differently, so the ones
     # #resolve_capture_groups recorded do not apply. Routes and groups are
     # parallel Arrays for #neighbour_route_for to walk with Array#index, as
-    # Enumerable#find over a Hash allocates on every call.
-    def neighbour_union(indices)
-      union = Regexp.union(@neutral_regexes.values_at(*indices))
+    # Enumerable#find over a Hash allocates on every call. Last come the
+    # buckets that narrow those routes, nil when no segment splits them well.
+    def neighbour_union(indices, bucket_unions)
+      regexps = @neutral_regexes.values_at(*indices)
+      union = Regexp.union(regexps)
       named_captures = union.named_captures
       routes = @neutral_map.values_at(*indices).freeze
       groups = routes.map { |route| named_captures.fetch(route.regexp_capture_index).first }.freeze
-      [union, routes, groups].freeze
+      [union, routes, groups, RouteBuckets.build(routes, regexps, bucket_unions)].freeze
     end
 
     # A mounted Rack app answers in a plain Hash, where the case of a name
