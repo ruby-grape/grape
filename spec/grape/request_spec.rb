@@ -114,6 +114,50 @@ describe Grape::Request do
         expect(request.params).to eq('a' => '123', 'b' => 'xyz', c: 'ccc')
         expect(env[Rack::RACK_REQUEST_QUERY_HASH]).to eq('a' => '123', 'b' => 'xyz')
       end
+
+      # With no query string the builder is handed a Hash every such request
+      # shares, so what one request writes must stay out of the next one's.
+      context 'when the request has no query string' do
+        let(:params) { {} }
+
+        it 'gives each request params of its own' do
+          expect(request.params).to eq(c: 'ccc')
+          request.params[:d] = 'ddd'
+
+          other_env = Rack::MockRequest.env_for('/', 'grape.routing_args' => { e: 'eee' })
+          expect(described_class.new(other_env, build_params_with: :passthrough).params).to eq(e: 'eee')
+        end
+      end
+    end
+
+    # Rack is not asked to parse a query string that is not there.
+    context 'when the request has no query string' do
+      let(:params) { {} }
+      let(:options) { default_options.merge('grape.routing_args' => { c: 'ccc' }) }
+
+      it 'returns the routing args alone' do
+        expect(request.params).to eq(ActiveSupport::HashWithIndifferentAccess.new(c: 'ccc'))
+      end
+
+      it 'leaves the query params for Rack to answer' do
+        request.params
+
+        expect(request.GET).to eq({})
+      end
+
+      it 'returns the routing args alone when the env holds no QUERY_STRING' do
+        env.delete(Rack::QUERY_STRING)
+
+        expect(request.params).to eq(ActiveSupport::HashWithIndifferentAccess.new(c: 'ccc'))
+      end
+
+      context 'when build_params_with: :hash is specified' do
+        let(:request) { described_class.new(env, build_params_with: :hash) }
+
+        it 'returns the routing args alone' do
+          expect(request.params).to eq(c: 'ccc')
+        end
+      end
     end
 
     # Rack reads a form body whatever the method says, so the params of a GET

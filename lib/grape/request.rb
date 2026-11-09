@@ -71,6 +71,8 @@ module Grape
     # Routing-args keys that are Grape's own, not request params.
     GRAPE_OWNED_ROUTING_ARGS = %i[version route_info].freeze
     ROUTE_INFO_ONLY = %i[route_info].freeze
+    NO_QUERY_PARAMS = {}.freeze
+    private_constant :NO_QUERY_PARAMS
 
     alias rack_params params
     alias rack_cookies cookies
@@ -137,10 +139,15 @@ module Grape
     # ships constructs a new object, so there is nothing to copy; one that
     # returns its argument would otherwise let the writes that follow --
     # routing args, coercions, defaults -- reach the env.
+    #
+    # A request with no query string has no query params to parse, so Rack is
+    # not asked for them: it would parse the empty String and memoize the
+    # empty Hash that makes in the env, for every route that reads only its
+    # path params.
     def build_params
       return params_builder.call(rack_params) if form_params?
 
-      query_hash = self.GET
+      query_hash = query_string.empty? ? NO_QUERY_PARAMS : self.GET
       built = params_builder.call(query_hash)
       built.equal?(query_hash) ? built.dup : built
     end
