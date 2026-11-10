@@ -134,22 +134,27 @@ module Grape
       env['CONTENT_LENGTH'].to_i.positive? || env['HTTP_TRANSFER_ENCODING'] == 'chunked'
     end
 
-    # +self.GET+ is the query hash Rack memoized in the env, not the copy the
-    # merge in Rack::Request#params used to hand over. Every builder Grape
-    # ships constructs a new object, so there is nothing to copy; one that
-    # returns its argument would otherwise let the writes that follow --
-    # routing args, coercions, defaults -- reach the env.
+    # Rack::Request#params is the query params merged with the form params
+    # into a new Hash, and only a request that sent both has two to merge.
+    # One that sent either is built from what Rack memoized in the env for
+    # it, and one that sent neither from NO_QUERY_PARAMS: Rack is not asked
+    # for the query params of an empty query string, which it would parse
+    # and memoize an empty Hash for.
     #
-    # A request with no query string has no query params to parse, so Rack is
-    # not asked for them: it would parse the empty String and memoize the
-    # empty Hash that makes in the env, for every route that reads only its
-    # path params.
+    # Every builder Grape ships constructs a new object, so there is nothing
+    # to copy; one that returns its argument would otherwise let the writes
+    # that follow -- routing args, coercions, defaults -- reach the env.
     def build_params
-      return params_builder.call(rack_params) if form_params?
+      form = form_params?
+      return params_builder.call(rack_params) if form && !query_string.empty?
 
-      query_hash = query_string.empty? ? NO_QUERY_PARAMS : self.GET
-      built = params_builder.call(query_hash)
-      built.equal?(query_hash) ? built.dup : built
+      source = form ? self.POST : query_params
+      built = params_builder.call(source)
+      built.equal?(source) ? built.dup : built
+    end
+
+    def query_params
+      query_string.empty? ? NO_QUERY_PARAMS : self.GET
     end
 
     def make_params

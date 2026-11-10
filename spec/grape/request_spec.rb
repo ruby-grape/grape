@@ -128,6 +128,17 @@ describe Grape::Request do
           expect(described_class.new(other_env, build_params_with: :passthrough).params).to eq(e: 'eee')
         end
       end
+
+      # With a body and no query string the builder is handed the form
+      # params Rack memoized, as it is the query params without a body.
+      context 'when the request has a body and no query string' do
+        let(:method) { Rack::POST }
+
+        it 'merges the routing args without touching the form params Rack memoized' do
+          expect(request.params).to eq('a' => '123', 'b' => 'xyz', c: 'ccc')
+          expect(request.POST).to eq('a' => '123', 'b' => 'xyz')
+        end
+      end
     end
 
     # Rack is not asked to parse a query string that is not there.
@@ -173,6 +184,34 @@ describe Grape::Request do
       end
     end
 
+    # Without a query string there is nothing to merge the form params with.
+    context 'when a body comes with no query string' do
+      let(:method) { Rack::POST }
+      let(:options) { default_options.merge('grape.routing_args' => { c: 'ccc' }) }
+
+      it 'returns the form params and the routing args' do
+        expect(request.params).to eq(ActiveSupport::HashWithIndifferentAccess.new(a: '123', b: 'xyz', c: 'ccc'))
+      end
+
+      context 'when build_params_with: :hash is specified' do
+        let(:request) { described_class.new(env, build_params_with: :hash) }
+
+        it 'returns them symbolized' do
+          expect(request.params).to eq(a: '123', b: 'xyz', c: 'ccc')
+        end
+      end
+
+      context 'when the body names one key as both a value and a hash' do
+        let(:env) do
+          Rack::MockRequest.env_for('/', method: Rack::POST, input: 'x[y]=1&x[y]z=2', 'CONTENT_TYPE' => 'application/x-www-form-urlencoded')
+        end
+
+        it 'raises a Grape::Exceptions::RequestError' do
+          expect { request.params }.to raise_error(Grape::Exceptions::RequestError)
+        end
+      end
+    end
+
     context 'when the query string is nested deeper than Rack parses' do
       let(:env) { Rack::MockRequest.env_for("/?foo#{'[a]' * Rack::Utils.param_depth_limit}=bar") }
 
@@ -191,23 +230,23 @@ describe Grape::Request do
 
     # The errors below are raised while a body is parsed, so the request
     # carries one: Grape only asks Rack for form params when it does.
-    context 'when rack_params raises an EOFError' do
+    context 'when reading the form params raises an EOFError' do
       let(:method) { Rack::POST }
 
-      before { allow(request).to receive(:rack_params).and_raise(EOFError) }
+      before { allow(request).to receive(:POST).and_raise(EOFError) }
 
       it 'raises a Grape::Exceptions::RequestError' do
         expect { request.params }.to raise_error(Grape::Exceptions::RequestError)
       end
     end
 
-    context 'when rack_params raises a custom error that includes Rack::BadRequest' do
+    context 'when reading the form params raises a custom error that includes Rack::BadRequest' do
       let(:method) { Rack::POST }
       let(:custom_rack_error) do
         Class.new(StandardError) { include Rack::BadRequest }
       end
 
-      before { allow(request).to receive(:rack_params).and_raise(custom_rack_error) }
+      before { allow(request).to receive(:POST).and_raise(custom_rack_error) }
 
       it 'raises a Grape::Exceptions::RequestError' do
         expect { request.params }.to raise_error(Grape::Exceptions::RequestError)
