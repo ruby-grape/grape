@@ -4884,6 +4884,88 @@ describe Grape::API do
           get '/mounted/fail'
           expect(last_response.body).to eq('inner rescue')
         end
+
+        it 'prefers a rescue_from :all defined by mounted over an outer class handler' do
+          subject.rescue_from ArgumentError do
+            error!('outer rescue')
+          end
+
+          app = Class.new(described_class)
+
+          subject.namespace :mounted do
+            rescue_from :all do
+              error!('inner rescue')
+            end
+            app.get('/fail') { raise ArgumentError.new }
+            mount app
+          end
+
+          get '/mounted/fail'
+          expect(last_response.body).to eq('inner rescue')
+        end
+
+        it 'prefers class handlers defined by mounted over its rescue_from :all' do
+          subject.rescue_from :all do
+            error!('outer rescue')
+          end
+
+          app = Class.new(described_class)
+
+          subject.namespace :mounted do
+            rescue_from :all do
+              error!('inner catch-all')
+            end
+            rescue_from ArgumentError do
+              error!('inner rescue')
+            end
+            app.get('/fail') { raise ArgumentError.new }
+            mount app
+          end
+
+          get '/mounted/fail'
+          expect(last_response.body).to eq('inner rescue')
+        end
+
+        it 'leaves what a rescue_from :all defined by mounted does not catch to the outer handlers' do
+          subject.rescue_from Exception do |e|
+            error!("outer rescue of #{e.class}")
+          end
+
+          app = Class.new(described_class)
+
+          subject.namespace :mounted do
+            rescue_from :all do |e|
+              error!("inner rescue of #{e.class}")
+            end
+            app.get('/standard') { raise ArgumentError.new }
+            app.get('/script') { raise NotImplementedError.new }
+            mount app
+          end
+
+          get '/mounted/standard'
+          expect(last_response.body).to eq('inner rescue of ArgumentError')
+          get '/mounted/script'
+          expect(last_response.body).to eq('outer rescue of NotImplementedError')
+        end
+
+        it 'hands an exception raised by a rescue_from :all defined by mounted to an outer class handler' do
+          subject.rescue_from ArgumentError do |e|
+            error!("outer rescue of #{e.message}")
+          end
+
+          app = Class.new(described_class)
+
+          subject.namespace :mounted do
+            rescue_from :all do
+              raise ArgumentError, 'translated'
+            end
+            app.get('/fail') { raise 'doh!' }
+            mount app
+          end
+
+          get '/mounted/fail'
+          expect(last_response.body).to eq('outer rescue of translated')
+        end
       end
 
       it 'collects the routes of the mounted api' do

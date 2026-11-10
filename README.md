@@ -3221,6 +3221,8 @@ end
 
 Here `'inner'` will be result of handling occurred `ArgumentError`.
 
+A `rescue_from :all` inside the namespace takes precedence over the root scope's handlers in the same way, including the root's `rescue_from ArgumentError`. It still ranks behind the namespace's own class handlers, and an exception it does not catch, one that is not a `StandardError`, still reaches the root's handlers.
+
 #### Unrescuable Exceptions
 
 `Grape::Exceptions::InvalidVersionHeader`, which is raised when the version in the request header doesn't match the currently evaluated version for the endpoint, will _never_ be rescued from a `rescue_from` block (even a `rescue_from :all`) This is because Grape relies on Rack to catch that error and try the next versioned-route for cases where there exist identical Grape endpoints with different versions.

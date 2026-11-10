@@ -31,11 +31,11 @@ describe Grape::API do
         main_rescue_from_after
       end
 
-      it 'is rescued by the rescue_from ZeroDivisionError handler from Main class' do
+      it 'is rescued by the rescue_from :all handler of the mounted API' do
         get '/'
 
-        expect(last_response.status).to eq(500)
-        expect(last_response.body).to eq({ type: 'zero' }.to_json)
+        expect(last_response.status).to eq(404)
+        expect(last_response.body).to eq({ type: 'all' }.to_json)
       end
     end
 
@@ -67,11 +67,11 @@ describe Grape::API do
         main_rescue_from_before
       end
 
-      it 'is rescued by the rescue_from ZeroDivisionError handler from Main class' do
+      it 'is rescued by the rescue_from :all handler of the mounted API' do
         get '/'
 
-        expect(last_response.status).to eq(500)
-        expect(last_response.body).to eq({ type: 'zero' }.to_json)
+        expect(last_response.status).to eq(404)
+        expect(last_response.body).to eq({ type: 'all' }.to_json)
       end
     end
   end
