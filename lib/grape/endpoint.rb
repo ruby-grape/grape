@@ -265,6 +265,12 @@ module Grape
 
     attr_reader :before_filter_passed
 
+    # What #declared filters params by. Named so that no helper is likely to
+    # take its place: a helper overrides any method of the endpoint.
+    def compiled_declared_params
+      @state.declared_params
+    end
+
     # The answer of an allowed-methods route, which the router hands a request
     # for a method its path has no route for: the Allow header, with a 204 to an
     # auto-OPTIONS and a 405 to anything else.
@@ -352,7 +358,8 @@ module Grape
         app:,
         callbacks: callbacks.each_value.all?(&:empty?) ? nil : callbacks.freeze,
         build_params_with: inheritable_setting.build_params_with,
-        undeclared_params: build_undeclared_params
+        undeclared_params: build_undeclared_params,
+        declared_params: build_declared_params
       )
       @prototype = build_prototype(build_helpers)
     end
@@ -364,6 +371,17 @@ module Grape
         declared_params: inheritable_setting.route_declared_params,
         contract_key_maps: inheritable_setting.contract_key_maps,
         path_params: routes.flat_map { |route| route.pattern.to_regexp.names }
+      )
+    end
+
+    def build_declared_params
+      setting = inheritable_setting
+      Grape::DeclaredParams.new(
+        declared_params: setting.route_declared_params,
+        own_declared_params: setting.declared_params.last || [],
+        route_params: config.params,
+        renamed_params: setting.route_renamed_params,
+        contract_key_maps: setting.contract_key_maps
       )
     end
 

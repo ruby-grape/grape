@@ -953,4 +953,84 @@ describe Grape::Endpoint do
       expect(JSON.parse(last_response.body)).to eq('shipping' => nil, 'address' => 'somewhere')
     end
   end
+
+  describe 'a param a desc documents in its own way' do
+    let(:app) do
+      Class.new(Grape::API) do
+        format :json
+
+        desc 'documented by hand', params: { 'limit' => { type: Integer }, 'note' => 'free text', 'ids' => { type: 'Array' } }
+        params do
+          optional :limit, type: Integer
+          optional :note, type: String
+          optional :ids, type: String
+        end
+        get('/') { declared(params) }
+      end
+    end
+
+    # The type decides the empty value a param that was not passed stands
+    # for, and only a type spelled as a String names one.
+    it 'has the empty value of the type the desc names, and none when it names no type as a String' do
+      get '/'
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body)).to eq('limit' => nil, 'note' => nil, 'ids' => [])
+    end
+  end
+
+  describe 'a param named by the configuration' do
+    let(:api) do
+      Class.new(Grape::API) do
+        format :json
+
+        params do
+          requires configuration[:name], type: String
+          optional :tags, type: Array
+        end
+        get('/') { declared(params) }
+      end
+    end
+    let(:app) do
+      mounted = api
+      Class.new(Grape::API) { mount mounted, with: { name: :title } }
+    end
+
+    it 'compiles before the API is mounted, when it has no name yet' do
+      expect { api.compile! }.not_to raise_error
+    end
+
+    it 'is filed under the name the API is mounted with' do
+      get '/', title: 'grape', junk: 1
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body)).to eq('title' => 'grape', 'tags' => [])
+    end
+  end
+
+  describe 'an empty value' do
+    let(:app) do
+      Class.new(Grape::API) do
+        format :json
+
+        params do
+          optional :tags, type: Array
+          optional :meta, type: Hash
+          optional :ids, type: Set
+        end
+        get '/' do
+          first = declared(params)
+          first[:tags] << 'filled'
+          first[:meta][:filled] = true
+          first[:ids] << 1
+          declared(params).transform_values(&:size)
+        end
+      end
+    end
+
+    it 'is a new one for every call' do
+      2.times do
+        get '/'
+        expect(JSON.parse(last_response.body)).to eq('tags' => 0, 'meta' => 0, 'ids' => 0)
+      end
+    end
+  end
 end
