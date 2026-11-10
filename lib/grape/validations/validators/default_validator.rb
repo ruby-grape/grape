@@ -31,10 +31,11 @@ module Grape
         private
 
         # Also #validate!'s whole job where Base#validate_attributes! applies:
-        # a scope that is always validated and does not iterate elements, once
-        # its params resolved to a Hash -- the root scope of every +params+
-        # block with a default in it. A scope like that depends on no other
-        # param, so the iterator and its dependency check have nothing to add.
+        # a scope with no Array scope and no +given+ on its chain, once its
+        # params resolved to a Hash -- the root scope of every +params+ block
+        # with a default in it, and the Hash scopes under it. A scope like
+        # that depends on no other param, so the iterator and its dependency
+        # check have nothing to add.
         def apply_defaults(params)
           @attrs.each do |attr_name|
             params[attr_name] = @default_call.call(params) if params[attr_name].nil?

@@ -121,17 +121,19 @@ module Grape
         # time a validator is built. See #validate and #validate!.
         def choose_validation_path(scope)
           @always_validated = scope.always_validated?
-          @direct = @always_validated && !scope.iterates_elements?
+          @direct = scope.independent? && scope.array_depth.zero?
           @direct_elements = scope.validated_when_given? && scope.iterates_elements? && scope.array_depth == 1
         end
 
-        # #validate! on a scope that always validates and does not iterate
-        # elements, once its params resolved to a Hash: the root scope and the
-        # required Hash scopes under it, which is most validators of most
-        # endpoints. There the iterator hands back that Hash alone, and every
-        # scope on the chain is required with no dependency, so the checks
-        # around the attribute loop drop out. The machinery cost more than
-        # the validation itself.
+        # #validate! on a scope with no Array scope and no +given+ on its
+        # chain, once its params resolved to a Hash: the root scope and the
+        # Hash scopes under it, required or optional, which is most validators
+        # of most endpoints. There the iterator hands back that Hash alone,
+        # and no scope on the chain has a dependency to meet. An optional one
+        # is only passed over when its params are empty, and #validate does
+        # not get this far with those (see ParamsScope#should_validate?). So
+        # the checks around the attribute loop drop out. The machinery cost
+        # more than the validation itself.
         def validate_attributes!(params)
           array_errors = nil
 
