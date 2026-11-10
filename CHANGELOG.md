@@ -35,6 +35,7 @@
 * [#3070](https://github.com/ruby-grape/grape/pull/3070): Speed up auto-`OPTIONS`, 405 and 404 answers on APIs with many paths - [@ericproulx](https://github.com/ericproulx).
 * [#3071](https://github.com/ruby-grape/grape/pull/3071): Skip the query parse when building the params of a request with no query string - [@ericproulx](https://github.com/ericproulx).
 * [#3072](https://github.com/ruby-grape/grape/pull/3072): Answer the `Accept` lists axios, jQuery and HTTPie send without negotiating them on every request - [@ericproulx](https://github.com/ericproulx).
+* [#3073](https://github.com/ruby-grape/grape/pull/3073): Let a `rescue_from :all` in a namespace or mounted API outrank the enclosing scope's handlers - [@ericproulx](https://github.com/ericproulx).
 * [#3076](https://github.com/ruby-grape/grape/pull/3076): Skip the query merge when building the params of a body sent without a query string - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 

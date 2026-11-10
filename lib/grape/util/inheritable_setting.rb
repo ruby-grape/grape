@@ -389,13 +389,13 @@ module Grape
       # Rescue-handler maps registered by +rescue_from+, keyed by exception
       # class and merged so a nested scope's handler wins. Record them with
       # #add_rescue_handlers; the backing store is an internal detail.
-      def rescue_handlers
-        merged_rescue_handlers(:rescue_handlers)
-      end
+      #
+      # #rescue_handlers also holds an +:all+ entry where a scope declared
+      # +rescue_from :all+, ranking that catch-all behind the scope's own
+      # handlers but ahead of every enclosing scope's.
+      def rescue_handlers = merged_rescue_handlers(:rescue_handlers)
 
-      def base_only_rescue_handlers
-        merged_rescue_handlers(:base_only_rescue_handlers)
-      end
+      def base_only_rescue_handlers = merged_rescue_handlers(:base_only_rescue_handlers)
 
       # An exception class registered twice in the same scope keeps its first
       # handler, and keeps the position it was first registered at.
@@ -682,7 +682,7 @@ module Grape
       # when an outer scope registered a more specific class.
       def merged_rescue_handlers(key)
         inherited = parent&.merged_rescue_handlers(key)
-        own = @rescue_handler_maps&.[](key)
+        own = own_rescue_handlers(key)
         return inherited unless own
 
         own.merge(inherited || {}) { |_klass, nearer, _inherited| nearer }
@@ -705,6 +705,17 @@ module Grape
       end
 
       private
+
+      # The +:all+ entry is added on read, so it follows the scope's own
+      # handlers however they were interleaved with the +rescue_from :all+.
+      # Only #rescue_handlers carries it: Middleware::Error scans every
+      # scope's exact-match handlers before any of these.
+      def own_rescue_handlers(key)
+        own = @rescue_handler_maps&.[](key)
+        return own unless key == :rescue_handlers && @namespace_inheritable&.key?(:all_rescue_handler)
+
+        (own || {}).merge(all: @namespace_inheritable[:all_rescue_handler])
+      end
 
       # Overrides +key+ for this scope, leaving the enclosing scopes' value
       # untouched. The store is allocated on first use. Returns the assigned

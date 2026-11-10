@@ -292,22 +292,34 @@ module Grape
         )
       end
 
+      # An exception raised in a +rescue_from+ block is never handed to a
+      # catch-all, so the +:all+ entry does not end the scan: an enclosing
+      # scope's handler still takes it.
       def registered_rescue_handler(klass)
-        registered_rescue_handler_entry(klass)&.last
+        registered_rescue_handler_entry(klass, catch_all: false)&.last
       end
 
       # The matched entry rather than just its handler, so callers can tell
       # *which* class matched — see {#grape_exceptions_precedence_handler}.
+      #
+      # Nil once the scan reaches the +:all+ entry of the nearest scope that
+      # declared +rescue_from :all+ (see InheritableSetting#rescue_handlers):
+      # what it catches goes to the catch-all, after #find_handler's Grape
+      # exception checks, rather than to an enclosing scope's handler.
       # @return [Array(Class, #call), nil]
-      def registered_rescue_handler_entry(klass)
+      def registered_rescue_handler_entry(klass, catch_all: true)
         rescue_handler_entry_from(base_only_rescue_handlers) { |err| klass == err } ||
-          rescue_handler_entry_from(rescue_handlers) { |err| klass <= err }
+          rescue_handler_entry_from(rescue_handlers) do |err|
+            next klass <= err unless err == :all
+
+            catch_all && klass <= StandardError
+          end
       end
 
       def rescue_handler_entry_from(handlers)
         error, handler = handlers&.find { |err, _handler| yield(err) }
 
-        return unless error
+        return if error.nil? || error == :all
 
         [error, handler || method(:default_rescue_handler)]
       end

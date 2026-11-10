@@ -12,7 +12,7 @@ module Grape
     #   rescue_from ArgumentError do ... end   # never runs
     #
     # Warn rather than reorder: which should win is the author's call, and
-    # +rescue_from :all+ (consulted only after the registered handlers) already
+    # +rescue_from :all+ (consulted only after its scope's registered handlers) already
     # offers "broad first, specific still wins" to anyone who wants it.
     module ShadowedRescueHandlers
       module_function

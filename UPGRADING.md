@@ -94,6 +94,25 @@ Every such request now answers the router's `404`, with `X-Cascade: pass` still 
 * A custom validator receives such a name as a Symbol in `validate_param!(attr_name, params)`. Compare `attr_name.to_s` if it checked the name against a String. Error messages and `declared(params)` name it as before.
 * `given 'name'` finds a parameter declared as `:name`, and `given :name` one declared as `'name'`, where both raised `Grape::Exceptions::UnknownParameter`.
 
+#### A `rescue_from :all` in a namespace or mounted API outranks the enclosing scope's handlers
+
+A `rescue_from :all` declared in a namespace or a mounted API now takes precedence over the handlers of the scopes around it, as a nested class handler already did ([#3073](https://github.com/ruby-grape/grape/pull/3073)). An enclosing scope's handler used to win whenever its class matched, so with the API below a `ZeroDivisionError` raised under `/alpacas` was answered by the root's handler, not the namespace's catch-all:
+
+```ruby
+rescue_from ZeroDivisionError do
+  error!('root', 500)
+end
+
+namespace :alpacas do
+  rescue_from :all do
+    error!('alpacas', 503) # now answers the ZeroDivisionError
+  end
+  get { 1 / 0 }
+end
+```
+
+To keep the enclosing handler for such an exception, register its class in the nested scope as well: a scope's class handlers still rank ahead of its own `rescue_from :all`. An exception `rescue_from :all` does not catch, one that is not a `StandardError`, still reaches the enclosing scope's handlers, and so does one raised inside the catch-all's block.
+
 ### Upgrading to >= 4.1.0
 
 #### `Rack::Head` wraps the router instead of each endpoint's stack
