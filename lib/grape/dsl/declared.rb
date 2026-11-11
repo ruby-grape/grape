@@ -23,13 +23,9 @@ module Grape
       def declared(passed_params, include_parent_namespaces: true, include_missing: true, evaluate_given: false, stringify: false)
         raise MethodNotYetAvailable unless before_filter_passed
 
-        contract_key_map = inheritable_setting.contract_key_maps
-        handler = DeclaredParamsHandler.new(include_missing:, evaluate_given:, stringify:, contract_key_map:)
-        declared_params = include_parent_namespaces ? inheritable_setting.route_declared_params : (inheritable_setting.declared_params.last || [])
-        renamed_params = inheritable_setting.route_renamed_params
-        route_params = config.params
-
-        handler.call(passed_params, declared_params, route_params, renamed_params)
+        declared_params = compiled_declared_params
+        handler = DeclaredParamsHandler.new(include_missing:, evaluate_given:, stringify:, contract_key_map: declared_params.contract_key_maps)
+        handler.call(passed_params, include_parent_namespaces ? declared_params.all : declared_params.own)
       end
     end
   end
