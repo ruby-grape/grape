@@ -18,6 +18,7 @@ group :development do
   gem 'benchmark-ips'
   gem 'benchmark-memory'
   gem 'irb'
+  gem 'ruby-gem-release', '0.6.0', require: false
 end
 
 group :test do
