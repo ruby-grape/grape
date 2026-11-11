@@ -42,7 +42,7 @@ module Grape
         template = translate(:format, scope: 'grape.errors', default: '%<attributes>s %<message>s')
         messages = errors.flat_map do |keys, errs|
           attributes = translate_attributes(keys)
-          errs.map { |error| ::I18n.interpolate(template, attributes:, message: error.message) }
+          errs.map { |error| interpolate(template, attributes:, message: error.message) }
         end
         messages.uniq!
         messages
