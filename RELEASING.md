@@ -1,112 +1,71 @@
 Releasing Grape
 ===============
 
-There're no particular rules about when to release Grape. Release bug fixes frequently, features not so frequently and breaking API changes rarely.
+There are no particular rules about when to release Grape. Release bug fixes frequently, features not so frequently and breaking API changes rarely.
+
+### One-Time Setup
+
+Releases use [ruby-gem-release 0.6.0](https://github.com/dblock/ruby-gem-release/tree/v0.6.0), pinned in both the Gemfile and reusable workflow, and RubyGems Trusted Publishing without a stored RubyGems API key.
+
+Create a GitHub environment named `release` in **Settings > Environments**. Configure required release-maintainer reviewers, prevent self-review where appropriate, and restrict deployments to `master`. Creating an unprotected environment alone does not restrict publication: repository writers can dispatch the workflow, and required reviewers gate publication.
+
+In the [grape trusted publishers settings](https://rubygems.org/gems/grape/trusted_publishers), configure these values:
+
+| Field | Value |
+| --- | --- |
+| Repository owner | `ruby-grape` |
+| Repository name | `grape` |
+| Workflow filename | `release.yml` |
+| Environment | `release` |
+| Workflow repository owner | `dblock` |
+| Workflow repository name | `ruby-gem-release` |
+
+The workflow repository identifies the reusable workflow, not Grape's caller workflow. Ensure branch and tag rules permit `GITHUB_TOKEN` to push release commits to `master` and create `vVERSION` tags. If rules require PRs or checks that the release token cannot bypass, a repository administrator must establish an approved release policy before dispatching; the workflow does not change repository protections.
 
 ### Release
 
-Run tests, check that all tests succeed locally.
+Run tests and check that all tests succeed locally:
 
-```
+```sh
 bundle install
-rake
+bundle exec rake
+bundle exec rake build
 ```
 
-Double-check that the [last build succeeded](https://github.com/ruby-grape/grape/actions) for all supported platforms.
+The release specs use `ruby-gem-release/rspec` to exercise the production workflow and README hooks in a disposable Git repository, replacing registry and hosted publication with the library's local adapters. They do not publish to RubyGems or GitHub.
 
-Those with r/w permissions to the [master Grape repository](https://github.com/ruby-grape/grape) generally have large Grape-based projects. Point one to Grape HEAD and run all your API tests to catch any obvious regressions.
-
-```
-gem grape, github: 'ruby-grape/grape'
-```
-
-Modify the "Stable Release" section in [README.md](README.md). Change the text to reflect that this is going to be the documentation for a stable release. Remove references to the previous release of Grape. Keep the file open, you'll have to undo this change after the release.
-
-```
-## Stable Release
-
-You're reading the documentation for the stable release of Grape, 0.6.0.
-```
-
-Change "Next Release" in [CHANGELOG.md](CHANGELOG.md) to the new version.
-
-```
-#### 0.6.0 (2013/9/16)
-```
-
-Remove the line with "Your contribution here.", since there will be no more contributions to this release.
-
-Commit your changes.
-
-```
-git add README.md CHANGELOG.md
-git commit -m "Preparing for release, 0.6.0."
-git push origin master
-```
-
-Release.
-
-```
-$ rake release
-
-grape 0.6.0 built to pkg/grape-0.6.0.gem.
-Tagged v0.6.0.
-Pushed git commits and tags.
-Pushed grape 0.6.0 to rubygems.org.
-```
-
-### Prepare for the Next Version
-
-Modify the "Stable Release" section in [README.md](README.md). Change the text to reflect that this is going to be the next release.
-
-```
-## Stable Release
-
-You're reading the documentation for the next release of Grape, which should be 0.6.1.
-The current stable release is [0.6.0](https://github.com/ruby-grape/grape/blob/v0.6.0/README.md).
-```
-
-Add the next release to [CHANGELOG.md](CHANGELOG.md).
-
-```
-### 0.6.1 (Next)
-
-#### Features
-
-* Your contribution here.
-
-#### Fixes
-
-* Your contribution here.
-```
-
-Bump the minor version in lib/grape/version.rb.
+Double-check that the [last build succeeded](https://github.com/ruby-grape/grape/actions) for all supported platforms. Point a Grape-based project at Grape HEAD and run its API tests to catch regressions:
 
 ```ruby
-module Grape
-  VERSION = '0.6.1'.freeze
-end
+gem 'grape', github: 'ruby-grape/grape'
 ```
 
-Commit your changes.
+Review the next section of [CHANGELOG.md](CHANGELOG.md) and the version in [lib/grape/version.rb](lib/grape/version.rb). Keep one `* Your contribution here.` placeholder in each of Features and Fixes; ruby-gem-release preserves this two-section format. Actual release notes are required.
 
+Dispatch **Release** from `master` in GitHub Actions, or run:
+
+```sh
+gh workflow run release.yml --repo ruby-grape/grape --ref master
 ```
-git add CHANGELOG.md README.md lib/grape/version.rb
-git commit -m "Preparing for next development iteration, 0.6.1."
-git push origin master
-```
+
+To select a different release version without a separate version-bump commit, pass `-f version=4.2.0`. Dispatching authorizes publication once the `release` environment's approval requirements are satisfied; do not dispatch from PR CI or use it as a dry run.
+
+The workflow validates release preconditions, dates the changelog and removes both contribution placeholders, updates the README to describe the stable release, and runs `bundle exec rake`. It builds and preserves the gem and recovery artifacts, publishes that exact gem to RubyGems, pushes the release commit and tag, and creates a GitHub Release. It then increments the patch version and pushes the next development iteration with both changelog sections and the README's stable-release link restored. No manual release edits or `rake release` invocation are needed.
+
+### Recovery
+
+Inspect the failed run and its `release-gem-*` artifact before retrying. It can contain the built gem, checksum manifest, and Git recovery bundle. RubyGems publication cannot be undone by resetting Git: if a version was uploaded, never publish different bytes under that version or move its tag. Follow the [ruby-gem-release recovery guide](https://github.com/dblock/ruby-gem-release/blob/v0.6.0/RELEASING.md#verify-and-recover) to determine which steps completed and recover deliberately.
 
 ### Make an Announcement
 
-Make an announcement on the [ruby-grape@googlegroups.com](mailto:ruby-grape@googlegroups.com) mailing list. The general format is as follows.
+Make an announcement on the [ruby-grape@googlegroups.com](mailto:ruby-grape@googlegroups.com) mailing list:
 
-```
-Grape 0.6.0 has been released.
+```text
+Grape 4.2.0 has been released.
 
-There were 8 contributors to this release, not counting documentation.
+There were N contributors to this release, not counting documentation.
 
 Please note the breaking API change in ...
 
 [copy/paste CHANGELOG here]
-
 ```

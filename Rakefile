@@ -25,3 +25,6 @@ require('rubocop/rake_task')
 RuboCop::RakeTask.new
 
 task(default: %i[rubocop spec])
+
+require_relative 'tasks/release'
+GrapeRelease.workflow.install_tasks

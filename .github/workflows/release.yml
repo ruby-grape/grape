@@ -1,0 +1,20 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Optional release version overriding the checked-in version.
+        type: string
+        required: false
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    uses: dblock/ruby-gem-release/.github/workflows/release.yml@v0.6.0
+    with:
+      ruby-version: '3.4'
+      version: ${{ inputs.version }}
