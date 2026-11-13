@@ -25,3 +25,9 @@ require('rubocop/rake_task')
 RuboCop::RakeTask.new
 
 task(default: %i[rubocop spec])
+
+# Duel requires Ruby 3.4 or later
+if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('3.4')
+  require('duel/rake_task')
+  Duel::RakeTask.new
+end

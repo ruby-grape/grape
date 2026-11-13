@@ -1,0 +1,92 @@
+name: Perf comment
+
+# Duel's report, as a new comment on the pull request, when Duel says to:
+# always (post), or only when its last comment's status differs from the
+# run's (change), so the latest comment is never stale. It never edits or
+# deletes a comment, but hides Duel's earlier ones as outdated, so the
+# newest is the one in view. It runs once the Perf workflow has, with
+# this repository's own workflow and a token that can write, so a pull
+# request from a fork gets a comment too. It checks nothing out and runs
+# none of the pull request's code, only `duel comment` (see Duel's
+# docs/ci.md), which trusts only what the Duel job could have said in
+# what it kept: the pull request's number, if it names the pull request
+# the run compared, and the comment and the status, if they're ones Duel
+# says. Its report, a fork's too, is the comment, as Markdown.
+#
+# And when the label that accepts a regression (c.accept_label in
+# .duel.rb) is added to a pull request, or taken off, it runs the Duel
+# job again, which reads the labels as it runs: a run that failed, once
+# the label's added, or one that passed, once it's taken off.
+#
+# (The workflow must be on the default branch before it runs at all.)
+on:
+  workflow_run:
+    workflows: ["Perf"]
+    types: [completed]
+  # (This repository's own workflow, as for the comment, with a token
+  # that can run a workflow again: it checks nothing out, and runs none
+  # of the pull request's code.)
+  pull_request_target:
+    types: [labeled, unlabeled]
+
+permissions: {}
+
+jobs:
+  comment:
+    name: Comment
+    if: ${{ github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion != 'cancelled' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read # to get the report from the Perf run
+      pull-requests: write # to comment on the pull request with the report
+    steps:
+      - name: Get the report
+        id: report
+        continue-on-error: true # there's none when the Duel job failed before comparing
+        uses: actions/download-artifact@v8
+        with:
+          name: duel-report
+          path: ${{ runner.temp }}/report
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+      - uses: ruby/setup-ruby@v1
+        if: steps.report.outcome == 'success'
+        with:
+          ruby-version: ruby
+      # Duel's own code, from RubyGems (none of the pull request's), so a
+      # fix to how it comments comes with a release of Duel.
+      - name: Comment on the pull request
+        if: steps.report.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          gem install duel --version '~> 0.1.8' --no-document
+          duel comment --report "$RUNNER_TEMP/report" --head "$HEAD_SHA" --marker 'duel'
+
+  again:
+    name: Run Duel again
+    if: >-
+      github.event_name == 'pull_request_target' && github.event.label.name == 'duel: accept'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write # to run the Perf workflow's jobs again
+    steps:
+      - name: Run Duel again
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          ACTION: ${{ github.event.action }}
+        run: |
+          # The newest Perf run of the pull request's head commit, once it's
+          # done (one that's running may have read the labels already).
+          id=$(gh run list --workflow "Perf" --event pull_request --commit "$HEAD_SHA" --limit 1 \
+            --json databaseId --jq '.[0].databaseId // empty')
+          [ -n "$id" ] || exit 0
+          gh run watch "$id" --interval 30 > /dev/null || true
+          conclusion=$(gh run view "$id" --json conclusion --jq .conclusion)
+          case "$ACTION:$conclusion" in
+            labeled:failure) gh run rerun "$id" --failed ;;
+            unlabeled:success) gh run rerun "$id" ;;
+          esac
