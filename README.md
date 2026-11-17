@@ -2657,7 +2657,7 @@ post do
 end
 ```
 
-You can also use one of status codes symbols that are provided by [Rack utils](https://www.rubydoc.info/gems/rack/Rack/Utils#HTTP_STATUS_CODES-constant)
+You can also use one of status codes symbols that are provided by [Rack utils](https://github.com/rack/rack/blob/main/lib/rack/utils.rb)
 
 ```ruby
 post do
