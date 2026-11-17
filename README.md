@@ -2657,7 +2657,7 @@ post do
 end
 ```
 
-You can also use one of status codes symbols that are provided by [Rack utils](http://www.rubydoc.info/github/rack/rack/Rack/Utils#HTTP_STATUS_CODES-constant)
+You can also use one of status codes symbols that are provided by [Rack utils](https://www.rubydoc.info/gems/rack/Rack/Utils#HTTP_STATUS_CODES-constant)
 
 ```ruby
 post do
@@ -4581,7 +4581,7 @@ Grape integrates with following third-party tools:
 * **Librato Metrics** - [grape-librato](https://github.com/seanmoon/grape-librato) gem
 * **Rails Performance** - [rails_performance](https://github.com/igorkasyanchuk/rails_performance) gem
 * **[Skylight](https://www.skylight.io/)** - [skylight](https://github.com/skylightio/skylight-ruby) gem, [documentation](https://docs.skylight.io/grape/)
-* **[AppSignal](https://www.appsignal.com)** - [appsignal-ruby](https://github.com/appsignal/appsignal-ruby) gem, [documentation](http://docs.appsignal.com/getting-started/supported-frameworks.html#grape)
+* **[AppSignal](https://www.appsignal.com)** - [appsignal-ruby](https://github.com/appsignal/appsignal-ruby) gem, [documentation](https://docs.appsignal.com/ruby/integrations/grape)
 * **[ElasticAPM](https://www.elastic.co/products/apm)** - [elastic-apm](https://github.com/elastic/apm-agent-ruby) gem, [documentation](https://www.elastic.co/guide/en/apm/agent/ruby/3.x/getting-started-rack.html#getting-started-grape)
 * **[Datadog APM](https://docs.datadoghq.com/tracing/)** - [ddtrace](https://github.com/datadog/dd-trace-rb) gem, [documentation](https://docs.datadoghq.com/tracing/setup_overview/setup/ruby/#grape)
 
