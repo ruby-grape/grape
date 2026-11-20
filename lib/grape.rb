@@ -3,7 +3,6 @@
 require 'logger'
 require 'monitor'
 require 'active_support'
-require 'active_support/isolated_execution_state'
 require 'active_support/core_ext/array/conversions' # to_xml
 require 'active_support/core_ext/array/wrap'
 require 'active_support/core_ext/hash/conversions' # to_xml
