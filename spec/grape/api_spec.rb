@@ -3849,7 +3849,12 @@ describe Grape::API do
       end
 
       it 'uses custom formatter' do
-        get '/simple.custom', 'HTTP_ACCEPT' => 'application/custom'
+        get '/simple.custom'
+        expect(last_response.body).to eql '{"custom_formatter":"hash"}'
+      end
+
+      it 'uses custom formatter when the Accept header asks for it' do
+        get '/simple', {}, 'HTTP_ACCEPT' => 'application/custom'
         expect(last_response.body).to eql '{"custom_formatter":"hash"}'
       end
     end
@@ -3878,7 +3883,12 @@ describe Grape::API do
       end
 
       it 'uses custom formatter' do
-        get '/simple.custom', 'HTTP_ACCEPT' => 'application/custom'
+        get '/simple.custom'
+        expect(last_response.body).to eql '{"custom_formatter":"hash"}'
+      end
+
+      it 'uses custom formatter when the Accept header asks for it' do
+        get '/simple', {}, 'HTTP_ACCEPT' => 'application/custom'
         expect(last_response.body).to eql '{"custom_formatter":"hash"}'
       end
     end
