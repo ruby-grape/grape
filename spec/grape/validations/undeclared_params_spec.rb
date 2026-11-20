@@ -136,6 +136,12 @@ describe Grape::Validations::UndeclaredParams do
         expect(last_response.body).not_to include('is not allowed')
       end
 
+      it 'does not look into a param its validators rejected' do
+        post_json '/orders', address: [{ street: 'Main', zip: '1' }], items: { sku: 'a', price: 1 }, items_count: 1
+        expect(last_response).to be_bad_request
+        expect(last_response.body).to eq('{"error":"address is invalid, items is invalid, items_count is not allowed"}')
+      end
+
       it 'takes anything in a param declared without a block' do
         post_json '/orders', metadata: { anything: { goes: 1 } }, tags: %w[a b]
         expect(last_response).to be_created

@@ -38,17 +38,35 @@ module Grape
       end
 
       # @param request [Grape::Request]
+      # @param validation_exceptions [Array<Grape::Exceptions::Validation,
+      #   Grape::Exceptions::ValidationArrayErrors>, nil] what the endpoint's
+      #   validators raised for +request+, nil when they raised nothing
       # @return [Array<Grape::Exceptions::Validation>, nil] one error for each
-      #   param of +request+ that is not declared, nil when there is none
-      def errors(request)
+      #   param of +request+ that is not declared, but for those inside a param
+      #   the validators rejected; nil when it sent only declared params
+      def errors(request, validation_exceptions)
         return unless request.params_sent?
 
-        undeclared_in(request.params, @tree)&.map do |path|
-          Grape::Exceptions::Validation.new(params: full_name(path), message: :undeclared)
-        end
+        paths = undeclared_in(request.params, @tree)
+        return unless paths
+
+        names = paths.map { |path| full_name(path) }
+        names = unreported(names, validation_exceptions) if validation_exceptions
+        names.map { |name| Grape::Exceptions::Validation.new(params: name, message: :undeclared) }
       end
 
       private
+
+      # A param the validators rejected is not looked into as well: an Array
+      # sent a Hash, say, is invalid, and each key of that Hash was named after
+      # it, as though the Hash were one of its elements. The request is
+      # answered 400 either way.
+      def unreported(names, validation_exceptions)
+        errors = validation_exceptions.flat_map(&:errors)
+        names.reject do |name|
+          errors.any? { |error| error.params.any? { |param| name.start_with?("#{param}[") } }
+        end
+      end
 
       # +children+ are the +[name, children]+ entries declared under +name+, or
       # nil when it is declared without any. Two declarations of a name with
