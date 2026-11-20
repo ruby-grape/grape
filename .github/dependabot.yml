@@ -1,0 +1,14 @@
+# Keeps the actions and reusable workflows that .github/workflows pins to
+# commits up to date, with their version comments. A release is proposed once
+# it is a week old, so that a compromised one has time to be caught and pulled.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns: ['*']
