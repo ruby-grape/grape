@@ -2020,6 +2020,8 @@ Grape.configure do |config|
 end
 ```
 
+An API reads the setting when it compiles, either on its first request or at [`compile!`](#all), so set it before then, for example in an initializer. A change made after an API has compiled has no effect on that API, for example when a spec's `before` sets it after an earlier spec already called the API.
+
 ```ruby
 format :json
 
