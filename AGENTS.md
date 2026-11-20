@@ -29,6 +29,8 @@ For code you write, fix RuboCop offenses directly rather than adding them to `.r
 - Run a single spec file with `bundle exec rspec spec/path/to/file_spec.rb`.
 - Run the full RSpec suite with `bundle exec rspec`.
 - The test suite uses `rack-test` for HTTP-level specs. Include `Rack::Test::Methods` and define `app` in specs that need it.
+- **Spec what a caller sees, not internals.** Don't pin an optimization with `instance_variable_get` or frozen-ivar assertions. Pick the cases it could get wrong and assert the answers, then check that each new spec fails without the change. Leave "the work was skipped" to a benchmark.
+- **I18n in specs.** Call `I18n.backend.translations(do_init: true)` before `store_translations` of a key `en.yml` also defines, or the lazy load overwrites it. Never call `I18n.backend.eager_load!` in a spec: every later `I18n.reload!` then reloads eagerly under whatever locales are set, which broke 21 CI jobs on #3059.
 
 ## Changelog
 
@@ -49,7 +51,7 @@ Update [UPGRADING.md](UPGRADING.md) only when introducing a **contract break** �
 - Ruby style is enforced via RuboCop (`.rubocop.yml`), with pinned gem versions in `Gemfile`.
 - Run `bundle exec rubocop` to check and `bundle exec rubocop -a` to auto-fix.
 - Frozen string literals are required in all files (`# frozen_string_literal: true`).
-- Minimum Ruby version is 3.2.
+- Minimum Ruby version is 3.3.1.
 
 Beyond what RuboCop enforces, prefer:
 
@@ -58,12 +60,35 @@ Beyond what RuboCop enforces, prefer:
 - **Don't use `case/when` for class-identity dispatch.** `when SomeClass` matches with `===`, i.e. `value.is_a?(SomeClass)` — that's correct only when dispatching on an *instance*. When dispatching on a class *value* (e.g. `type` is the class itself), use `if type == X` or `[X, Y].include?(type)` instead.
 - **No comments restating what the code does.** Reserve comments for *why* something non-obvious is happening (hidden constraint, surprising invariant, workaround) — well-named identifiers carry the *what*.
 - **`blank?` / `present?` only on outside input.** Request data (params, headers, query values) and values a developer hands over (a body, `error!` headers or backtrace, `desc` options, translations, a class to register, whose `name` can be overridden) arrive loosely typed, and `blank?`'s leniency is the point there. A request String must be scrubbed first, though: `blank?`'s whitespace regexp raises on an invalid byte sequence. A value Grape built or has already normalized has a known type, so ask exactly what it can be: `empty?` for a collection that is never nil, `nil? || empty?` where nil is a real state, and truthiness for an object or nil. Prefer removing nil at the source (as `stacked` does with `EMPTY_STACK`) over guarding against it. This keeps every `blank?` a place to check for scrubbing.
+- **`empty?`, not `== ''`.** Where a value can be of any type (coercers, validators, params), scope the check to Strings: `value.is_a?(String) && value.empty?`. A bare `empty?` raises on an Integer, and `respond_to?(:empty?)` would also turn `[]` and `{}` into nil.
+- **Keep `unless x.empty?` on request paths.** `empty?` compiles to its own VM instruction on String, Array and Hash, while `any?` is a method call, and `any?` answers differently when every element is falsy (`[nil].any?` is false). Don't let a cop rewrite them.
+- **Forward with `Forwardable`.** Use `extend Forwardable` and `def_delegator`, not hand-written one-line methods or ActiveSupport's `delegate`. The exception is a reader on the request path: a `def_delegator` method checks `defined?` on every call, so write it out with a comment saying why, as `Grape::Endpoint` does.
+- **Declare settings with a class macro.** A family of same-bodied reader/writer pairs is declared with a private class macro (`inheritable_property :auth`), not an inline `define_method` loop. Inline loops stay for the DSL verb families already written that way.
+- **Share state through an explicit `Data`.** When one object starts from another's state, hold that state in a `Data.define` naming exactly what is carried, and rebuild it with `with`. Don't copy instance variables through reflection with a deny-list, which silently carries any ivar added later.
+- **Keep the smallest surface.** When replacing a class, keep only the methods something calls: grep for callers and run the suite without the rest. Anything a released version had gets an UPGRADING note when it goes.
+- **Don't work around Rack's internals.** No `defined?(Rack::X)` load-time branches, `bind_call` bypasses of Rack methods, or Rack subclasses that memoize. When Rack is slow to answer, restructure Grape's own question: cheap env checks first, parse once and pass the result down, compare against Rack's public constants.
+- **Worked examples in comments go on class docs and public methods**, not on private helpers.
+- **YARD `@!method` directives.** Indent the docstring under the directive, and qualify every `(see …)` in full, as in `(see Grape::DSL::Parameters#requires)`. A bare `(see #requires)` resolves to nothing, without a warning.
+
+## Pitfalls
+
+- `Grape::RACK_ERRORS` is an Array of exception classes, for `rescue *Grape::RACK_ERRORS`. The `'rack.errors'` env key is `Rack::RACK_ERRORS`. Inside `Grape::`, an unqualified `RACK_ERRORS` resolves to the Array.
+- On Rack 3, `Rack::CONTENT_LENGTH` is the response header name, `content-length`. The request's env key is the literal `'CONTENT_LENGTH'`.
+- `Rack::Headers.new(hash)` returns an empty Hash whose *default value* is `hash`. Copy with `Rack::Headers.new.merge!(hash)`, which allocates once (`merge` allocates twice).
+- Both mustermann requires in `lib/grape.rb` are needed: `mustermann/ast/pattern` alone raises `NameError` on `URI`. The suite stays green without the first one only because dry-types happens to load `uri` earlier.
+- On a request path, never read an exception's `backtrace` eagerly, and never rescue just to re-raise. At request depth either one costs about 25 µs, against 1–3 µs for a plain `raise` and `rescue`. Pass `original_exception:` along, and match in the `rescue` clause with a module that defines `self.===`.
+
+## Performance
+
+Benchmarks live in `benchmark/`. Read [benchmark/README.md](benchmark/README.md) before measuring a change: several traps there make an A/B look like a regression, or make a benchmark measure nothing.
 
 ## Commits and PRs
 
 - Never push directly to master — always work on a branch and open a PR targeting `ruby-grape/grape master`.
 - **One commit per PR**, kept current by amending — don't stack follow-up "address review" or "fix CI" commits on the branch. After amending, force-push with `git push --force-with-lease` (never plain `--force`).
-- Split changes by concern: one logical refactor / feature / fix per PR. When a working tree contains unrelated changes, stash the others and open them separately rather than bundling.
+- Split changes by concern: one logical refactor / feature / fix per PR. When a working tree contains unrelated changes, leave them in place and open them separately rather than bundling.
+- **Stage explicit paths**, as in `git add CHANGELOG.md lib/x.rb spec/x_spec.rb`. Never use `git add -A` or `git add .`: a working tree often carries files that aren't yours, such as a fresh `benchmark/version_throughput/RESULTS.md`. Don't `git stash pop` without checking `git stash list` first, since a `git stash push` that found nothing to save leaves someone else's entry on top.
+- **No AI session links** in PR descriptions, commit messages or comments. The repository is public.
 - PR titles and commit messages should be clear and imperative (e.g. "Fix UnknownAuthStrategy when subclassing Auth::Base").
 - Reference the related issue in the commit message and PR description (e.g. `Fixes #1234`).
 
@@ -80,6 +105,13 @@ git push --force-with-lease origin <branch>
 ```
 
 CHANGELOG conflicts are common when two open PRs both add entries at the bottom of `#### Features` / `#### Fixes` — resolve by keeping both entries in PR-number order (oldest first). Mixed conflicts in `lib/` should be resolved on their merits: preserve the master version's structural changes and re-apply the branch's intent on top, rather than reverting either side wholesale.
+
+After every rebase, diff `CHANGELOG.md` and `UPGRADING.md` against `origin/master`, even when the rebase was clean:
+- A rebase past a release can leave the PR's entries under the version just released.
+- A clean rebase appends entries after master's latest, not in PR-number order.
+- It can also drop the blank line before an UPGRADING `####` heading.
+
+Then run the full `bundle exec rake`: a textually clean rebase can still break the branch.
 
 ## Gem Dependencies
 
