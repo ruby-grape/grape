@@ -6,8 +6,10 @@ on:
 
 jobs:
   danger:
-    uses: numbata/danger-pr-comment/.github/workflows/danger-run.yml@v0.2.0
-    secrets: inherit
+    uses: numbata/danger-pr-comment/.github/workflows/danger-run.yml@6152b4436901a31e3ebbf09152ae182282487a75 # v0.2.0
+    # What the called workflow asks for. It needs no secret but the token.
+    permissions:
+      contents: read
     with:
       ruby-version: '3.4'
       gemfile: gemfiles/danger.gemfile
