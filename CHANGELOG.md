@@ -53,6 +53,7 @@
 * [#3080](https://github.com/ruby-grape/grape/pull/3080): Drop the `active_support/isolated_execution_state` require that ActiveSupport now autoloads - [@ericproulx](https://github.com/ericproulx).
 * [#3082](https://github.com/ruby-grape/grape/pull/3082): Stop reporting the keys of a param its validators rejected as undeclared - [@ericproulx](https://github.com/ericproulx).
 * [#3083](https://github.com/ruby-grape/grape/pull/3083): Apply a mounting API's `default_error_status` to routes defined before the mount - [@ericproulx](https://github.com/ericproulx).
+* [#3086](https://github.com/ruby-grape/grape/pull/3086): Close and delete multipart upload tempfiles once the response is closed - [@anyingiit](https://github.com/anyingiit), [@ericproulx](https://github.com/ericproulx).
 * [#3087](https://github.com/ruby-grape/grape/pull/3087): Let a mounted API `use` the named params of the scope it is mounted in - [@ericproulx](https://github.com/ericproulx).
 * [#3093](https://github.com/ruby-grape/grape/pull/3093): Move the endpoint Rack stack building into `Endpoint::RackStack` to fix RuboCop - [@ericproulx](https://github.com/ericproulx).
 * [#3099](https://github.com/ruby-grape/grape/pull/3099): Report a nested Array scope that got no Array under its own name only - [@ericproulx](https://github.com/ericproulx).
