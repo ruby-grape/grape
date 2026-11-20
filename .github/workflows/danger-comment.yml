@@ -7,10 +7,9 @@ on:
 
 jobs:
   comment:
-    uses: numbata/danger-pr-comment/.github/workflows/danger-comment.yml@6152b4436901a31e3ebbf09152ae182282487a75 # v0.2.0
+    uses: danger/danger-pr-comment/.github/workflows/danger-comment.yml@645e89bcc7be89ee7e8362166110b05cbced8e59 # v0.3.0
     # What the called workflow asks for. It needs no secret but the token.
     permissions:
-      contents: read
       actions: read
       issues: write
       pull-requests: write
