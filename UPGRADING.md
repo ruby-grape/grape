@@ -3,6 +3,10 @@ Upgrading Grape
 
 ### Upgrading to >= 4.2.0
 
+#### A `use` of unknown params raises when the API compiles
+
+A mounted API can now `use` the reusable `params` of the scope it is mounted in ([#3087](https://github.com/ruby-grape/grape/pull/3087)). An API's `params` blocks run before it is mounted, so a name `use` cannot find no longer raises `Params :name not found!` as the API class is defined. It raises when the API compiles, either on its first request or at `compile!`. A Rails application that eager loads compiles the APIs mounted in its routes at boot, so a misspelled name still fails the boot there. Elsewhere, call `compile!` on your API at boot, or in a spec, to catch one before a request does.
+
 #### Minimum required ActiveSupport is now 8.0
 
 Grape no longer supports Rails 7.2, which reached end of life on 2026-08-09. ActiveSupport 8.0 is now the minimum (`add_dependency 'activesupport', '>= 8.0'`) ([#3056](https://github.com/ruby-grape/grape/pull/3056)). Upgrade to Rails 8.0 or newer before bumping Grape, or to ActiveSupport 8.0 or newer if you run Grape without Rails.

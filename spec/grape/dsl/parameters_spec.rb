@@ -67,11 +67,6 @@ describe Grape::DSL::Parameters do
       subject.use :params_group, **options
       expect(subject.validates_reader).to eq([[:id], { desc: 'value' }])
     end
-
-    it 'raises error when non-existent named param is called' do
-      subject.api = Class.new { include Grape::DSL::Settings }.new
-      expect { subject.use :params_group }.to raise_error('Params :params_group not found!')
-    end
   end
 
   describe '#use_scope' do

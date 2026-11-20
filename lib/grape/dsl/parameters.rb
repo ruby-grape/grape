@@ -53,8 +53,13 @@ module Grape
 
         named_params = @api.inheritable_setting.named_params || {}
         names.each do |name|
-          params_block = named_params.fetch(name) do
-            raise "Params :#{name} not found!"
+          params_block = named_params[name]
+          # An API's params are evaluated before it is mounted, and the scope
+          # it is mounted in may define the name (see Grape::API.mount_instance).
+          # The endpoint raises if it is still missing when it compiles.
+          unless params_block
+            @api.inheritable_setting.route_setting(:unresolved_named_param, name)
+            next
           end
 
           if options.empty?

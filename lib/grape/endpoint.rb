@@ -343,6 +343,7 @@ module Grape
     end
 
     def compile!
+      raise_on_unresolved_named_param
       app = config.app || build_stack
       warn_unauthenticated_mounted_app
       # nil when no phase has a filter -- most endpoints -- so that #run skips
@@ -355,6 +356,13 @@ module Grape
         undeclared_params: build_undeclared_params
       )
       @prototype = build_prototype(build_helpers)
+    end
+
+    # A +use+ whose name neither the API nor the scopes it is mounted in
+    # define (see DSL::Parameters#use).
+    def raise_on_unresolved_named_param
+      unresolved = inheritable_setting.route_setting(:unresolved_named_param)
+      raise "Params :#{unresolved} not found!" if unresolved
     end
 
     def build_undeclared_params

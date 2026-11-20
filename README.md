@@ -2546,6 +2546,27 @@ class API < Grape::API
 end
 ```
 
+A mounted API can `use` the reusable `params` of the scope it is mounted in, and of the APIs that scope is mounted in, though its own and those of the API it subclasses come first.
+
+```ruby
+class Posts < Grape::API
+  params do
+    use :pagination
+  end
+  get :posts do
+    Post.page(params[:page]).per(params[:per_page])
+  end
+end
+
+class API < Grape::API
+  helpers SharedParams
+
+  mount Posts
+end
+```
+
+A name `use` finds nowhere raises `Params :pagination not found!` when the API compiles, either on its first request or at [`compile!`](#all), so `Posts` served on its own raises, while mounted in `API` it does not.
+
 Helpers support blocks that can help set default values. The following API can return a collection sorted by `id` or `created_at` in `asc` or `desc` order.
 
 ```ruby
