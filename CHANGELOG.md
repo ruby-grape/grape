@@ -40,6 +40,7 @@
 * [#3076](https://github.com/ruby-grape/grape/pull/3076): Skip the query merge when building the params of a body sent without a query string - [@ericproulx](https://github.com/ericproulx).
 * [#3079](https://github.com/ruby-grape/grape/pull/3079): Fix two dead links in the README - [@farisbasha](https://github.com/farisbasha).
 * [#3080](https://github.com/ruby-grape/grape/pull/3080): Drop the `active_support/isolated_execution_state` require that ActiveSupport now autoloads - [@ericproulx](https://github.com/ericproulx).
+* [#3082](https://github.com/ruby-grape/grape/pull/3082): Stop reporting the keys of a param its validators rejected as undeclared - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.1.0 (2026-10-31)

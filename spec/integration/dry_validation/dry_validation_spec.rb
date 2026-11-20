@@ -241,6 +241,12 @@ describe 'Dry::Schema', if: defined?(Dry::Schema) do
         expect(last_response).to be_bad_request
         expect(last_response.body).to eq('number is missing, items[0][price] is not allowed')
       end
+
+      it 'does not look into a param the contract rejected' do
+        post '/foos/123/required', number: '1', items: { sku: 'a', price: 1 }
+        expect(last_response).to be_bad_request
+        expect(last_response.body).to eq('items must be an array')
+      end
     end
   end
 end

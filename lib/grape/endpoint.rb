@@ -224,7 +224,7 @@ module Grape
     def run_validators(request:)
       validators = @state.inheritable_setting.route_validations
       validation_exceptions = validation_exceptions_from(validators, request) unless validators.empty?
-      undeclared = @state.undeclared_params&.errors(request)
+      undeclared = @state.undeclared_params&.errors(request, validation_exceptions)
       validation_exceptions = [*validation_exceptions, *undeclared] if undeclared
 
       raise Grape::Exceptions::ValidationErrors.new(exceptions: validation_exceptions, headers: header) if validation_exceptions
