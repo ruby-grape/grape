@@ -135,11 +135,16 @@ module Grape
 
         @router.compile!
         @router.freeze
-        # One Rack::Head around the router strips the body of every HEAD
-        # response the API gives, including the router's own 404 and a mounted
-        # Rack app's, which go through no endpoint's stack. Rack::Lint goes
-        # outside it, where it sees the response that is served.
-        @app = Rack::Head.new(@router)
+        # Rack::Head and the tempfile reaper wrap the router once rather than
+        # each endpoint's stack, so they also reach the router's own 404 and a
+        # mounted Rack app's response, which go through no endpoint's stack.
+        # Rack::Head strips the body of every HEAD response. The reaper closes
+        # and unlinks the request's multipart tempfiles once the response is
+        # closed. Around an endpoint, it would also do so when a route cascades
+        # and the router closes that route's body, before the next route reads
+        # the same upload. Rack::Lint goes outside both, where it sees the
+        # response that is served.
+        @app = Grape::Middleware::TempfileReaper.new(Rack::Head.new(@router))
         @app = Rack::Lint.new(@app) if lint?
         @cascade = self.class.cascade
       end
