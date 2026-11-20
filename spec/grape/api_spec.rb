@@ -4043,6 +4043,47 @@ describe Grape::API do
       get '/exception'
       expect(last_response).to be_bad_request
     end
+
+    context 'when set by the API that mounts another' do
+      let(:mounted) do
+        Class.new(described_class) do
+          get('/error') { error! 'rain!' }
+          get('/exception') { raise 'rain!' }
+        end
+      end
+
+      before { subject.rescue_from :all }
+
+      it 'applies to error! in the routes the mounted API defined first' do
+        subject.default_error_status 400
+        subject.mount mounted
+        get '/error'
+        expect(last_response).to be_bad_request
+      end
+
+      it 'applies to an exception rescued in the routes the mounted API defined first' do
+        subject.default_error_status 400
+        subject.mount mounted
+        get '/exception'
+        expect(last_response).to be_bad_request
+      end
+
+      it 'applies when set after the mount, as format and rescue_from do' do
+        subject.mount mounted
+        subject.default_error_status 400
+        get '/error'
+        expect(last_response).to be_bad_request
+      end
+
+      it "leaves the mounted API's own default error status" do
+        mounted.default_error_status 422
+        mounted.get('/own') { error! 'rain!' }
+        subject.default_error_status 400
+        subject.mount mounted
+        get '/own'
+        expect(last_response).to be_unprocessable
+      end
+    end
   end
 
   context 'routes' do

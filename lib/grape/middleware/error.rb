@@ -14,21 +14,23 @@ module Grape
       ) do
         def initialize(
           all_rescue_handler: nil, base_only_rescue_handlers: nil, content_types: nil,
-          default_error_formatter: nil, default_message: '', default_status: 500,
+          default_error_formatter: nil, default_message: '', default_status: nil,
           error_formatters: nil, format: :txt,
           grape_exceptions_rescue_handler: nil, internal_grape_exceptions_rescue_handler: nil,
           rescue_all: false, rescue_grape_exceptions: false, rescue_handlers: nil,
           rescue_options: nil
         )
-          # `rescue_options:` and `default_error_formatter:` arrive nil from
-          # `Endpoint#error_middleware_options` when the API called no
-          # `rescue_from` and no `format` — and an explicit nil bypasses the
-          # keyword defaults above, so restore them here rather than letting nil
-          # reach `rescue_options.backtrace` in `#initialize` or the formatter
-          # lookup in `#format_message`. A bare `super` hands the parameters
-          # over as they stand, these two included.
+          # `rescue_options:`, `default_error_formatter:` and `default_status:`
+          # arrive nil from `Endpoint#error_middleware_options` when the API
+          # called no `rescue_from`, no `format` and no `default_error_status` —
+          # and an explicit nil bypasses a keyword default, so restore them here
+          # rather than letting nil reach `rescue_options.backtrace` in
+          # `#initialize`, the formatter lookup in `#format_message` or an error
+          # response's status. A bare `super` hands the parameters over as they
+          # stand, these three included.
           rescue_options ||= Grape::DSL::RescueOptions.new
           default_error_formatter ||= Grape::ErrorFormatter::Txt
+          default_status ||= 500
           super
         end
       end
