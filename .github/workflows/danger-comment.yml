@@ -13,3 +13,6 @@ jobs:
       actions: read
       issues: write
       pull-requests: write
+    # Post a report only when Danger has something to say; an existing report comment is still updated.
+    with:
+      comment-empty: false

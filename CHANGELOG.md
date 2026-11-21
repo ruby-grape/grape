@@ -11,6 +11,7 @@
 * [#3063](https://github.com/ruby-grape/grape/pull/3063): Drop support for Rack 2.2 and 3.0 and require Rack 3.1 - [@ericproulx](https://github.com/ericproulx).
 * [#3088](https://github.com/ruby-grape/grape/pull/3088): Pin workflow actions to commits and grant their tokens only what they need - [@ericproulx](https://github.com/ericproulx).
 * [#3090](https://github.com/ruby-grape/grape/pull/3090): Call Danger's workflows from danger/danger-pr-comment, where they moved - [@ericproulx](https://github.com/ericproulx).
+* [#3092](https://github.com/ruby-grape/grape/pull/3092): Skip posting empty Danger report comments - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 #### Fixes
