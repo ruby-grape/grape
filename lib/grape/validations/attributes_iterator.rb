@@ -81,7 +81,14 @@ module Grape
           # its elements deeper than that is yielded as-is, so the attribute
           # validators see a non-hash and fail it the same way any other
           # unexpected element type does.
-          if resource_params.is_a?(Array) && parent_indices.size < @max_nesting
+          if parent_indices.size < @max_nesting
+            # Short of that depth, a value is an Array scope's own param in an
+            # element of an Array further up. One that is not an Array was left
+            # out or given as something else, which that scope's own validators
+            # report; it has no elements, as #each finds at the top. Yielding it
+            # as one reported a second error, under the index of the Array above.
+            next unless resource_params.is_a?(Array)
+
             nested_indices = [index] + parent_indices
             do_each(resource_params, tracker, index_scope, nested_indices, sent_elements?(resource_params, nested_indices), &)
             next
