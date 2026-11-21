@@ -8,10 +8,14 @@ module Grape
     # compile time, from the endpoint's settings.
     module RackStack
       # The innermost app of every endpoint's Rack stack. The endpoint to run
-      # comes out of the env, so the lambda holds no state and one of them serves
-      # every stack, rather than one being allocated per endpoint.
-      RUN_ENDPOINT = ->(env) { env[Grape::Env::API_ENDPOINT].run }
-      private_constant :RUN_ENDPOINT
+      # comes out of the env, so the app holds no state and one of them serves
+      # every stack, rather than one being allocated per endpoint. A module
+      # rather than a lambda, which carries the self it was written under and
+      # so cannot be frozen all the way down.
+      module RunEndpoint
+        def self.call(env) = env[Grape::Env::API_ENDPOINT].run
+      end
+      private_constant :RunEndpoint
 
       module_function
 
@@ -27,7 +31,7 @@ module Grape
         stack.use Grape::Middleware::Formatter, **formatter_middleware_options(setting, format, content_types)
 
         builder = stack.build
-        builder.run RUN_ENDPOINT
+        builder.run RunEndpoint
         builder.to_app
       end
 

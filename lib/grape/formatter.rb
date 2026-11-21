@@ -6,7 +6,13 @@ module Grape
 
     module_function
 
-    DEFAULT_LAMBDA_FORMATTER = ->(obj, _env) { obj }
+    # Answers the body as it is, for a format nothing is registered for. A
+    # module like the formatters registered here, rather than a lambda: a
+    # lambda carries the self it was written under, so it cannot be frozen
+    # all the way down.
+    DEFAULT_LAMBDA_FORMATTER = Module.new do
+      def self.call(obj, _env) = obj
+    end
 
     def formatter_for(api_format, formatters)
       return formatters[api_format] if formatters&.key?(api_format)
