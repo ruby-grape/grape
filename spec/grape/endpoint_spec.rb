@@ -1187,7 +1187,10 @@ describe Grape::Endpoint do
         have_attributes(name: 'endpoint_run.grape', payload: { endpoint: a_kind_of(described_class),
                                                                env: an_instance_of(Hash) }),
         have_attributes(name: 'format_response.grape', payload: { env: an_instance_of(Hash),
-                                                                  formatter: a_kind_of(Module) })
+                                                                  formatter: a_kind_of(Module) }),
+        have_attributes(name: 'endpoint_call.grape', payload: { endpoint: a_kind_of(described_class),
+                                                                env: an_instance_of(Hash),
+                                                                response: match([200, a_kind_of(Hash), respond_to(:each)]) })
       )
 
       # In order that events were initialized
@@ -1202,8 +1205,54 @@ describe Grape::Endpoint do
                                                                           request: a_kind_of(Grape::Request) }),
         have_attributes(name: 'endpoint_render.grape', payload: { endpoint: a_kind_of(described_class) }),
         have_attributes(name: 'format_response.grape', payload: { env: an_instance_of(Hash),
-                                                                  formatter: a_kind_of(Module) })
+                                                                  formatter: a_kind_of(Module) }),
+        have_attributes(name: 'endpoint_call.grape', payload: { endpoint: a_kind_of(described_class),
+                                                                env: an_instance_of(Hash),
+                                                                response: match([200, a_kind_of(Hash), respond_to(:each)]) })
       )
+    end
+
+    context 'when the stack answers an error' do
+      let(:call_event) { events.find { |event| event.name == 'endpoint_call.grape' } }
+      let(:run_event) { events.find { |event| event.name == 'endpoint_run.grape' } }
+
+      it 'reports the response of an exception rescue_from answers' do
+        subject.rescue_from(ArgumentError) { error!('not found', 404) }
+        subject.get('/missing') { raise ArgumentError }
+        get '/missing'
+        expect(call_event.payload[:response]).to match([404, a_kind_of(Hash), respond_to(:each)])
+        expect(call_event.payload[:endpoint].status).to eq 404
+      end
+
+      it 'reports the response of params that fail validation' do
+        subject.params { requires :id, type: Integer }
+        subject.get('/invalid') { 'ok' }
+        get '/invalid'
+        expect(call_event.payload[:response].first).to eq 400
+        expect(call_event.payload[:endpoint].status).to eq 400
+      end
+
+      it 'leaves the rescued exception to endpoint_run.grape' do
+        subject.rescue_from(ArgumentError) { error!('not found', 404) }
+        subject.get('/missing') { raise ArgumentError }
+        get '/missing'
+        expect(run_event.payload[:exception_object]).to be_a(ArgumentError)
+        expect(call_event.payload).not_to have_key(:exception_object)
+      end
+
+      it 'reports an exception nothing rescues, without a response' do
+        subject.get('/raise') { raise ArgumentError }
+        expect { get '/raise' }.to raise_error(ArgumentError)
+        expect(call_event.payload[:exception_object]).to be_a(ArgumentError)
+        expect(call_event.payload).not_to have_key(:response)
+      end
+    end
+
+    it 'starts endpoint_call.grape before endpoint_run.grape and ends it after' do
+      get '/'
+      call_event, run_event = %w[endpoint_call.grape endpoint_run.grape].map { |name| events.find { |event| event.name == name } }
+      expect(call_event.time).to be <= run_event.time
+      expect(call_event.end).to be >= run_event.end
     end
   end
 

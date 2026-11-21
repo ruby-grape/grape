@@ -159,7 +159,12 @@ module Grape
     def call!(env)
       env[Grape::Env::API_ENDPOINT] = self
       @env = env
-      @state.app.call(env)
+      app = @state.app
+      # Checked here rather than in an instrument helper, as every request
+      # comes through: the helper's frame and block cost as much again.
+      return app.call(env) unless ActiveSupport::Notifications.notifier.listening?('endpoint_call.grape')
+
+      instrument_call(app)
     end
 
     def ==(other)
@@ -318,6 +323,18 @@ module Grape
     # the payload Hash and notification machinery are skipped and the block runs
     # directly (no added allocations); the block is forwarded anonymously so
     # nothing is allocated unless a subscriber is present.
+    #
+    # +endpoint_call.grape+ wraps the endpoint's whole Rack stack, so its
+    # +response+ is the one the client gets, after +rescue_from+ and the
+    # formatter. +endpoint_run.grape+ stays inside the stack: it ends before
+    # an exception is rescued, which is what lets it report that exception.
+    # #call! checks for a subscriber before calling this.
+    def instrument_call(app)
+      ActiveSupport::Notifications.instrument('endpoint_call.grape', endpoint: self, env:) do |payload|
+        payload[:response] = app.call(env)
+      end
+    end
+
     def instrument_run(&)
       return yield unless ActiveSupport::Notifications.notifier.listening?('endpoint_run.grape')
 

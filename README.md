@@ -4511,11 +4511,20 @@ Grape has built-in support for [ActiveSupport::Notifications](http://api.rubyonr
 
 The following hook points are currently supported:
 
-##### endpoint_run.grape
+##### endpoint_call.grape
 
-The main execution of an endpoint, includes filters and rendering.
+A request to an endpoint, through its whole stack of middleware: what `endpoint_run.grape` reports, plus `rescue_from`, error responses and formatting. Its `response` is the one the client gets, so its status is the response's even when an exception was rescued or params failed validation.
 
 * *endpoint* - The endpoint instance
+* *env* - The request environment
+* *response* - The Rack response, `[status, headers, body]`, absent when an exception escapes the stack (reported as the event's `exception_object`, as with any event)
+
+##### endpoint_run.grape
+
+The main execution of an endpoint, includes filters and rendering. It ends before `rescue_from` turns an exception into a response: the event reports that exception (`exception_object`), but its endpoint's `status` is still the one before the error. Use `endpoint_call.grape` for the status the client gets.
+
+* *endpoint* - The endpoint instance
+* *env* - The request environment
 
 ##### endpoint_render.grape
 
