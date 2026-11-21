@@ -17,6 +17,28 @@ post 'avatar' do
 end
 ```
 
+#### A required param the request left out is only reported missing
+
+A `requires` param the request left out now answers `is missing` and nothing else ([#3100](https://github.com/ruby-grape/grape/pull/3100)). Its other validators, custom ones included, are only called for a param the request sent, as they already were for an `optional` one. A custom validator that read the value used to be handed `nil` for it and raise, so the request answered `500` instead of `400`. The README's own `AlphaNumeric` example did that.
+
+The built-in validators that added a second error for a missing param no longer do:
+
+```ruby
+params do
+  requires :n, type: Integer, values: [1, 2]
+  requires :email, type: String, allow_blank: false
+end
+```
+
+```
+# Before
+n is missing, n does not have a valid value, email is missing, email is empty
+# After
+n is missing, email is missing
+```
+
+This also drops the `does not have a valid value` that [#3010](https://github.com/ruby-grape/grape/pull/3010) added after `is missing` for a nested param with `values` (see [A required param with `values` rejects `nil` in a nested scope](#a-required-param-with-values-rejects-nil-in-a-nested-scope)). A param sent as `null` is still validated, and `values` still rejects it. A custom validator that has to see a missing param, to report it in its own words for instance, can override `validate(request)`, which is called whether the param was sent or not.
+
 #### `Grape::Util::MediaType` parses for a vendor's pattern
 
 `Grape::Util::MediaType.parse`, `.best_quality` and `.new` take `vendor_pattern:`, the pattern `Grape::Util::MediaType.vendor_pattern(vendor)` answers, in place of `vendor:` ([#3098](https://github.com/ruby-grape/grape/pull/3098)). The header versioner looks its vendor's pattern up as it is built, so a request no longer reads a cache. Only code calling these internals is affected: pass `vendor_pattern: Grape::Util::MediaType.vendor_pattern(vendor)`.

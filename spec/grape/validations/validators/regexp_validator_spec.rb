@@ -118,7 +118,7 @@ describe Grape::Validations::Validators::RegexpValidator do
     it 'refuses inapppopriate' do
       get '/nested_regexp_with_array', people: 'invalid name'
       expect(last_response.status).to eq(400)
-      expect(last_response.body).to eq('{"error":"people is invalid, people[names] is missing, people[names] is invalid"}')
+      expect(last_response.body).to eq('{"error":"people is invalid, people[names] is missing"}')
     end
   end
 

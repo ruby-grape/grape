@@ -254,7 +254,7 @@ describe Grape::Validations::Validators::ValuesValidator do
     it 'reports a missing param the way the root scope does' do
       post_json '/address', address: {}
       expect(last_response.status).to eq 400
-      expect(last_response.body).to eq({ error: 'address[country] is missing, address[country] does not have a valid value' }.to_json)
+      expect(last_response.body).to eq({ error: 'address[country] is missing' }.to_json)
     end
 
     it 'does not allow nil in a given block whose dependency is met' do
@@ -1190,7 +1190,7 @@ describe Grape::Validations::Validators::ValuesValidator do
       get 'values_wrapped_by_with_block'
 
       expect(last_response.status).to eq 400
-      expect(last_response.body).to eq({ error: 'type is missing, type does not have a valid value' }.to_json)
+      expect(last_response.body).to eq({ error: 'type is missing' }.to_json)
     end
   end
 end

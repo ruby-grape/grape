@@ -686,6 +686,37 @@ describe Grape::Validations::Validators::CoerceValidator do
       end
     end
 
+    context 'when a required param is left out' do
+      before do
+        subject.params do
+          requires :ids, type: Array[Integer], coerce_with: ->(val) { val.split(',').map(&:to_i) }
+          requires :tags, type: Set[String]
+          optional :items, type: Array do
+            requires :n, type: Integer, coerce_with: ->(val) { Integer(val.strip) }
+          end
+        end
+        subject.post('/') { 'ok' }
+      end
+
+      it 'reports it missing, without coercing it' do
+        post '/', {}.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('ids is missing, tags is missing')
+      end
+
+      it 'reports one left out of an element missing, without coercing it' do
+        post '/', { ids: '1', tags: ['a'], items: [{ n: ' 3' }, {}] }.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('items[1][n] is missing')
+      end
+
+      it 'coerces one sent as null' do
+        post '/', { ids: '1', tags: nil }.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('tags is invalid')
+      end
+    end
+
     context 'using coerce_with' do
       it 'parses parameters with Array type' do
         subject.params do
