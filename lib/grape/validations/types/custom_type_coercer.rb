@@ -37,7 +37,39 @@ module Grape
 
         TYPE_CHECK_METHODS = %i[coerced? parsed?].freeze
         COLLECTION_TYPES = [Array, Set].freeze
-        private_constant :TYPE_CHECK_METHODS, :COLLECTION_TYPES
+
+        # What a coercer calls to coerce and to check. Frozen objects rather
+        # than lambdas: a lambda carries the coercer as its self and the values
+        # it closes over as they are, so a compiled API holding one could not
+        # be frozen all the way down.
+        HashSymbolizer = Data.define(:coercion) do
+          def call(val) = coercion.call(val).deep_symbolize_keys
+        end
+
+        # +dup+ before +map!+: the collection is whatever the user's coercion
+        # method returned — possibly frozen, possibly the input itself — so we
+        # must not mutate it in place. +dup+ also preserves the class, keeping a
+        # +Set+ a +Set+ (unlike +map+, which would return an +Array+).
+        CollectionSymbolizer = Data.define(:coercion) do
+          def call(val) = coercion.call(val).dup.map! { |item| item.is_a?(Hash) ? item.deep_symbolize_keys : item }
+        end
+
+        InstanceCheck = Data.define(:type) do
+          def call(value) = value.is_a?(type)
+        end
+
+        EnumerableCheck = Data.define(:type) do
+          def call(value) = value.is_a?(Enumerable) && value.all? { |val| matches?(type.first, val) }
+
+          private
+
+          def matches?(type, value)
+            return value.all? { |val| matches?(type.first, val) } if type.is_a?(Enumerable) && value.is_a?(Enumerable)
+
+            !type.is_a?(Enumerable) && value.is_a?(type)
+          end
+        end
+        private_constant :TYPE_CHECK_METHODS, :COLLECTION_TYPES, :HashSymbolizer, :CollectionSymbolizer, :InstanceCheck, :EnumerableCheck
 
         # A new coercer for the given type specification
         # and coercion method.
@@ -72,8 +104,8 @@ module Grape
 
         def build_coercion_method(type, method)
           coercion_method = infer_coercion_method(type, method)
-          return hash_symbolizer(coercion_method) if type == Hash
-          return collection_symbolizer(coercion_method) if COLLECTION_TYPES.include?(type)
+          return HashSymbolizer.new(coercion_method) if type == Hash
+          return CollectionSymbolizer.new(coercion_method) if COLLECTION_TYPES.include?(type)
 
           coercion_method
         end
@@ -85,39 +117,13 @@ module Grape
           method.method(:parse)
         end
 
-        def hash_symbolizer(method)
-          ->(val) { method.call(val).deep_symbolize_keys }
-        end
-
-        # +dup+ before +map!+: the collection is whatever the user's coercion
-        # method returned — possibly frozen, possibly the input itself — so we
-        # must not mutate it in place. +dup+ also preserves the class, keeping a
-        # +Set+ a +Set+ (unlike +map+, which would return an +Array+).
-        def collection_symbolizer(method)
-          ->(val) { method.call(val).dup.map! { |item| symbolize_if_hash(item) } }
-        end
-
-        def symbolize_if_hash(item)
-          item.is_a?(Hash) ? item.deep_symbolize_keys : item
-        end
-
         def infer_type_check(type)
           method_name = TYPE_CHECK_METHODS.detect { |m| type.respond_to?(m) }
           return type.method(method_name) if method_name
           return type if type.respond_to?(:call)
-          return enumerable_type_check(type) if type.is_a?(Enumerable)
+          return EnumerableCheck.new(type) if type.is_a?(Enumerable)
 
-          ->(value) { value.is_a? type }
-        end
-
-        def enumerable_type_check(type)
-          ->(value) { value.is_a?(Enumerable) && value.all? { |val| recursive_type_check(type.first, val) } }
-        end
-
-        def recursive_type_check(type, value)
-          return value.all? { |val| recursive_type_check(type.first, val) } if type.is_a?(Enumerable) && value.is_a?(Enumerable)
-
-          !type.is_a?(Enumerable) && value.is_a?(type)
+          InstanceCheck.new(type)
         end
       end
     end

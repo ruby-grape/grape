@@ -16,6 +16,7 @@
 * [#3092](https://github.com/ruby-grape/grape/pull/3092): Skip posting empty Danger report comments - [@dblock](https://github.com/dblock).
 * [#3095](https://github.com/ruby-grape/grape/pull/3095): Freeze Grape's constants all the way down - [@ericproulx](https://github.com/ericproulx).
 * [#3096](https://github.com/ruby-grape/grape/pull/3096): Define Grape's callable constants as modules rather than lambdas - [@ericproulx](https://github.com/ericproulx).
+* [#3097](https://github.com/ruby-grape/grape/pull/3097): Build param defaults and custom type coercions from frozen objects rather than procs - [@ericproulx](https://github.com/ericproulx).
 * [#3098](https://github.com/ruby-grape/grape/pull/3098): Look up the header versioner's vendor pattern once, when it is built - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
