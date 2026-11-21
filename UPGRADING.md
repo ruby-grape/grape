@@ -132,6 +132,20 @@ end
 
 A route defined after the mount already answered 400. A `default_error_status` the mounting API sets after `mount` now applies too, as its `format` and `rescue_from` already did. A mounted API's own `default_error_status` still wins, so to keep 500 in a mounted API, declare `default_error_status 500` in it.
 
+#### Upload tempfiles are deleted once the response is closed
+
+Grape now closes and deletes the tempfiles of a multipart upload once the response is closed, or once an exception escapes the API ([#3086](https://github.com/ruby-grape/grape/pull/3086)). It used to leave them until garbage collection or the process exited, unless the API ran inside an application that already did this, such as Rails with its `Rack::TempfileReaper`.
+
+Code that keeps an uploaded tempfile after the response, for instance by handing its path to a background job, has to copy or move the file first:
+
+```ruby
+post 'avatar' do
+  path = Rails.root.join('tmp', 'uploads', SecureRandom.uuid)
+  FileUtils.cp(params[:avatar][:tempfile].path, path)
+  ProcessAvatarJob.perform_later(path.to_s)
+end
+```
+
 ### Upgrading to >= 4.1.0
 
 #### `Rack::Head` wraps the router instead of each endpoint's stack
