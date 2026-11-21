@@ -19,7 +19,9 @@ module Grape
       # version +20+. Given the vendor it is parsed for, the vendor is spelled
       # out and everything after it up to the format is the version.
       #
-      # Keyed by the vendors APIs declare, never by what a client sends.
+      # Keyed by the vendors APIs declare, never by what a client sends, and
+      # read through {.vendor_pattern} where a vendor is declared, so that a
+      # request reads no shared, mutable state.
       class VendorVersionHeaderRegexCache < Grape::Util::Cache
         def initialize
           super
@@ -34,12 +36,12 @@ module Grape
       # strings are what it writes into the env. The arguments are copied
       # rather than frozen, as they are the caller's.
       #
-      # A +subtype+ naming a vendor other than +vendor+ is parsed as it would
-      # be without one.
-      def initialize(type:, subtype:, vendor: nil)
+      # A +subtype+ naming a vendor other than the one +vendor_pattern+ is for
+      # is parsed as it would be without one.
+      def initialize(type:, subtype:, vendor_pattern: nil)
         @type = -type
         @subtype = -subtype
-        match = VendorVersionHeaderRegexCache[vendor].match(@subtype) if vendor
+        match = vendor_pattern.match(@subtype) if vendor_pattern
         match ||= VENDOR_VERSION_HEADER_REGEX.match(@subtype)
         if match
           @vendor = match[:vendor].freeze
@@ -64,17 +66,24 @@ module Grape
       end
 
       class << self
-        def best_quality(header, available_media_types, vendor: nil)
-          parse(best_quality_media_type(header, available_media_types), vendor:)
+        # The pattern that parses a media type for +vendor+, keeping a hyphen
+        # in a version, to be passed as +vendor_pattern:+. Look it up where the
+        # vendor is declared, once.
+        def vendor_pattern(vendor)
+          VendorVersionHeaderRegexCache[vendor]
         end
 
-        def parse(media_type, vendor: nil)
+        def best_quality(header, available_media_types, vendor_pattern: nil)
+          parse(best_quality_media_type(header, available_media_types), vendor_pattern:)
+        end
+
+        def parse(media_type, vendor_pattern: nil)
           return if media_type.blank?
 
           type, subtype = media_type.downcase.split('/', 2)
           return if type.blank? || subtype.blank?
 
-          new(type:, subtype:, vendor:)
+          new(type:, subtype:, vendor_pattern:)
         end
 
         def match?(media_type)
