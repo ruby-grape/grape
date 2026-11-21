@@ -10,6 +10,7 @@
 * [#3062](https://github.com/ruby-grape/grape/pull/3062): Use the reusable Danger workflow with a separate Gemfile - [@dblock](https://github.com/dblock).
 * [#3063](https://github.com/ruby-grape/grape/pull/3063): Drop support for Rack 2.2 and 3.0 and require Rack 3.1 - [@ericproulx](https://github.com/ericproulx).
 * [#3077](https://github.com/ruby-grape/grape/pull/3077): Add benchmarks that fail a pull request that makes Grape slower or allocate more, with [Duel](https://github.com/sferik/duel-ruby) - [@sferik](https://github.com/sferik).
+* [#3078](https://github.com/ruby-grape/grape/pull/3078): Automate gem releases with ruby-gem-release - [@dblock](https://github.com/dblock).
 * [#3085](https://github.com/ruby-grape/grape/pull/3085): Report `endpoint_call.grape` around an endpoint's whole stack, with the response the client gets - [@ericproulx](https://github.com/ericproulx).
 * [#3088](https://github.com/ruby-grape/grape/pull/3088): Pin workflow actions to commits and grant their tokens only what they need - [@ericproulx](https://github.com/ericproulx).
 * [#3090](https://github.com/ruby-grape/grape/pull/3090): Call Danger's workflows from danger/danger-pr-comment, where they moved - [@ericproulx](https://github.com/ericproulx).

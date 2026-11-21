@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Optional release version overriding the checked-in version.
+        type: string
+        required: false
+      dry-run:
+        description: Only check the release prerequisites, without editing, pushing, or publishing.
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    uses: dblock/ruby-gem-release/.github/workflows/release.yml@fc9b2673899047f7cb021e4c7f6528d819d06f77 # v0.9.0
+    permissions:
+      contents: write
+      id-token: write
+    with:
+      ruby-version: '3.4'
+      gemfile: gemfiles/release.gemfile
+      version: ${{ inputs.version }}
+      dry-run: ${{ inputs.dry-run }}
