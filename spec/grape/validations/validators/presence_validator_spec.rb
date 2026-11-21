@@ -42,7 +42,7 @@ describe Grape::Validations::Validators::PresenceValidator do
     it 'requires when missing' do
       get '/requires'
       expect(last_response.status).to eq(400)
-      expect(last_response.body).to eq('{"error":"email is required, email has no value"}')
+      expect(last_response.body).to eq('{"error":"email is required"}')
     end
 
     it 'requires when empty' do
@@ -96,7 +96,7 @@ describe Grape::Validations::Validators::PresenceValidator do
     it 'requires when missing' do
       get '/'
       expect(last_response.status).to eq(400)
-      expect(last_response.body).to eq('{"error":"email is missing, email is empty"}')
+      expect(last_response.body).to eq('{"error":"email is missing"}')
     end
 
     it 'requires when empty' do
