@@ -135,13 +135,14 @@ module Grape
       # Fork a point-in-time copy prepared for a freshly-built endpoint: the
       # declared params and validations accumulated by the surrounding scopes
       # are snapshotted into the copy's per-route settings, since the
-      # namespace stacks are wiped between routes (see #reset_validations!),
-      # and request-serving defaults are applied.
+      # namespace stacks are wiped between routes (see #reset_validations!).
+      # No request-serving default is written into the copy: an API that
+      # mounts this one later still has to reach it (see #inherit_from), so
+      # the endpoint falls back when it reads one.
       def point_in_time_copy_for_endpoint
         copy = point_in_time_copy
         copy.route_declared_params = copy.declared_params.flatten
         copy.route_validations = copy.validations.dup
-        copy.default_error_status ||= 500
         copy
       end
 

@@ -2855,6 +2855,8 @@ class API < Grape::API
 end
 ```
 
+It also applies to the APIs it mounts, unless they set their own.
+
 ### Handling 404
 
 For Grape to handle all the 404s for your API, it can be useful to use a catch-all.

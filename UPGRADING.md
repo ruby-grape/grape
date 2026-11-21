@@ -113,6 +113,25 @@ end
 
 To keep the enclosing handler for such an exception, register its class in the nested scope as well: a scope's class handlers still rank ahead of its own `rescue_from :all`. An exception `rescue_from :all` does not catch, one that is not a `StandardError`, still reaches the enclosing scope's handlers, and so does one raised inside the catch-all's block.
 
+#### A mounting API's `default_error_status` reaches the routes its mounted APIs defined first
+
+An API's `default_error_status` now applies to every route of the APIs it mounts, whichever was defined first ([#3083](https://github.com/ruby-grape/grape/pull/3083)). A route used to keep 500 when nothing above it had set `default_error_status` by the time it was defined. So in the usual layout below, where the mounted API is defined before the API that mounts it, `error!` and the exceptions `rescue_from` answers without a status of their own gave 500:
+
+```ruby
+class Status < Grape::API
+  get :status do
+    error!('unavailable') # now 400, was 500
+  end
+end
+
+class Base < Grape::API
+  default_error_status 400
+  mount Status
+end
+```
+
+A route defined after the mount already answered 400. A `default_error_status` the mounting API sets after `mount` now applies too, as its `format` and `rescue_from` already did. A mounted API's own `default_error_status` still wins, so to keep 500 in a mounted API, declare `default_error_status 500` in it.
+
 ### Upgrading to >= 4.1.0
 
 #### `Rack::Head` wraps the router instead of each endpoint's stack

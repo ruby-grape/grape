@@ -36,7 +36,7 @@ module Grape
       # @param original_exception [Exception] The original exception that caused the error.
       # @raise [Grape::Exceptions::Halt] always, carrying the response.
       def error!(message, status = nil, additional_headers = nil, backtrace = nil, original_exception = nil)
-        resolved_status = self.status(status || inheritable_setting.default_error_status)
+        resolved_status = self.status(status || inheritable_setting.default_error_status || 500)
         headers = additional_headers.present? ? header.merge(additional_headers) : header
         raise Grape::Exceptions::Halt.new(
           message:, status: resolved_status, headers:, backtrace:, original_exception:
