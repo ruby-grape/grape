@@ -639,7 +639,7 @@ get :public_timeline do
 end
 ```
 
-Parameters are automatically populated from the request body on `POST`, `PUT`, `PATCH`, `DELETE` and `QUERY` for form input, JSON and XML content-types.
+Parameters are automatically populated from the request body on `POST`, `PUT`, `PATCH`, `DELETE` and `QUERY` for form input, JSON and XML content-types. Rack parses form input whatever the method, so a `GET` with a form-encoded or multipart body has it in `params` too, while a JSON or XML body on a `GET` is ignored. To send a query in the request body, use [`QUERY`](#the-query-method).
 
 The request:
 
