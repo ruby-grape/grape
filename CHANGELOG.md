@@ -15,6 +15,7 @@
 * [#3090](https://github.com/ruby-grape/grape/pull/3090): Call Danger's workflows from danger/danger-pr-comment, where they moved - [@ericproulx](https://github.com/ericproulx).
 * [#3092](https://github.com/ruby-grape/grape/pull/3092): Skip posting empty Danger report comments - [@dblock](https://github.com/dblock).
 * [#3095](https://github.com/ruby-grape/grape/pull/3095): Freeze Grape's constants all the way down - [@ericproulx](https://github.com/ericproulx).
+* [#3096](https://github.com/ruby-grape/grape/pull/3096): Define Grape's callable constants as modules rather than lambdas - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

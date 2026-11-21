@@ -3,8 +3,15 @@
 module Grape
   class Router
     class Route < BaseRoute
-      FORWARD_MATCH_METHOD = ->(input, pattern) { input.start_with?(pattern.origin) }
-      NON_FORWARD_MATCH_METHOD = ->(input, pattern) { pattern.match?(input) }
+      # Modules rather than lambdas, which carry the self they were written
+      # under and so cannot be frozen all the way down.
+      FORWARD_MATCH_METHOD = Module.new do
+        def self.call(input, pattern) = input.start_with?(pattern.origin)
+      end
+
+      NON_FORWARD_MATCH_METHOD = Module.new do
+        def self.call(input, pattern) = pattern.match?(input)
+      end
 
       attr_reader :app, :request_method, :index
 
