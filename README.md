@@ -3,6 +3,7 @@
 [![Gem Version](https://badge.fury.io/rb/grape.svg)](http://badge.fury.io/rb/grape)
 [![test](https://github.com/ruby-grape/grape/actions/workflows/test.yml/badge.svg)](https://github.com/ruby-grape/grape/actions/workflows/test.yml)
 [![Coverage Status](https://coveralls.io/repos/github/ruby-grape/grape/badge.svg?branch=master)](https://coveralls.io/github/ruby-grape/grape?branch=master)
+[![Duel](https://raw.githubusercontent.com/sferik/duel-ruby/main/assets/badge.svg)](https://github.com/ruby-grape/grape/actions/workflows/perf.yml)
 
 ## What is Grape?
 

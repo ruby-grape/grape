@@ -1,0 +1,47 @@
+name: Perf
+
+# Duel's performance regression guards, run by Duel's reusable workflow
+# (see Duel's docs/ci.md), which this one calls with what .duel.rb sets
+# that it needs. On pull requests only, and only those that change what
+# the benchmarks measure (or the benchmarks, or how they run): a squash
+# merge's push would mostly repeat its pull request's run. Run by hand
+# (on a fork, say), it compares the code with itself, which checks the
+# setup.
+on:
+  pull_request:
+    paths:
+      - lib/**
+      - duel/**
+      - .duel.rb
+      - grape.gemspec
+      - gemfiles/duel.gemfile
+      - .github/workflows/perf.yml
+  workflow_dispatch:
+
+# A pull request's newer push cancels its run, if that's still going, as
+# only its newest commit's result counts.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions: {}
+
+jobs:
+  duel:
+    # At the commit Duel's release was tagged at, as a tag can be moved.
+    uses: sferik/duel-ruby/.github/workflows/duel.yml@14e3fd0c230d19872715e4e3ecd30955825f1233 # v0.3.0
+    # (It runs the branch's code, so it only reads. The jobs that write,
+    # for a push, are a workflow of Duel's own, which this one, for pull
+    # requests alone, doesn't call.)
+    permissions:
+      contents: read
+      pull-requests: read # for the pull request's labels (see c.accept_label)
+    with:
+      # The newest Ruby, which those who care most about speed run.
+      ruby-version: "4.0"
+      # With YJIT, as Rails turns it on, and some changes to Grape are
+      # faster or slower with it than without.
+      jit: yjit
+      # Duel's own bundle, so Duel and StackProf stay out of the one every
+      # other Gemfile evaluates.
+      gemfile: gemfiles/duel.gemfile
