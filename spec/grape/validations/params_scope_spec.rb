@@ -1065,7 +1065,7 @@ describe Grape::Validations::ParamsScope do
         post '/lines', { lines: [[{ name: 'x' }]] }.to_json, 'CONTENT_TYPE' => 'application/json'
 
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('lines[0] is invalid, lines[0][name] is missing, lines[0][name] is invalid')
+        expect(last_response.body).to eq('lines[0] is invalid, lines[0][name] is missing')
       end
 
       it 'rejects elements wrapped in several extra arrays' do
