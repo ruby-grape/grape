@@ -9,17 +9,10 @@ module Grape
       @contract_key_map = contract_key_map
     end
 
-    def call(passed_params, declared_params, route_params, renamed_params)
-      recursive_declared(
-        passed_params,
-        declared_params:,
-        route_params:,
-        renamed_params:
-      )
-    end
-
-    private
-
+    # @param passed_params [Hash, Array] the params to filter
+    # @param declared_params [Array<Grape::DeclaredParams::Param>] the params
+    #   to keep of them
+    #
     # An element of an Array scope that is not a Hash has no keys to filter,
     # so it is returned as it came in, the way a leaf value is. Validation
     # lets one through wherever nothing in the scope is required of it: an
@@ -27,15 +20,13 @@ module Grape
     # all optional checks nothing on an element that is not a Hash. Filtering
     # it anyway meant building an empty copy of it, which raised for +nil+,
     # +false+ and numbers and indexed a String with a Symbol.
-    def recursive_declared(passed_params, declared_params:, route_params:, renamed_params:, params_nested_path: [])
+    def call(passed_params, declared_params)
       return passed_params unless passed_params.is_a?(Array) || passed_params.respond_to?(:key?)
 
       res = if passed_params.is_a?(Array)
-              passed_params.map do |passed_param|
-                recursive_declared(passed_param, declared_params:, params_nested_path:, renamed_params:, route_params:)
-              end
+              passed_params.map { |passed_param| call(passed_param, declared_params) }
             else
-              declared_hash(passed_params, declared_params:, params_nested_path:, renamed_params:, route_params:)
+              declared_hash(passed_params, declared_params)
             end
 
       @contract_key_map.each { |key_map| key_map.write(passed_params, res) }
@@ -43,102 +34,38 @@ module Grape
       res
     end
 
-    def declared_hash(passed_params, declared_params:, params_nested_path:, renamed_params:, route_params:)
-      declared_params.each_with_object(passed_params.class.new) do |declared_param_attr, memo|
-        next if @evaluate_given && !declared_param_attr.scope.attr_meets_dependency?(passed_params)
+    private
 
-        declared_hash_attr(
-          passed_params,
-          declared_param: declared_param_attr.key,
-          params_nested_path:,
-          memo:,
-          renamed_params:,
-          route_params:
-        )
+    def declared_hash(passed_params, declared_params)
+      declared_params.each_with_object(passed_params.class.new) do |declared_param, memo|
+        next if @evaluate_given && !declared_param.scope.attr_meets_dependency?(passed_params)
+
+        name = declared_param.name
+        next unless @include_missing || passed_params.key?(name)
+
+        memo[@stringify ? declared_param.string_key : declared_param.key] = declared_value(passed_params[name], declared_param, passed_params)
       end
     end
 
-    def declared_hash_attr(passed_params, declared_param:, params_nested_path:, memo:, renamed_params:, route_params:)
-      return declare_leaf(passed_params, declared_param:, params_nested_path:, memo:, renamed_params:, route_params:) unless declared_param.is_a?(Hash)
+    # What a declared param is filed as: its value, or the empty value its
+    # type has when that is nil, a fresh one every time since the caller may
+    # fill it.
+    def declared_value(passed_param, declared_param, passed_params)
+      children = declared_param.children
+      return declared_children(passed_param || passed_params.class.new, declared_param, children) if children
 
-      declared_param.each_pair do |parent, children|
-        declare_nested(passed_params, parent:, children:, params_nested_path:, memo:, renamed_params:, route_params:)
-      end
+      passed_param || declared_param.empty_value&.dup || passed_param
     end
 
-    def declare_nested(passed_params, parent:, children:, params_nested_path:, memo:, renamed_params:, route_params:)
-      return unless @include_missing || passed_params.key?(parent)
-
-      memo_key = build_memo_key(params_nested_path, parent, renamed_params)
-      passed_children = passed_params[parent] || passed_params.class.new
-      nested_path = nested_path_for(params_nested_path, parent)
-      # A value that is neither a Hash nor an Array where children are declared
-      # -- left unvalidated by a +given+ whose dependency is not met, say -- is
-      # returned as it came in, as #recursive_declared returns an element like
-      # it.
+    # A param with children is filed as what #call keeps of its value, a Hash
+    # of the same class as the params around it when it was not passed.
+    #
+    # A value that is neither a Hash nor an Array where children are declared
+    # -- left unvalidated by a +given+ whose dependency is not met, say -- is
+    # returned as it came in, as #call returns an element like it.
+    def declared_children(passed_children, declared_param, children)
       has_passed_children = !passed_children.respond_to?(:any?) || passed_children.any?
-
-      memo[memo_key] = handle_passed_param(nested_path, route_params:, has_passed_children:) do
-        recursive_declared(
-          passed_children,
-          declared_params: children,
-          params_nested_path: nested_path,
-          renamed_params:,
-          route_params:
-        )
-      end
-    end
-
-    # The declared param has no children. Find its value or set it to nil.
-    def declare_leaf(passed_params, declared_param:, params_nested_path:, memo:, renamed_params:, route_params:)
-      return unless @include_missing || (passed_params.respond_to?(:key?) && passed_params.key?(declared_param))
-
-      memo_key = build_memo_key(params_nested_path, declared_param, renamed_params)
-      passed_param = passed_params[declared_param]
-
-      memo[memo_key] = passed_param || handle_passed_param(nested_path_for(params_nested_path, declared_param), route_params:) do
-        passed_param
-      end
-    end
-
-    # The lookup key is the param's whole path, built fresh -- two Arrays and a
-    # String per declared param -- and only an API using +as:+ has anything to
-    # find with it, so the common empty table is not asked.
-    def build_memo_key(params_nested_path, declared_param, renamed_params)
-      renamed_param_name = renamed_params[nested_path_for(params_nested_path, declared_param)] unless renamed_params.empty?
-      param = renamed_param_name || declared_param
-      @stringify ? param.to_s : param.to_sym
-    end
-
-    def nested_path_for(parent_path, key)
-      parent_path + [key.to_s]
-    end
-
-    def handle_passed_param(params_nested_path, route_params:, has_passed_children: false)
-      return yield if has_passed_children
-
-      key = params_nested_path.first
-      key += "[#{params_nested_path[1..].join('][')}]" if params_nested_path.size > 1
-
-      type = route_params.dig(key, :type)
-      return yield if type.nil?
-
-      empty_value_for(type, key, route_params) || yield
-    end
-
-    # The empty value a param of +type+ declares when it was not passed, or
-    # nil when +type+ has none. A fresh one every time: the caller may fill it.
-    def empty_value_for(type, key, route_params)
-      return {} if type == 'Hash' && no_child_params?(route_params, "#{key}[")
-      return [] if type == 'Array' || (type.start_with?('[') && !type.include?(','))
-
-      Set.new if type.start_with?('#<Set', 'Set')
-    end
-
-    # The prefix is built once by the caller: interpolated inside the block, it
-    # was a new String for every param on the route.
-    def no_child_params?(route_params, prefix)
-      route_params.keys.none? { |k| k.start_with?(prefix) }
+      (declared_param.empty_value&.dup unless has_passed_children) || call(passed_children, children)
     end
   end
 end
