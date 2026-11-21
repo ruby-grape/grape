@@ -49,6 +49,7 @@
 * [#3082](https://github.com/ruby-grape/grape/pull/3082): Stop reporting the keys of a param its validators rejected as undeclared - [@ericproulx](https://github.com/ericproulx).
 * [#3083](https://github.com/ruby-grape/grape/pull/3083): Apply a mounting API's `default_error_status` to routes defined before the mount - [@ericproulx](https://github.com/ericproulx).
 * [#3087](https://github.com/ruby-grape/grape/pull/3087): Let a mounted API `use` the named params of the scope it is mounted in - [@ericproulx](https://github.com/ericproulx).
+* [#3093](https://github.com/ruby-grape/grape/pull/3093): Move the endpoint Rack stack building into `Endpoint::RackStack` to fix RuboCop - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.1.0 (2026-10-31)
