@@ -45,8 +45,9 @@ module Grape
             super
             @cache = Hash.new do |h, (vendor, available_media_types)|
               declared = available_media_types.map(&:-@).freeze
+              vendor_pattern = Grape::Util::MediaType.vendor_pattern(vendor) if vendor
               h[[vendor, declared].freeze] = [*declared, *COMMON_ACCEPT_HEADERS].to_h do |accept|
-                [accept, Grape::Util::MediaType.best_quality(accept, declared, vendor:)]
+                [accept, Grape::Util::MediaType.best_quality(accept, declared, vendor_pattern:)]
               end.compact.freeze
             end
           end
@@ -55,6 +56,7 @@ module Grape
         def initialize(app, **options)
           super
           @media_type_for_accept = MediaTypeForAcceptCache[[vendor, available_media_types]]
+          @vendor_pattern = Grape::Util::MediaType.vendor_pattern(vendor) if vendor
         end
 
         # Base#call copies the middleware per request so #before can keep the
@@ -93,7 +95,7 @@ module Grape
           strict_header_checks!
           # The table's keys are valid Strings, which scrubbing leaves alone, so
           # it is read with the header as it came.
-          media_type = @media_type_for_accept[env['HTTP_ACCEPT']] || Grape::Util::MediaType.best_quality(accept_header, available_media_types, vendor:)
+          media_type = @media_type_for_accept[env['HTTP_ACCEPT']] || Grape::Util::MediaType.best_quality(accept_header, available_media_types, vendor_pattern: @vendor_pattern)
           return yield media_type if media_type
 
           fail!
@@ -143,7 +145,7 @@ module Grape
         def fail!
           return if env[Grape::Env::GRAPE_ALLOWED_METHODS]
 
-          media_types = q_values_mime_types.map { |mime_type| Grape::Util::MediaType.parse(mime_type, vendor:) }
+          media_types = q_values_mime_types.map { |mime_type| Grape::Util::MediaType.parse(mime_type, vendor_pattern: @vendor_pattern) }
           vendor_not_found!(media_types) || version_not_found!(media_types)
         end
 

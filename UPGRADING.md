@@ -3,6 +3,10 @@ Upgrading Grape
 
 ### Upgrading to >= 4.2.0
 
+#### `Grape::Util::MediaType` parses for a vendor's pattern
+
+`Grape::Util::MediaType.parse`, `.best_quality` and `.new` take `vendor_pattern:`, the pattern `Grape::Util::MediaType.vendor_pattern(vendor)` answers, in place of `vendor:` ([#3098](https://github.com/ruby-grape/grape/pull/3098)). The header versioner looks its vendor's pattern up as it is built, so a request no longer reads a cache. Only code calling these internals is affected: pass `vendor_pattern: Grape::Util::MediaType.vendor_pattern(vendor)`.
+
 #### A `use` of unknown params raises when the API compiles
 
 A mounted API can now `use` the reusable `params` of the scope it is mounted in ([#3087](https://github.com/ruby-grape/grape/pull/3087)). An API's `params` blocks run before it is mounted, so a name `use` cannot find no longer raises `Params :name not found!` as the API class is defined. It raises when the API compiles, either on its first request or at `compile!`. A Rails application that eager loads compiles the APIs mounted in its routes at boot, so a misspelled name still fails the boot there. Elsewhere, call `compile!` on your API at boot, or in a spec, to catch one before a request does.
