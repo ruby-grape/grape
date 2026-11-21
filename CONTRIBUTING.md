@@ -90,6 +90,17 @@ raise ArgumentError, 'A block is required.'
 
 This does not apply to `Grape::Exceptions::*` messages meant to be rendered in an API response body, which are already lowercase and unpunctuated by convention and typically come from locale YAML rather than inline strings.
 
+#### Benchmark
+
+Grape has two kinds of benchmarks. Those in [duel](duel) guard each pull request that changes `lib`: the Perf workflow runs them with [Duel](https://github.com/sferik/duel-ruby) on the pull request and on the branch it targets, side by side, and fails a pull request that makes them slower or allocate more. A scenario on a hot path, which a change to Grape could slow down, goes there, as a `duel/*_duel.rb` file. To run them, on Ruby 3.4 or later:
+
+```
+BUNDLE_GEMFILE=gemfiles/duel.gemfile bundle install
+BUNDLE_GEMFILE=gemfiles/duel.gemfile bundle exec duel
+```
+
+Those in [benchmark](benchmark) are run by hand, for what a pull request's check doesn't ask: [version_throughput](benchmark/version_throughput) compares Grape's releases with each other, and [grape_on_rack](benchmark/grape_on_rack) profiles memory under a live server.
+
 #### Write Documentation
 
 Document any external behavior in the [README](README.md).

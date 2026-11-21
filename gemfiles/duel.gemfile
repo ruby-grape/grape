@@ -1,0 +1,14 @@
+# frozen_string_literal: true
+
+# Duel's own bundle, used only by .github/workflows/perf.yml, so that Duel
+# and StackProf stay out of the bundle every other Gemfile evaluates. Duel
+# requires Ruby 3.4 or later. To run the benchmarks locally:
+#
+#   BUNDLE_GEMFILE=gemfiles/duel.gemfile bundle exec duel
+
+eval_gemfile '../Gemfile'
+
+# (An exact version, the release whose workflows .github/workflows call,
+# bumped with them.)
+gem 'duel', '0.3.0'
+gem 'stackprof', platforms: :mri

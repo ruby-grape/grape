@@ -25,3 +25,11 @@ require('rubocop/rake_task')
 RuboCop::RakeTask.new
 
 task(default: %i[rubocop spec])
+
+# Duel's tasks, in its own bundle (gemfiles/duel.gemfile).
+begin
+  require('duel/rake_task')
+  Duel::RakeTask.new
+rescue LoadError
+  # (Any other bundle, which hasn't got Duel.)
+end

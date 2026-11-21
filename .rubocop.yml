@@ -2,11 +2,17 @@ AllCops:
   NewCops: enable
   TargetRubyVersion: 3.3
   SuggestExtensions: false
+  Include:
+    - .duel.rb
   Exclude:
     - vendor/**/*
     - bin/**/*
     - benchmark/**/*
     - tmp/**/*
+
+inherit_mode:
+  merge:
+    - Include
 
 plugins:
   - rubocop-exception_messages
@@ -31,6 +37,10 @@ Style/MultilineIfModifier:
 
 Style/MutableConstant:
   Recursive: true
+
+Style/OneClassPerFile:
+  Exclude:
+    - duel/**/*.rb
 
 Style/RaiseArgs:
   Enabled: false

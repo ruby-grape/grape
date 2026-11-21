@@ -1,0 +1,31 @@
+name: Perf comment
+
+# Duel's report, as a new comment on the pull request, when Duel says
+# to, by Duel's reusable workflow (see Duel's docs/ci.md), which this
+# one calls once the Perf workflow has run, with a token that can write,
+# so a pull request from a fork gets a comment too. It checks nothing
+# out and runs none of the pull request's code, only `duel comment`.
+#
+# And when the label that accepts a regression (c.accept_label in
+# .duel.rb) is added to a pull request, or taken off, it runs the Duel
+# job again.
+#
+# (The workflow must be on the default branch before it runs at all.)
+on:
+  workflow_run:
+    workflows: ["Perf"]
+    types: [completed]
+  pull_request_target:
+    types: [labeled, unlabeled]
+
+permissions: {}
+
+jobs:
+  comment:
+    # At the commit Duel's release was tagged at, as a tag can be moved.
+    uses: sferik/duel-ruby/.github/workflows/duel-comment.yml@14e3fd0c230d19872715e4e3ecd30955825f1233 # v0.3.0
+    permissions:
+      actions: write # to get the report from the Perf run, and run its Duel job again
+      pull-requests: write # to comment on the pull request with the report
+    with:
+      accept-label: "duel: accept"
