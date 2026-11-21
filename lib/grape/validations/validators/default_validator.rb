@@ -4,16 +4,33 @@ module Grape
   module Validations
     module Validators
       class DefaultValidator < Base
+        # What answers a missing param's default. Frozen objects rather than
+        # procs: a proc carries the validator as its self and the values it
+        # closes over as they are, so a compiled API holding one could not be
+        # frozen all the way down.
+        Value = Data.define(:value) do
+          def call(_params) = value
+        end
+
+        Copy = Data.define(:value) do
+          def call(_params) = value.dup
+        end
+
+        Deferred = Data.define(:callable) do
+          def call(_params) = callable.call
+        end
+        private_constant :Value, :Copy, :Deferred
+
         def initialize(attrs, options, required, scope, opts)
           super
           # !important, lazy call at runtime
           @default_call =
             if options.is_a?(Proc)
-              options.arity.zero? ? proc { options.call } : options
+              options.arity.zero? ? Deferred.new(options) : options
             elsif options.duplicable?
-              proc { options.dup }
+              Copy.new(options)
             else
-              proc { options }
+              Value.new(options)
             end
         end
 
