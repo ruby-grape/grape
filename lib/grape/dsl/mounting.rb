@@ -25,7 +25,7 @@ module Grape
 
         normalize_mounts(mounts).each_pair do |app, path|
           if app.respond_to?(:mount_instance)
-            mount({ app.mount_instance(configuration: mount_opts[:with] || {}) => path }, mount_opts)
+            mount({ new_mount_instance(app, mount_opts) => path }, mount_opts)
             next
           end
 
@@ -41,6 +41,13 @@ module Grape
       end
 
       private
+
+      # An instance of the Grape::API +app+ built for this mount, with its
+      # +with:+ configuration and this scope's named params, which its +use+
+      # can find (see Grape::API.mount_instance).
+      def new_mount_instance(app, mount_opts)
+        app.mount_instance(configuration: mount_opts[:with] || {}, named_params: inheritable_setting.named_params)
+      end
 
       # The settings the endpoint mounting +app+ at +path+ is built with. Past
       # #mount's +mount_instance+ branch, a Grape app is an already instantiated

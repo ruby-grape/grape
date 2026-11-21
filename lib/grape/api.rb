@@ -102,15 +102,32 @@ module Grape
       # For instance, a description could be done using: `desc configuration[:description]` if it may vary
       # depending on where the endpoint is mounted. Use with care, if you find yourself using configuration
       # too much, you may actually want to provide a new API rather than remount it.
-      def mount_instance(configuration: nil)
+      def mount_instance(configuration: nil, named_params: nil)
         instance = Class.new(@base_parent)
         instance.configuration = Grape::Util::EndpointConfiguration.new(configuration || {})
         instance.base = self
+        lend_named_params(instance, named_params) if named_params
         replay_setup_on(instance)
         instance
       end
 
       private
+
+      # The replay runs the API's +params+ blocks, whose +use+ looks its name
+      # up there and then, before +mount+ hands the instance the settings of
+      # the scope it is mounted in (see DSL::Mounting#mounted_setting). Until
+      # then, that scope's named params sit between the instance and what it
+      # inherits from its superclass, less the names the superclass defines,
+      # which resolve as they did. Only the named params: the rest, such as a
+      # +route_param+'s type, reaches the mounted routes when they are mounted.
+      def lend_named_params(instance, named_params)
+        setting = instance.top_level_setting
+        inherited = setting.parent
+        lender = Grape::Util::InheritableSetting.new
+        lender.inherit_from(inherited)
+        lender.add_named_params(named_params.except(*inherited&.named_params&.keys))
+        setting.inherit_from(lender)
+      end
 
       # When inherited, will create a list of all instances (times the API was mounted)
       # It will listen to the setup required to mount that endpoint, and replicate it on any new instance

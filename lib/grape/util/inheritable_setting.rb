@@ -197,9 +197,11 @@ module Grape
 
       # The route-scope settings handed to each Grape::Router::Route: every
       # +route_setting+ registration, the description and renamed params,
-      # minus #route_validations / #route_declared_params.
+      # minus #route_validations / #route_declared_params and the
+      # +:unresolved_named_param+ that Endpoint#compile! raises for (see
+      # DSL::Parameters#use).
       def route_settings
-        route.except(:declared_params, :validations)
+        route.except(:declared_params, :validations, :unresolved_named_param)
       end
 
       # Read (when +value+ is nil) or write an arbitrary route-scoped setting.
