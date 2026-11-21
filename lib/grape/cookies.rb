@@ -7,7 +7,7 @@ module Grape
     DELETED_COOKIES_ATTRS = {
       max_age: '0',
       value: '',
-      expires: Time.at(0)
+      expires: Time.at(0).freeze
     }.freeze
 
     def_delegators :cookies, :[], :each

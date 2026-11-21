@@ -5,7 +5,7 @@ module Grape
     class Base < StandardError
       include Grape::Util::Translation
 
-      MESSAGE_STEPS = %w[problem summary resolution].to_h { |s| [s.to_sym, s.capitalize] }.freeze
+      MESSAGE_STEPS = %w[problem summary resolution].to_h { |s| [s.to_sym, s.capitalize.freeze] }.freeze
 
       attr_reader :status, :headers
 

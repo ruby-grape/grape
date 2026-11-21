@@ -40,12 +40,12 @@ module Grape
 
       SPECIAL = {
         ::JSON => Json,
-        Array[JSON] => JsonArray,
+        [JSON].freeze => JsonArray,
         ::File => File,
         Rack::Multipart::UploadedFile => File
       }.freeze
 
-      GROUPS = [Array, Hash, JSON, Array[JSON]].freeze
+      GROUPS = [Array, Hash, JSON, [JSON].freeze].freeze
 
       # Is the given class a primitive type as recognized by Grape?
       #

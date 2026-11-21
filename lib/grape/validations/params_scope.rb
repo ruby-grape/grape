@@ -42,7 +42,7 @@ module Grape
       # we maintain a list of them here and skip looking up validators for them.
       RESERVED_DOCUMENTATION_KEYWORDS = %i[as required param_type is_array format example].freeze
 
-      SPECIAL_JSON = [JSON, Array[JSON]].freeze
+      SPECIAL_JSON = [JSON, [JSON].freeze].freeze
 
       # What {#validated_params} returns for a scope that should not be
       # validated. A plain +false+ would be indistinguishable from params of
