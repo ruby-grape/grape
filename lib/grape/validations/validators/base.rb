@@ -69,6 +69,7 @@ module Grape
           @opts = SharedOptions.new(**opts.slice(:allow_blank, :fail_fast))
           @exception_message = message(self.class.default_message_key) if self.class.default_message_key
           @iterator = AttributesIterator.new(@scope).freeze
+          @validates_missing = validates_missing?
           choose_validation_path(scope)
         end
 
@@ -116,6 +117,19 @@ module Grape
 
         alias required? required
 
+        # Whether #validate_param! is asked about an attribute the params do
+        # not hold, or params that are not a Hash. PresenceValidator is, to
+        # report it missing, and CoerceValidator of a required one, which
+        # tells for itself.
+        # Every other validator sees only the params a request sent, whether
+        # they are required or not, so a missing one is reported once, and a
+        # custom validator is never handed one that is not there. The other
+        # built-in validators count on it: they read the attribute without
+        # asking first whether the params are a Hash that holds it.
+        def validates_missing?
+          false
+        end
+
         # A scope's parent, optionality, dependency and type are all set
         # before its block declares anything, so these are settled by the
         # time a validator is built. See #validate and #validate!.
@@ -138,7 +152,7 @@ module Grape
           array_errors = nil
 
           @attrs.each do |attr_name|
-            validate_param!(attr_name, params) if required? || params.key?(attr_name)
+            validate_param!(attr_name, params) if @validates_missing || params.key?(attr_name)
           rescue Grape::Exceptions::Validation => e
             (array_errors ||= []) << e
           end
@@ -196,11 +210,12 @@ module Grape
         end
 
         # Runs #validate_param! for each attribute +element+ holds, or for every
-        # one when they are required, and returns +array_errors+ with what
-        # failed appended, allocating it on the first failure.
+        # one when this validator reports a missing one (see
+        # #validates_missing?), and returns +array_errors+ with what failed
+        # appended, allocating it on the first failure.
         def validate_element_attributes(element, array_errors)
           @attrs.each do |attr_name|
-            validate_param!(attr_name, element) if required? || (hash_like?(element) && element.key?(attr_name))
+            validate_param!(attr_name, element) if @validates_missing || (hash_like?(element) && element.key?(attr_name))
           rescue Grape::Exceptions::Validation => e
             (array_errors ||= []) << e
           end

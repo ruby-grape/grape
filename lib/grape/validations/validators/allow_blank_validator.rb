@@ -12,7 +12,7 @@ module Grape
         end
 
         def validate_param!(attr_name, params)
-          return if @value || !hash_like?(params)
+          return if @value
 
           value = params[attr_name]
           return if value == false || !Grape::Util::Scrub.blank?(value)

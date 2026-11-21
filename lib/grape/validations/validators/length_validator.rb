@@ -16,8 +16,6 @@ module Grape
         end
 
         def validate_param!(attr_name, params)
-          return unless hash_like?(params)
-
           param = params[attr_name]
 
           return unless param.respond_to?(:length)

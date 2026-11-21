@@ -11,6 +11,12 @@ module Grape
 
           validation_error!(attr_name)
         end
+
+        private
+
+        def validates_missing?
+          true
+        end
       end
     end
   end

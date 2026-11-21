@@ -1863,6 +1863,8 @@ params do
 end
 ```
 
+`validate_param!` is only called for a param the request sent. A `requires` param the request left out is reported as `text is missing`, and none of its other validators are called. A param sent as `null` reaches `validate_param!` as `nil`.
+
 You can also create custom classes that take parameters.
 
 ```ruby
