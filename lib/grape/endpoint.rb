@@ -11,12 +11,6 @@ module Grape
     include Grape::DSL::Headers
     include Grape::DSL::InsideRoute
 
-    # The innermost app of every endpoint's Rack stack. The endpoint to run
-    # comes out of the env, so the lambda holds no state and one of them serves
-    # every stack, rather than one being allocated per endpoint.
-    RUN_ENDPOINT = ->(env) { env[Grape::Env::API_ENDPOINT].run }
-    private_constant :RUN_ENDPOINT
-
     attr_reader :env, :request, :endpoints
 
     # Written out rather than delegated: the request path reads them, and a
@@ -367,19 +361,25 @@ module Grape
 
     def compile!
       raise_on_unresolved_named_param
-      app = config.app || build_stack
+      app = config.app || RackStack.build(inheritable_setting)
       warn_unauthenticated_mounted_app
-      # nil when no phase has a filter -- most endpoints -- so that #run skips
-      # all five on one read.
-      callbacks = inheritable_setting.callbacks
       @state = @state.with(
         app:,
-        callbacks: callbacks.each_value.all?(&:empty?) ? nil : callbacks.freeze,
+        callbacks: build_callbacks,
         build_params_with: inheritable_setting.build_params_with,
         undeclared_params: build_undeclared_params,
         declared_params: build_declared_params
       )
       @prototype = build_prototype(build_helpers)
+    end
+
+    # nil when no phase has a filter -- most endpoints -- so that #run skips
+    # all five on one read.
+    def build_callbacks
+      callbacks = inheritable_setting.callbacks
+      return if callbacks.each_value.all?(&:empty?)
+
+      callbacks.freeze
     end
 
     # A +use+ whose name neither the API nor the scopes it is mounted in
@@ -521,68 +521,6 @@ module Grape
       namespace_inheritable_version.length == 1 ? namespace_inheritable_version.first : namespace_inheritable_version
     end
 
-    def build_stack
-      stack = Grape::Middleware::Stack.new
-
-      setting = inheritable_setting
-      content_types = setting.content_types
-      format = setting.format
-
-      stack.use Grape::Middleware::Error, **error_middleware_options(format, content_types)
-
-      stack.concat setting.middleware
-      use_versioner(stack)
-      stack.use Grape::Middleware::Formatter, **formatter_middleware_options(format, content_types)
-
-      builder = stack.build
-      builder.run RUN_ENDPOINT
-      builder.to_app
-    end
-
-    # The versioner for the strategy +version+ declared, when it declared one.
-    def use_versioner(stack)
-      setting = inheritable_setting
-      versions = setting.version
-      return if versions.nil? || versions.empty?
-
-      version_options = setting.version_options
-      stack.use Grape::Middleware::Versioner.using(version_options.using),
-                versions: versions.flatten,
-                version_options:,
-                prefix: setting.root_prefix,
-                mount_path: setting.mount_path
-    end
-
-    def formatter_middleware_options(format, content_types)
-      setting = inheritable_setting
-      {
-        format:,
-        default_format: setting.default_format || :txt,
-        content_types:,
-        formatters: setting.formatters,
-        parsers: setting.parsers
-      }
-    end
-
-    def error_middleware_options(format, content_types)
-      setting = inheritable_setting
-      {
-        format:,
-        content_types:,
-        default_status: setting.default_error_status,
-        rescue_all: setting.rescue_all?,
-        rescue_grape_exceptions: setting.rescue_grape_exceptions?,
-        default_error_formatter: setting.default_error_formatter,
-        error_formatters: setting.error_formatters,
-        rescue_options: setting.rescue_options,
-        rescue_handlers: setting.rescue_handlers,
-        base_only_rescue_handlers: setting.base_only_rescue_handlers,
-        all_rescue_handler: setting.all_rescue_handler,
-        grape_exceptions_rescue_handler: setting.grape_exceptions_rescue_handler,
-        internal_grape_exceptions_rescue_handler: setting.internal_grape_exceptions_rescue_handler
-      }
-    end
-
     # Every helper of the route's scope, wherever it was declared in it, and
     # of the scopes around it.
     def build_helpers
@@ -595,7 +533,7 @@ module Grape
     end
 
     # A bare Rack app mounted with +mount+ is called directly (see +compile!+):
-    # it does not go through +build_stack+, so the API's authentication
+    # it does not go through RackStack, so the API's authentication
     # middleware never runs and the mount is reachable unauthenticated. Mounted
     # Grape APIs are unaffected because they rebuild their own stack from the
     # inherited settings. Warn so this bypass isn't silent.
