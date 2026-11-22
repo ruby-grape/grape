@@ -294,6 +294,35 @@ describe Grape::Validations do
       end
     end
 
+    context 'requires an Array nested in an Array, given something else' do
+      before do
+        subject.params do
+          requires :points, type: Array do
+            requires :location, type: Array do
+              requires :id, type: Integer
+            end
+          end
+        end
+        subject.post('/') { 'ok' }
+      end
+
+      it 'reports a value that is not an Array under its own name only' do
+        body = { points: [{ location: [{ id: 1 }] }, { location: [{ id: 1 }, { id: 2 }] }, { location: 0 }] }
+        post '/', body.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('points[2][location] is invalid')
+      end
+
+      it 'reports one left out under its own name only' do
+        body = { points: [{ location: [{ id: 1 }, { id: 2 }] }, {}] }
+        post '/', body.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('points[1][location] is missing')
+      end
+    end
+
     context 'requires :all using Grape::Entity documentation' do
       def define_requires_all
         documentation = {
@@ -755,7 +784,7 @@ describe Grape::Validations do
         # NOTE: with body parameters in json or XML or similar this
         # should actually fail with: children[parents][name] is missing.
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('children[1][parents] is missing, children[0][parents][1][name] is missing, children[0][parents][1][name] is empty')
+        expect(last_response.body).to eq('children[1][parents] is missing')
       end
 
       it 'errors when a parameter is not present in array within array' do
@@ -786,17 +815,11 @@ describe Grape::Validations do
         # should actually return 200, since an empty array is valid.
         get '/within_array', children: []
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq(
-          'children[0][name] is missing, ' \
-          'children[0][parents] is missing, ' \
-          'children[0][parents] is invalid, ' \
-          'children[0][parents][0][name] is missing, ' \
-          'children[0][parents][0][name] is empty'
-        )
+        expect(last_response.body).to eq('children[0][name] is missing, children[0][parents] is missing, children[0][parents] is invalid')
 
         get '/within_array', children: [{ name: 'Jay' }]
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('children[0][parents] is missing, children[0][parents][0][name] is missing, children[0][parents][0][name] is empty')
+        expect(last_response.body).to eq('children[0][parents] is missing')
       end
 
       it 'errors when param is not an Array' do
@@ -944,7 +967,7 @@ describe Grape::Validations do
         expect(last_response.status).to eq(200)
         put_with_json '/within_array', children: [{ name: 'Jay' }]
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('children[0][parents] is missing, children[0][parents][0][name] is missing')
+        expect(last_response.body).to eq('children[0][parents] is missing')
       end
     end
 
@@ -1085,7 +1108,7 @@ describe Grape::Validations do
       it 'does internal validations if the outer group is present' do
         get '/nested_optional_group', items: [{ key: 'foo' }]
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('items[0][required_subitems] is missing, items[0][required_subitems][0][value] is missing')
+        expect(last_response.body).to eq('items[0][required_subitems] is missing')
 
         get '/nested_optional_group', items: [{ key: 'foo', required_subitems: [{ value: 'bar' }] }]
         expect(last_response.status).to eq(200)
@@ -1105,7 +1128,7 @@ describe Grape::Validations do
       it 'handles validation within arrays' do
         get '/nested_optional_group', items: [{ key: 'foo' }]
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('items[0][required_subitems] is missing, items[0][required_subitems][0][value] is missing')
+        expect(last_response.body).to eq('items[0][required_subitems] is missing')
 
         get '/nested_optional_group', items: [{ key: 'foo', required_subitems: [{ value: 'bar' }] }]
         expect(last_response.status).to eq(200)
