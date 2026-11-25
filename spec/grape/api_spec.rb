@@ -1628,6 +1628,15 @@ describe Grape::API do
       expect(last_response.body).to eql 'first second'
     end
 
+    it 'runs a filter declared below the route in its scope after the ones above it (#1331)' do
+      subject.before { @foo = 'first' }
+      subject.get('/') { "#{instance_variable_get(:@foo)} #{instance_variable_get(:@bar)}" }
+      subject.before { @bar = 'second' }
+
+      expect { get '/' }.to output(%r{\AGrape: since 4\.2\.0, GET / also goes through what is declared below it in the same scope: `before`}).to_stderr
+      expect(last_response.body).to eql 'first second'
+    end
+
     context 'with a before filter on a namespace' do
       subject do
         Class.new(described_class) do
@@ -1769,6 +1778,15 @@ describe Grape::API do
       expect(last_response.content_type).to eq('text/plain')
     end
 
+    # Unlike middleware, filters and rescue handlers, settings such as the
+    # format apply to the routes declared below them only.
+    it 'keeps the format of a route declared above it' do
+      subject.format :json
+
+      expect { get '/foo' }.not_to output.to_stderr
+      expect(last_response.content_type).to eq('text/plain')
+    end
+
     it 'does not set Cache-Control' do
       get '/foo'
       expect(last_response.headers[Rack::CACHE_CONTROL]).to be_nil
@@ -1825,8 +1843,11 @@ describe Grape::API do
         blk.yield ' file content'
       end
 
-      subject.use ChunkedResponse
-      subject.get('/stream') { stream test_stream }
+      # A scope of its own, so that the middleware leaves the context's route alone.
+      subject.namespace do
+        use ChunkedResponse
+        get('/stream') { stream test_stream }
+      end
       get '/stream', {}, 'HTTP_VERSION' => 'HTTP/1.1', Rack::SERVER_PROTOCOL => 'HTTP/1.1'
 
       expect(last_response.content_type).to eq('text/plain')
@@ -2104,24 +2125,26 @@ describe Grape::API do
         expect(last_response.body).to eql 'hello'
       end
 
-      # A route captures the middleware registered above it. Whether some
-      # earlier `use` had already seeded the scope's stack must not change that.
+      # A route goes through every middleware of its scope, wherever it is
+      # declared in it (#1331), and warns about the ones below it until 5.0.
       context 'when declared below a route' do
-        it 'does not apply to that route' do
-          subject.get('/') { env['phony.args'].inspect }
-          subject.use phony_middleware, 'too-late'
+        let(:warning) { %r{\AGrape: since 4\.2\.0, GET / also goes through what is declared below it in the same scope: `use #<Class:0x\h+>`} }
 
-          get '/'
-          expect(last_response.body).to eql 'nil'
+        it 'applies to that route' do
+          subject.get('/') { env['phony.args'].inspect }
+          subject.use phony_middleware, 'below'
+
+          expect { get '/' }.to output(warning).to_stderr
+          expect(last_response.body).to eql [['below']].inspect
         end
 
-        it 'does not apply to that route when an earlier use seeded the stack' do
-          subject.use phony_middleware, 'in-time'
+        it 'applies to that route after the middleware declared above it' do
+          subject.use phony_middleware, 'above'
           subject.get('/') { env['phony.args'].flatten.inspect }
-          subject.use phony_middleware, 'too-late'
+          subject.use phony_middleware, 'below'
 
-          get '/'
-          expect(last_response.body).to eql ['in-time'].inspect
+          expect { get '/' }.to output(warning).to_stderr
+          expect(last_response.body).to eql %w[above below].inspect
         end
       end
 
@@ -2172,22 +2195,27 @@ describe Grape::API do
 
     describe '.rescue_from declared below a route' do
       let(:boom) { Class.new(StandardError) }
+      let(:warning) { %r{\AGrape: since 4\.2\.0, GET / also goes through what is declared below it in the same scope: `rescue_from`} }
 
-      it 'does not apply to that route' do
+      it 'applies to that route' do
         error_class = boom
         subject.get('/') { raise error_class }
-        subject.rescue_from(error_class) { error!('too late', 480) }
+        subject.rescue_from(error_class) { error!('below', 480) }
 
-        expect { get '/' }.to raise_error(error_class)
+        expect { get '/' }.to output(warning).to_stderr
+        expect(last_response.status).to eq(480)
       end
 
-      it 'does not apply to that route when an earlier rescue_from seeded the map' do
+      it 'applies to that route along with the rescue_from declared above it' do
         error_class = boom
-        subject.rescue_from(ArgumentError) { error!('in time', 481) }
-        subject.get('/') { raise error_class }
-        subject.rescue_from(error_class) { error!('too late', 480) }
+        subject.rescue_from(ArgumentError) { error!('above', 481) }
+        subject.get('/') { raise(params[:above] ? ArgumentError : error_class) }
+        subject.rescue_from(error_class) { error!('below', 480) }
 
-        expect { get '/' }.to raise_error(error_class)
+        expect { get '/' }.to output(warning).to_stderr
+        expect(last_response.status).to eq(480)
+        get '/', above: true
+        expect(last_response.status).to eq(481)
       end
 
       it 'adds a block if one is given' do
@@ -2351,6 +2379,37 @@ describe Grape::API do
       end
 
       get '/hello'
+      expect(last_response).to be_successful
+      get '/admin/hello'
+      expect(last_response).to be_unauthorized
+    end
+
+    # #1331: only the route declared directly in the scope warns, as one in a
+    # namespace was already protected.
+    it 'protects the routes declared above it in its scope' do
+      subject.get(:hello) { 'Hello, world.' }
+      subject.namespace(:admin) { get(:hello) { 'Hello, admin.' } }
+      subject.http_basic { |u, _p| u == 'allow' }
+
+      expect { get '/hello' }.to output(
+        'Grape: since 4.2.0, GET /hello also goes through what is declared below it in the same scope: `auth :http_basic` ' \
+        "(see UPGRADING.md). Declare those above the route, or in a namespace holding only the routes they should cover.\n"
+      ).to_stderr
+      expect(last_response).to be_unauthorized
+      get '/admin/hello'
+      expect(last_response).to be_unauthorized
+      get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow', 'whatever')
+      expect(last_response).to be_successful
+    end
+
+    it 'leaves the routes of a sibling namespace alone' do
+      subject.namespace(:public) { get(:hello) { 'Hello, world.' } }
+      subject.namespace(:admin) do
+        get(:hello) { 'Hello, admin.' }
+        http_basic { |u, _p| u == 'allow' }
+      end
+
+      expect { get '/public/hello' }.to output(%r{\AGrape: since 4\.2\.0, GET /admin/hello also goes through}).to_stderr
       expect(last_response).to be_successful
       get '/admin/hello'
       expect(last_response).to be_unauthorized
@@ -3363,7 +3422,9 @@ describe Grape::API do
     # Grape's exceptions are StandardErrors, so it used to be silently inert
     # unless the catch-all happened to be spelled `rescue_from :all`.
     context 'with a catch-all class handler' do
-      subject(:app) do
+      # Not the subject: the bare `rescue_from :grape_exceptions` the describe
+      # registers on that would reach these routes too.
+      let(:app) do
         Class.new(Grape::API) do
           format :json
           rescue_from(StandardError) { error!({ h: 'catch-all' }, 500) }
@@ -5516,8 +5577,10 @@ describe Grape::API do
             throw :error, message: 'Unauthorized', status: 500
           end
         end
-        subject.use middleware
-        subject.get do
+        # A scope of its own, so that the middleware leaves the context's route alone.
+        subject.namespace do
+          use middleware
+          get {}
         end
         get '/'
         expect(last_response).to be_server_error

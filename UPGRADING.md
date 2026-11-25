@@ -3,6 +3,39 @@ Upgrading Grape
 
 ### Upgrading to >= 4.2.0
 
+#### Middleware, authentication, callbacks and `rescue_from` reach every route of their scope
+
+A `use` (or `insert`, `insert_before`, `insert_after`), an `http_basic` or other `auth`, a callback such as `before`, or a `rescue_from` used to skip the routes declared above it in the same scope. It still reached the namespaces and mounted APIs declared above it, so an `http_basic` below a route left only that route open ([#1331](https://github.com/ruby-grape/grape/issues/1331)). Since [#3105](https://github.com/ruby-grape/grape/pull/3105) it reaches every route of its scope, wherever it is declared, as `helpers` do since [#3061](https://github.com/ruby-grape/grape/pull/3061). For routes of the same scope, this reverses the 4.0.0 entry below on registrations no longer reaching routes defined above them.
+
+```ruby
+class API < Grape::API
+  get(:status) { 'ok' }                      # was open, now answers 401
+  namespace(:admin) { get(:stats) { '...' } } # already answered 401
+  http_basic { |username, password| ... }
+end
+```
+
+An API that relied on routes above a registration staying outside it, such as public routes above an `http_basic`, has to declare the registration in a namespace that holds only the routes it should cover:
+
+```ruby
+class API < Grape::API
+  get(:status) { 'ok' }
+
+  namespace(:admin) do
+    http_basic { |username, password| ... }
+    get(:stats) { '...' }
+  end
+end
+```
+
+Until 5.0, Grape warns about each route this changes when the API compiles:
+
+```
+Grape: since 4.2.0, GET /status also goes through what is declared below it in the same scope: `auth :http_basic` (see UPGRADING.md). Declare those above the route, or in a namespace holding only the routes they should cover.
+```
+
+Settings such as `format`, `prefix` and `version` are unchanged.
+
 #### Upload tempfiles are deleted once the response is closed
 
 Grape now closes and deletes the tempfiles of a multipart upload once the response is closed, or once an exception escapes the API ([#3086](https://github.com/ruby-grape/grape/pull/3086)). It used to leave them until garbage collection or the process exited, unless the API ran inside an application that already did this, such as Rails with its `Rack::TempfileReaper`.

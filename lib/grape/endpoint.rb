@@ -108,8 +108,9 @@ module Grape
       )
       @endpoints = app.endpoints if app.respond_to?(:endpoints)
       # The live settings of the scope the route is declared in. The copy in
-      # the State holds that scope's helpers as they were at this line; these
-      # also hold the ones declared further down, read once the API compiles.
+      # the State holds that scope's helpers, middleware, filters and rescue
+      # handlers as they were at this line; these also hold the ones declared
+      # further down, read once the API compiles.
       @scope_setting = new_settings
     end
 
@@ -361,7 +362,7 @@ module Grape
 
     def compile!
       raise_on_unresolved_named_param
-      app = config.app || RackStack.build(inheritable_setting)
+      app = config.app || build_rack_stack
       warn_unauthenticated_mounted_app
       @state = @state.with(
         app:,
@@ -373,10 +374,18 @@ module Grape
       @prototype = build_prototype(build_helpers)
     end
 
-    # nil when no phase has a filter -- most endpoints -- so that #run skips
-    # all five on one read.
+    # A mount answers through the endpoints of the API it mounts, whose own
+    # scopes hang off this one, so only a route warns.
+    def build_rack_stack
+      RegistrationsBelowWarning.call(routes:, above: inheritable_setting, scope: @scope_setting)
+      RackStack.build(inheritable_setting, scope: @scope_setting)
+    end
+
+    # Every filter of the route's scope, wherever it was declared in it, and
+    # of the scopes around it. nil when no phase has a filter -- most
+    # endpoints -- so that #run skips all five on one read.
     def build_callbacks
-      callbacks = inheritable_setting.callbacks
+      callbacks = @scope_setting.callbacks
       return if callbacks.each_value.all?(&:empty?)
 
       callbacks.freeze
@@ -539,7 +548,7 @@ module Grape
     # inherited settings. Warn so this bypass isn't silent.
     def warn_unauthenticated_mounted_app
       return unless bare_rack_app?
-      return unless inheritable_setting.auth
+      return unless @scope_setting.auth
 
       warn "Grape: #{config.app} is mounted under an API that declares authentication, but authentication " \
            'middleware does not wrap mounted Rack applications. Requests to this mount are not authenticated by Grape.'

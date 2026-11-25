@@ -2960,17 +2960,16 @@ end
 
 Grape warns when a `rescue_from` is registered for a class an earlier one in the same scope already covers. This is about ordering within a scope; a handler in a nested namespace or a mounted API always takes precedence over one inherited from an enclosing scope, whatever the classes are.
 
-A `rescue_from` also has to be declared **above** the routes it should cover. A route captures the handlers registered before it, so one declared below a route never runs for it:
+A `rescue_from` reaches every route of its scope, wherever it is declared in it, as well as the namespaces and mounted APIs in that scope:
 
 ```ruby
 class Twitter::API < Grape::API
-  rescue_from :all do ... end   # covers GET /statuses
   get :statuses do ... end
-  rescue_from ArgumentError do ... end   # never runs for GET /statuses
+  rescue_from ArgumentError do ... end   # also runs for GET /statuses
 end
 ```
 
-The same goes for `use` and the `before`/`after` callbacks. `helpers` are the exception: they reach every route of their scope, wherever they are declared in it.
+The same goes for `use`, `http_basic` and the other `auth` methods, the `before`/`after` callbacks and `helpers`. To keep one away from some routes, declare it in a namespace that holds only the routes it should cover. Settings such as `format`, `prefix` and `version` work differently, so declare them above the routes they apply to.
 
 Notice that you could combine these two approaches (rescuing custom errors takes precedence). For example, it's useful for handling all exceptions except Grape validation errors.
 
@@ -3914,7 +3913,7 @@ end
 
 ### Basic Auth
 
-Grape has built-in Basic authentication (the given `block` is executed in the context of the current `Endpoint`).  Authentication applies to the current namespace and any children, but not parents.
+Grape has built-in Basic authentication (the given `block` is executed in the context of the current `Endpoint`).  Authentication applies to the current namespace and any children, but not parents. It covers every route of the namespace, including those declared above it.
 
 ```ruby
 http_basic do |username, password|

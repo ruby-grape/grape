@@ -19,14 +19,19 @@ module Grape
 
       module_function
 
-      def build(setting)
+      # +setting+ is the route's settings copy, as they stood where the route
+      # was declared. The middleware and rescue handlers come from +scope+
+      # instead, the live settings of the scope it was declared in, so that a
+      # +use+, +auth+ or +rescue_from+ reaches every route of its scope,
+      # wherever it is declared in it.
+      def build(setting, scope:)
         stack = Grape::Middleware::Stack.new
         content_types = setting.content_types
         format = setting.format
 
-        stack.use Grape::Middleware::Error, **error_middleware_options(setting, format, content_types)
+        stack.use Grape::Middleware::Error, **error_middleware_options(setting, scope, format, content_types)
 
-        stack.concat setting.middleware
+        stack.concat scope.middleware
         use_versioner(stack, setting)
         stack.use Grape::Middleware::Formatter, **formatter_middleware_options(setting, format, content_types)
 
@@ -58,21 +63,21 @@ module Grape
         }
       end
 
-      def error_middleware_options(setting, format, content_types)
+      def error_middleware_options(setting, scope, format, content_types)
         {
           format:,
           content_types:,
           default_status: setting.default_error_status,
-          rescue_all: setting.rescue_all?,
-          rescue_grape_exceptions: setting.rescue_grape_exceptions?,
+          rescue_all: scope.rescue_all?,
+          rescue_grape_exceptions: scope.rescue_grape_exceptions?,
           default_error_formatter: setting.default_error_formatter,
           error_formatters: setting.error_formatters,
-          rescue_options: setting.rescue_options,
-          rescue_handlers: setting.rescue_handlers,
-          base_only_rescue_handlers: setting.base_only_rescue_handlers,
-          all_rescue_handler: setting.all_rescue_handler,
-          grape_exceptions_rescue_handler: setting.grape_exceptions_rescue_handler,
-          internal_grape_exceptions_rescue_handler: setting.internal_grape_exceptions_rescue_handler
+          rescue_options: scope.rescue_options,
+          rescue_handlers: scope.rescue_handlers,
+          base_only_rescue_handlers: scope.base_only_rescue_handlers,
+          all_rescue_handler: scope.all_rescue_handler,
+          grape_exceptions_rescue_handler: scope.grape_exceptions_rescue_handler,
+          internal_grape_exceptions_rescue_handler: scope.internal_grape_exceptions_rescue_handler
         }
       end
     end
