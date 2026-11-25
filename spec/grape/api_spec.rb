@@ -497,6 +497,114 @@ describe Grape::API do
         expect(inner_namespace).to eq '/awesome'
       end
     end
+
+    # A route declared directly in a scope keeps the settings declared above
+    # it. One declared in a namespace used to take them as the API ended up,
+    # so a `version` or `format` declared after the namespace reached it too.
+    context 'with a setting declared after it' do
+      it 'keeps the version declared above it' do
+        subject.version 'v1', using: :path
+        subject.namespace(:a) { get { 'a' } }
+        subject.version 'v2', using: :path
+        subject.namespace(:b) { get { 'b' } }
+
+        expect { get '/v1/a' }.to output(
+          'Grape: since 4.2.0, GET /:version/a no longer takes the `version` declared after a namespace it is in ' \
+          "(see UPGRADING.md). Declare settings above the namespaces they apply to.\n"
+        ).to_stderr
+        expect(last_response.body).to eq('a')
+        get '/v2/a'
+        expect(last_response).to be_not_found
+        get '/v2/b'
+        expect(last_response.body).to eq('b')
+      end
+
+      it 'keeps the format declared above it, as a route declared directly in the scope does' do
+        subject.get(:top) { 'top' }
+        subject.namespace(:a) { get { 'a' } }
+        subject.format :json
+        subject.namespace(:b) { get { 'b' } }
+
+        expect { get '/a' }.to output(
+          'Grape: since 4.2.0, GET /a no longer takes the `format` and `default_error_formatter` declared after a namespace it is in ' \
+          "(see UPGRADING.md). Declare settings above the namespaces they apply to.\n"
+        ).to_stderr
+        expect(last_response.content_type).to eq('text/plain')
+        get '/top'
+        expect(last_response.content_type).to eq('text/plain')
+        get '/b'
+        expect(last_response.content_type).to eq('application/json')
+      end
+
+      it 'keeps the prefix declared above it, however deep it is nested' do
+        subject.prefix :api
+        subject.route_param(:id) { namespace(:comments) { get { params[:id] } } }
+        subject.prefix :other
+
+        expect { get '/api/7/comments' }.to output(%r{\AGrape: since 4\.2\.0, GET /api/:id/comments no longer takes the `prefix`}).to_stderr
+        expect(last_response.body).to eq('7')
+        get '/other/7/comments'
+        expect(last_response).to be_not_found
+      end
+
+      # A content type registered on its own used to narrow the formats of
+      # every namespace declared above it, which then refused a plain request.
+      it 'keeps the content types declared above it' do
+        subject.namespace(:a) { get { 'a' } }
+        subject.content_type :xml, 'application/xml'
+
+        get '/a'
+        expect(last_response.body).to eq('a')
+      end
+
+      it 'keeps two routes that differ only in the version they took' do
+        subject.version 'v1', using: :path
+        subject.namespace { get(:hello) { 'v1' } }
+        subject.version 'v2', using: :path
+        subject.namespace { get(:hello) { 'v2' } }
+
+        expect { get '/v1/hello' }.to output(%r{GET /:version/hello no longer takes the `version`}).to_stderr
+        expect(last_response.body).to eq('v1')
+        get '/v2/hello'
+        expect(last_response.body).to eq('v2')
+      end
+
+      it 'keeps the settings declared above the namespace an API is mounted in' do
+        mounted = Class.new(described_class) { get(:hello) { 'hello' } }
+        subject.namespace(:inner) { mount mounted }
+        subject.format :json
+
+        expect { get '/inner/hello' }.to output(%r{\AGrape: since 4\.2\.0, GET /inner/hello no longer takes the `format`}).to_stderr
+        expect(last_response.content_type).to eq('text/plain')
+      end
+
+      it 'still takes the settings of the API it is mounted in' do
+        subject.format :json
+        subject.mount Class.new(described_class) { namespace(:inner) { get { 'inner' } } }
+
+        get '/inner'
+        expect(last_response.content_type).to eq('application/json')
+      end
+
+      it 'does not warn about a setting the namespace declares itself' do
+        subject.namespace(:a) do
+          default_error_status 418
+          get { error!('a') }
+        end
+        subject.default_error_status 419
+
+        expect { get '/a' }.not_to output.to_stderr
+        expect(last_response.status).to eq(418)
+      end
+
+      it 'does not warn about a registration declared after it, which still reaches it' do
+        subject.namespace(:a) { get { raise 'boom' } }
+        subject.rescue_from(:all) { error!('rescued', 500) }
+
+        expect { get '/a' }.not_to output.to_stderr
+        expect(last_response.body).to eq('rescued')
+      end
+    end
   end
 
   describe '.call' do

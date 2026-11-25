@@ -47,12 +47,9 @@ module Grape
       private
 
       # Execute the block within a context where our inheritable settings are forked
-      # to a new child scope.
+      # to a new child scope (see Grape::Util::InheritableSetting#nest).
       def within_namespace
-        new_inheritable_settings = Grape::Util::InheritableSetting.new
-        new_inheritable_settings.inherit_from inheritable_setting
-
-        @inheritable_setting = new_inheritable_settings
+        @inheritable_setting = inheritable_setting.nest
 
         result = yield
 
