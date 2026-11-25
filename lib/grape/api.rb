@@ -26,6 +26,10 @@ module Grape
       group inheritable_setting logger middleware namespace prefix resource resources segment version versions
     ].freeze
 
+    # DSL methods that read the setting named by their key when given nothing
+    # else, and are answered unrecorded like SETTING_READERS.
+    KEYED_SETTING_READERS = %i[global_setting namespace_setting route_setting].freeze
+
     Helpers = Grape::DSL::Helpers::BaseHelper
 
     Boolean = Class.new
@@ -72,8 +76,9 @@ module Grape
       end
 
       # Redefines all methods so that are forwarded to add_setup and be recorded.
-      # A read (see SETTING_READERS) is answered by the last instance, which is
-      # where add_setup takes its answer from, without being recorded.
+      # A read (see SETTING_READERS and KEYED_SETTING_READERS) is answered by
+      # the last instance, which is where add_setup takes its answer from,
+      # without being recorded.
       def override_all_methods!
         (base_instance.methods - Class.methods - NON_OVERRIDABLE).each do |method_override|
           define_singleton_method(method_override) do |*args, **kwargs, &block|
@@ -184,7 +189,10 @@ module Grape
       end
 
       def setting_read?(method, args, kwargs, block)
-        SETTING_READERS.include?(method) && args.empty? && kwargs.empty? && block.nil?
+        return false unless kwargs.empty? && block.nil?
+        return args.empty? if SETTING_READERS.include?(method)
+
+        KEYED_SETTING_READERS.include?(method) && args.size == 1
       end
 
       # Skips steps that contain arguments to be lazily executed (on re-mount time)
