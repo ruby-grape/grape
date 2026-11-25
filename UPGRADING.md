@@ -3,6 +3,20 @@ Upgrading Grape
 
 ### Upgrading to >= 4.2.0
 
+#### Upload tempfiles are deleted once the response is closed
+
+Grape now closes and deletes the tempfiles of a multipart upload once the response is closed, or once an exception escapes the API ([#3086](https://github.com/ruby-grape/grape/pull/3086)). It used to leave them until garbage collection or the process exited, unless the API ran inside an application that already did this, such as Rails with its `Rack::TempfileReaper`.
+
+Code that keeps an uploaded tempfile after the response, for instance by handing its path to a background job, has to copy or move the file first:
+
+```ruby
+post 'avatar' do
+  path = Rails.root.join('tmp', 'uploads', SecureRandom.uuid)
+  FileUtils.cp(params[:avatar][:tempfile].path, path)
+  ProcessAvatarJob.perform_later(path.to_s)
+end
+```
+
 #### `Grape::Util::MediaType` parses for a vendor's pattern
 
 `Grape::Util::MediaType.parse`, `.best_quality` and `.new` take `vendor_pattern:`, the pattern `Grape::Util::MediaType.vendor_pattern(vendor)` answers, in place of `vendor:` ([#3098](https://github.com/ruby-grape/grape/pull/3098)). The header versioner looks its vendor's pattern up as it is built, so a request no longer reads a cache. Only code calling these internals is affected: pass `vendor_pattern: Grape::Util::MediaType.vendor_pattern(vendor)`.

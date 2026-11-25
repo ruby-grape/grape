@@ -1294,6 +1294,8 @@ post '/' do
 end
 ```
 
+Grape closes and deletes the tempfiles of an upload once the response is closed, or once an exception escapes the API, as Rails does. To keep an uploaded file, copy or move it before the response is closed.
+
 ### First-Class `JSON` Types
 
 Grape supports complex parameters given as JSON-formatted strings using the special `type: JSON` declaration. JSON objects and arrays of objects are accepted equally, with nested validation rules applied to all objects in either case:
