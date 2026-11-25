@@ -4762,6 +4762,26 @@ describe Grape::API do
         expect(subject.compile!).to be(compiled)
       end
 
+      it 'keeps the compiled API when a setting is read by its key (#2071)' do
+        subject.namespace_setting :a, 1
+        subject.global_setting :b, 2
+        subject.mount app => '/thing'
+        subject.route_setting :c, 3
+        compiled = subject.compile!
+
+        expect([subject.namespace_setting(:a), subject.global_setting(:b), subject.route_setting(:c)]).to eq([1, 2, 3])
+        expect(subject.compile!).to be(compiled)
+      end
+
+      # Given a value as well, the same method writes it, so it is recorded and
+      # replayed on every mount of the API.
+      it 'writes a setting given by its key on every mount of the API' do
+        app.namespace_setting :a, 1
+        subject.mount app => '/thing'
+
+        expect(app.namespace_setting(:a)).to eq(1)
+      end
+
       # Called with no argument, +get+ still declares a route, so it is recorded
       # like any step and replayed on every mount of the API.
       it 'declares a route written with no argument on every mount of the API' do
