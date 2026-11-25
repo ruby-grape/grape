@@ -1,6 +1,11 @@
 name: test
 
-on: [push, pull_request]
+# On pushes to master and on pull requests: a branch with a pull request
+# would otherwise run the whole matrix twice for each push.
+on:
+  push:
+    branches: [master]
+  pull_request:
 
 permissions:
   contents: read
