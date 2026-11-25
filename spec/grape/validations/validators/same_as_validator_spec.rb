@@ -28,6 +28,14 @@ describe Grape::Validations::Validators::SameAsValidator do
         expect(last_response.body).to eq('password_confirmation is not the same as password')
       end
     end
+
+    context 'is left out' do
+      it 'reports it missing only' do
+        post '/', password: '987654'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('password_confirmation is missing')
+      end
+    end
   end
 
   describe '/value-hash' do

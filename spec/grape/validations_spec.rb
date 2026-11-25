@@ -614,7 +614,7 @@ describe Grape::Validations do
       it 'errors when param is not a Hash' do
         get '/required', items: 'not a hash'
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('items is invalid, items[key] is missing, items[key] is invalid')
+        expect(last_response.body).to eq('items is invalid, items[key] is missing')
 
         get '/required', items: [{ key: 'hash in array' }]
         expect(last_response.status).to eq(400)
@@ -815,7 +815,7 @@ describe Grape::Validations do
         # should actually return 200, since an empty array is valid.
         get '/within_array', children: []
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('children[0][name] is missing, children[0][parents] is missing, children[0][parents] is invalid')
+        expect(last_response.body).to eq('children[0][name] is missing, children[0][parents] is missing')
 
         get '/within_array', children: [{ name: 'Jay' }]
         expect(last_response.status).to eq(400)
@@ -1510,6 +1510,56 @@ describe Grape::Validations do
         end
       end
 
+      context 'when a custom validator reads the value of a required param' do
+        let(:alpha_numeric) do
+          Class.new(Grape::Validations::Validators::Base) do
+            def validate_param!(attr_name, params)
+              return if params[attr_name].match?(/\A[[:alnum:]]+\z/)
+
+              validation_error!(attr_name, 'must consist of alpha-numeric characters')
+            end
+          end
+        end
+
+        before do
+          stub_const('AlphaNumericValidator', alpha_numeric)
+          described_class.register(AlphaNumericValidator)
+          subject.params do
+            requires :text, alpha_numeric: true
+            optional :items, type: Array do
+              requires :code, alpha_numeric: true
+            end
+          end
+          subject.post('/alpha_numeric') { 'ok' }
+        end
+
+        after { described_class.deregister(:alpha_numeric) }
+
+        it 'reports the param missing without calling the validator' do
+          post '/alpha_numeric'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('text is missing')
+        end
+
+        it 'reports it missing from an element of an Array without calling the validator' do
+          post '/alpha_numeric', { text: 'abc', items: [{ code: 'x1' }, { other: 1 }] }.to_json, 'CONTENT_TYPE' => 'application/json'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('items[1][code] is missing')
+        end
+
+        it 'reports an element that is not a Hash without calling the validator' do
+          post '/alpha_numeric', { text: 'abc', items: ['x'] }.to_json, 'CONTENT_TYPE' => 'application/json'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('items[0] is invalid, items[0][code] is missing')
+        end
+
+        it 'calls the validator when the param is present' do
+          post '/alpha_numeric', text: 'a b'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('text must consist of alpha-numeric characters')
+        end
+      end
+
       context 'when using requires with a custom validator' do
         before do
           subject.params do
@@ -1530,10 +1580,10 @@ describe Grape::Validations do
           expect(last_response.body).to eq('required with custom works!')
         end
 
-        it 'validates when param is not present' do
+        it 'reports a param that is not present as missing, without calling the validator' do
           get '/required_custom'
           expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq('custom is missing, custom is not custom!')
+          expect(last_response.body).to eq('custom is missing')
         end
 
         context 'nested namespaces' do

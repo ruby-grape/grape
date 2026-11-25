@@ -23,8 +23,6 @@ module Grape
         end
 
         def validate_param!(attr_name, params)
-          return unless hash_like?(params) && params.key?(attr_name)
-
           excepts = current_excepts
           return if excepts.nil?
 

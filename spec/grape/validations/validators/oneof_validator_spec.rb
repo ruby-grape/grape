@@ -108,7 +108,7 @@ describe Grape::Validations::Validators::OneofValidator do
     it 'rejects when the value key is missing entirely' do
       post '/pricing', '{}', 'CONTENT_TYPE' => 'application/json'
       expect(last_response.status).to eq(400)
-      expect(JSON.parse(last_response.body)['error']).to include('value is missing')
+      expect(JSON.parse(last_response.body)['error']).to eq('value is missing')
     end
   end
 
@@ -234,7 +234,7 @@ describe Grape::Validations::Validators::OneofValidator do
     it 'responds with a validation error instead of raising a TypeError' do
       post '/items', { items: ['str'] }.to_json, 'CONTENT_TYPE' => 'application/json'
       expect(last_response.status).to eq(400)
-      expect(JSON.parse(last_response.body)['error']).to include('items[0][value] is invalid')
+      expect(JSON.parse(last_response.body)['error']).to eq('items[0] is invalid, items[0][value] is missing')
     end
   end
 
