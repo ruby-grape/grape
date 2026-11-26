@@ -290,6 +290,25 @@ end
 
 Assuming that the post and comment endpoints are mounted in `/posts` and `/comments`, you should now be able to do `get /posts/votes`, `post /posts/votes`, `get /comments/votes` and `post /comments/votes`.
 
+Each mount builds its own copy of the API by running the DSL calls of its class body again, with the blocks given to them. A `namespace` or `params` block runs once when the class is defined and once more for each mount. It runs again whenever a class-level method runs on the mounting API after its `mount`, which mounts the API afresh. So keep side effects out of those blocks:
+
+```ruby
+class Voting::API < Grape::API
+  Rails.logger.info 'runs once'
+
+  namespace 'votes' do
+    Rails.logger.info 'runs when Voting::API is defined, and again for each mount'
+    get do
+      # Your logic
+    end
+  end
+
+  mounted do
+    Rails.logger.info 'runs once for each mount'
+  end
+end
+```
+
 ### Mount Configuration
 
 You can configure remountable endpoints to change how they behave according to where they are mounted.
