@@ -1154,21 +1154,38 @@ describe Grape::Validations::Validators::ValuesValidator do
     end
   end
 
-  describe '/proc/arity2' do
-    let(:app) do
-      Class.new(Grape::API) do
-        default_format :json
-
-        params do
-          requires :input_one, :input_two, values: { value: ->(v1, v2) { v1 + v2 > 10 } }
-        end
-        get '/proc/arity2'
+  # Each param is validated on its own, so a predicate has one value to be
+  # called with. A Proc that needed two used to answer 400 to every request
+  # (#2401).
+  describe 'a Proc taking more than one argument' do
+    {
+      'a lambda of two' => ->(v1, v2) { v1 + v2 > 10 },
+      'a Proc naming two parameters' => proc { |v1, v2| v1 + v2.to_i > 10 },
+      'a lambda requiring two before a splat' => ->(v1, v2, *) { v1 + v2 > 10 }
+    }.each do |description, predicate|
+      it "raises an ArgumentError for #{description} when the API is defined" do
+        expect do
+          Class.new(Grape::API) { params { requires :input_one, :input_two, values: { value: predicate } } }
+        end.to raise_error(ArgumentError, /\A`values` takes a Proc with no argument, .* not a Proc of arity -?\d+: /)
       end
     end
 
-    it 'returns an error status code' do
-      get '/proc/arity2', input_one: 2, input_two: 3
-      expect(last_response.status).to eq 400
+    context 'when only the first is required' do
+      let(:app) do
+        Class.new(Grape::API) do
+          params do
+            requires :number, type: Integer, values: ->(value, floor = 0) { value > floor }
+          end
+          get('/floor') { 'ok' }
+        end
+      end
+
+      it 'calls it with the value' do
+        get '/floor', number: 1
+        expect(last_response.status).to eq 200
+        get '/floor', number: 0
+        expect(last_response.status).to eq 400
+      end
     end
   end
 

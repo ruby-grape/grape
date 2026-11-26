@@ -71,6 +71,12 @@ Grape: since 4.2.0, GET /:version/statuses no longer takes the `version` declare
 
 Registrations, such as `use`, `helpers`, `auth` and `rescue_from`, still reach the namespaces declared above them. What an API inherits from its superclass is unchanged.
 
+#### A `values` Proc that takes more than one argument raises `ArgumentError`
+
+`values:` validates each param on its own, so its Proc is called with one value at a time. A Proc that needs more than one argument, such as `->(one, two) { one + two > 10 }`, used to raise on every request. Grape rescued that, warned, and answered `400` whatever the values were. A non-lambda Proc got `nil` for the other arguments. Such a Proc now raises `ArgumentError` when the API is defined ([#3108](https://github.com/ruby-grape/grape/pull/3108)), as `except_values` already did for a Proc that takes any argument.
+
+A Proc with one required argument and optional ones, such as `->(value, floor = 0) { value > floor }`, is still called with the value. To validate several params together, use a custom validator, which is given the other params, or a `rule` of a `dry-validation` contract. See [Custom Validators](README.md#custom-validators).
+
 #### Upload tempfiles are deleted once the response is closed
 
 Grape now closes and deletes the tempfiles of a multipart upload once the response is closed, or once an exception escapes the API ([#3086](https://github.com/ruby-grape/grape/pull/3086)). It used to leave them until garbage collection or the process exited, unless the API ran inside an application that already did this, such as Rails with its `Rack::TempfileReaper`.

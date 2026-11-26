@@ -6,6 +6,10 @@ module Grape
       class ValuesValidator < Base
         default_message_key :values
 
+        # The arities of a Proc that can be called with one value: one
+        # parameter, or at most one required before optional ones or a splat.
+        PREDICATE_ARITIES = [1, -1, -2].freeze
+
         def initialize(attrs, options, required, scope, opts)
           super
           values = option_value
@@ -15,6 +19,7 @@ module Grape
           # Anything else is the collection itself, held as it came rather than
           # behind a lambda that would only hand it back.
           if values.is_a?(Proc)
+            check_arity!(values.arity)
             @values_call = values
             @values_is_predicate = !values.arity.zero?
           else
@@ -34,6 +39,17 @@ module Grape
         end
 
         private
+
+        # Each param is validated on its own, so a predicate is called with one
+        # value. One that needed more used to raise on every request, which was
+        # rescued and answered as an invalid value, and a non-lambda Proc got
+        # nil for the others: neither could ever see a second param.
+        def check_arity!(arity)
+          return if arity.zero? || PREDICATE_ARITIES.include?(arity)
+
+          raise ArgumentError, "`values` takes a Proc with no argument, returning the allowed values, or with one, checking each value, not a Proc of arity #{arity}: " \
+                               "it is called with one param's value at a time. To check params together, use a custom validator or a contract rule"
+        end
 
         # +false+ is a value: AS's +blank?+ says otherwise.
         def blank_and_allowed?(val)
