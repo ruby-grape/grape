@@ -71,6 +71,37 @@ Grape: since 4.2.0, GET /:version/statuses no longer takes the `version` declare
 
 Registrations, such as `use`, `helpers`, `auth` and `rescue_from`, still reach the namespaces declared above them. What an API inherits from its superclass is unchanged.
 
+#### A mounted API keeps what its superclass declares
+
+An API that subclasses another one inherits what that one declares, but used to only when it was the Rack app itself. Mounted, it lost all of it: the superclass's helpers, callbacks, middleware, `auth`, `rescue_from` handlers, and settings such as `prefix`, `version` and `format` ([#1820](https://github.com/ruby-grape/grape/issues/1820)). A helper call raised `NameError`, and a `before` callback that authenticated was skipped, so the routes answered without it. Since [#3111](https://github.com/ruby-grape/grape/pull/3111) a mounted API keeps them:
+
+```ruby
+class Authenticated < Grape::API
+  prefix 'v2'
+  format :json
+  helpers AuthHelpers
+  before { authenticate! }
+end
+
+class Sensors < Authenticated
+  get(:sensors) { current_user.sensors }
+end
+
+class API < Grape::API
+  mount Sensors
+end
+```
+
+```
+# Before
+GET /sensors(.:format)  # not authenticated, then NameError on current_user
+
+# After
+GET /v2/sensors(.json)  # authenticated
+```
+
+Check the routes of the subclasses you mount: they move under the `prefix` and `version` their superclass declares, answer in its `format`, and go through its callbacks and middleware. When the API mounting one inherits from the same superclass, what that superclass declares still applies once, as it did. A workaround that repeats a superclass's callbacks or middleware in the subclass, or in the API mounting it, now runs them twice, and can go.
+
 #### A `values` Proc that takes more than one argument raises `ArgumentError`
 
 `values:` validates each param on its own, so its Proc is called with one value at a time. A Proc that needs more than one argument, such as `->(one, two) { one + two > 10 }`, used to raise on every request. Grape rescued that, warned, and answered `400` whatever the values were. A non-lambda Proc got `nil` for the other arguments. Such a Proc now raises `ArgumentError` when the API is defined ([#3108](https://github.com/ruby-grape/grape/pull/3108)), as `except_values` already did for a Proc that takes any argument.

@@ -12,7 +12,7 @@ module Grape
     # protected methods too, so it has to be named here for {.override_all_methods!}
     # to leave it alone. +base+ is read on the API class itself whenever a mount
     # is refreshed, so recording it would refresh every mount below it again.
-    NON_OVERRIDABLE = %i[base base= base_instance? call change! configuration compile! eager_load! inherit_settings recognize_path reset! routes top_level_setting].freeze
+    NON_OVERRIDABLE = %i[base base= base_instance? call change! configuration compile! eager_load! inherit_settings mounted_in mounted_in= recognize_path reset! routes top_level_setting].freeze
 
     # DSL methods that answer a setting when called with nothing to set -- no
     # argument, keyword or block -- and change none. Such a call is a read, and
@@ -51,7 +51,7 @@ module Grape
       # a delegator would raise NoMethodError just as the missing one does.
       # +call+ is written out below.
       def_delegators :base_instance, :new, :configuration, :change!, :compile!, :eager_load!, :recognize_path, :routes,
-                     :base, :base=, :base_instance?, :reset!, :top_level_setting
+                     :base, :base=, :base_instance?, :mounted_in, :mounted_in=, :reset!, :top_level_setting
 
       # The interface point between Rack and Grape; it accepts a request from
       # Rack and ultimately returns an array of three values: the status, the
@@ -107,10 +107,11 @@ module Grape
       # For instance, a description could be done using: `desc configuration[:description]` if it may vary
       # depending on where the endpoint is mounted. Use with care, if you find yourself using configuration
       # too much, you may actually want to provide a new API rather than remount it.
-      def mount_instance(configuration: nil, named_params: nil)
+      def mount_instance(configuration: nil, named_params: nil, mounted_in: nil)
         instance = Class.new(@base_parent)
         instance.configuration = Grape::Util::EndpointConfiguration.new(configuration || {})
         instance.base = self
+        instance.mounted_in = mounted_in
         lend_named_params(instance, named_params) if named_params
         replay_setup_on(instance)
         instance

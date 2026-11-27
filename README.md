@@ -262,6 +262,24 @@ class Twitter::API < Grape::API
 end
 ```
 
+A mounted API also keeps what the API it subclasses declares: its helpers, callbacks, middleware, `rescue_from` handlers, and settings such as `prefix` and `format`, as it does when it is the Rack app itself. When the API mounting it inherits from the same API, what that one declares applies once.
+
+```ruby
+class Twitter::Authenticated < Grape::API
+  format :json
+  helpers Twitter::AuthHelpers
+  before { authenticate! }
+end
+
+class Twitter::Timeline < Twitter::Authenticated
+  get(:timeline) { current_user.timeline }
+end
+
+class Twitter::API < Grape::API
+  mount Twitter::Timeline # GET /timeline authenticates, and answers JSON
+end
+```
+
 ## Remounting
 
 You can mount the same endpoints in two different locations.
