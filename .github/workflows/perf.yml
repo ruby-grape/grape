@@ -28,6 +28,18 @@ permissions: {}
 
 jobs:
   duel:
+    # One report for each JIT, as a change can be faster under one and
+    # slower under the other.
+    name: Duel (${{ matrix.entry.jit }})
+    strategy:
+      # A regression under one JIT shouldn't cancel the other's report.
+      fail-fast: false
+      matrix:
+        entry:
+          # YJIT, as Rails turns it on.
+          - { jit: yjit }
+          # ZJIT, Ruby's newer JIT.
+          - { jit: zjit }
     # At the commit Duel's release was tagged at, as a tag can be moved.
     uses: sferik/duel-ruby/.github/workflows/duel.yml@14e3fd0c230d19872715e4e3ecd30955825f1233 # v0.3.0
     # (It runs the branch's code, so it only reads. The jobs that write,
@@ -39,9 +51,9 @@ jobs:
     with:
       # The newest Ruby, which those who care most about speed run.
       ruby-version: "4.0"
-      # With YJIT, as Rails turns it on, and some changes to Grape are
-      # faster or slower with it than without.
-      jit: yjit
+      jit: ${{ matrix.entry.jit }}
+      # Each JIT's report is named after it, so the Perf comment shows both.
+      report: ${{ matrix.entry.jit }}
       # Duel's own bundle, so Duel and StackProf stay out of the one every
       # other Gemfile evaluates.
       gemfile: gemfiles/duel.gemfile

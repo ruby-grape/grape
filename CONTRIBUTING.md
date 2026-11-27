@@ -92,7 +92,7 @@ This does not apply to `Grape::Exceptions::*` messages meant to be rendered in a
 
 #### Benchmark
 
-Grape has two kinds of benchmarks. Those in [duel](duel) guard each pull request that changes `lib`: the Perf workflow runs them with [Duel](https://github.com/sferik/duel-ruby) on the pull request and on the branch it targets, side by side, and fails a pull request that makes them slower or allocate more. A scenario on a hot path, which a change to Grape could slow down, goes there, as a `duel/*_duel.rb` file. To run them, on Ruby 3.4 or later:
+Grape has two kinds of benchmarks. Those in [duel](duel) guard each pull request that changes `lib`: the Perf workflow runs them with [Duel](https://github.com/sferik/duel-ruby), once under YJIT and once under ZJIT, on the pull request and on the branch it targets, side by side, and fails a pull request that makes them slower or allocate more. A scenario on a hot path, which a change to Grape could slow down, goes there, as a `duel/*_duel.rb` file. To run them, on Ruby 3.4 or later:
 
 ```
 BUNDLE_GEMFILE=gemfiles/duel.gemfile bundle install
