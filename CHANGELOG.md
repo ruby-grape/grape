@@ -19,6 +19,7 @@
 * [#3097](https://github.com/ruby-grape/grape/pull/3097): Build param defaults and custom type coercions from frozen objects rather than procs - [@ericproulx](https://github.com/ericproulx).
 * [#3098](https://github.com/ruby-grape/grape/pull/3098): Look up the header versioner's vendor pattern once, when it is built - [@ericproulx](https://github.com/ericproulx).
 * [#3101](https://github.com/ruby-grape/grape/pull/3101): Run the test workflow on pushes to master only, not twice for a pull request's branch - [@dblock](https://github.com/dblock).
+* [#3113](https://github.com/ruby-grape/grape/pull/3113): Add a built-in `:sse` format that streams server-sent events - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
