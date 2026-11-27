@@ -31,6 +31,12 @@ module Grape
 
         attr_reader :base
 
+        # The API this instance was built to be mounted in, set before its
+        # setup is replayed (see Grape::API.mount_instance), so that an API
+        # mounted during that replay already knows every API it ends up in.
+        # nil for an API's base instance.
+        attr_accessor :mounted_in
+
         def base=(grape_api)
           @base = grape_api
           grape_api.instances << self
@@ -90,7 +96,7 @@ module Grape
         protected
 
         def inherit_settings(other_settings)
-          top_level_setting.inherit_from other_settings.point_in_time_copy
+          top_level_setting.inherit_from superclass_settings_onto(other_settings.point_in_time_copy)
 
           # Propagate any inherited params down to our endpoints, and reset any
           # compiled routes.
@@ -103,6 +109,43 @@ module Grape
         end
 
         private
+
+        # A mounted API inherits what its superclass declares, then what the
+        # scope it is mounted in does. Inheriting that scope alone dropped
+        # everything the superclass declared: helpers, filters, middleware,
+        # rescue_from, prefix, format. The superclass's settings are shared
+        # with its other subclasses and mounts, so they are copied onto the
+        # scope rather than re-parented, as they stand at the mount: a
+        # superclass reopened afterwards doesn't reach it. The copy stops at a
+        # superclass that an API this one is mounted in, however far out, also
+        # inherits from: what that one declares already reaches it from there,
+        # and would otherwise apply twice.
+        def superclass_settings_onto(mounted_scope)
+          mounting = mounting_apis
+          shared = superclass.ancestors.find { |klass| klass == Grape::API::Instance || mounting.any? { |api| api <= klass } }
+          return mounted_scope if shared == superclass
+
+          stop = shared.inheritable_setting unless shared == Grape::API::Instance
+          copy_settings_onto(superclass.inheritable_setting, stop, mounted_scope)
+        end
+
+        def mounting_apis
+          apis = []
+          api = mounted_in
+          while api
+            apis << api
+            api = api.mounted_in
+          end
+          apis
+        end
+
+        def copy_settings_onto(setting, stop, root)
+          return root if setting.nil? || setting.equal?(stop)
+
+          copy = setting.point_in_time_copy
+          copy.inherit_from(copy_settings_onto(setting.parent, stop, root))
+          copy
+        end
 
         def inherited(subclass)
           super

@@ -62,6 +62,7 @@
 * [#3105](https://github.com/ruby-grape/grape/pull/3105): Make `use`, `http_basic`, callbacks and `rescue_from` reach every route of their scope, including those declared above them - [@ericproulx](https://github.com/ericproulx).
 * [#3106](https://github.com/ruby-grape/grape/pull/3106): Keep a namespace to the `version`, `format`, `prefix` and other settings declared above it - [@ericproulx](https://github.com/ericproulx).
 * [#3108](https://github.com/ruby-grape/grape/pull/3108): Raise `ArgumentError` when a `values` Proc needs more than one argument - [@ericproulx](https://github.com/ericproulx).
+* [#3111](https://github.com/ruby-grape/grape/pull/3111): Keep what a mounted API's superclass declares, such as its helpers, callbacks and `prefix` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.1.0 (2026-10-31)

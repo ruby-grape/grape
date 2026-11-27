@@ -44,9 +44,10 @@ module Grape
 
       # An instance of the Grape::API +app+ built for this mount, with its
       # +with:+ configuration and this scope's named params, which its +use+
-      # can find (see Grape::API.mount_instance).
+      # can find (see Grape::API.mount_instance), and this API as the one it
+      # is mounted in (see Grape::API::Instance.mounted_in).
       def new_mount_instance(app, mount_opts)
-        app.mount_instance(configuration: mount_opts[:with] || {}, named_params: inheritable_setting.named_params)
+        app.mount_instance(configuration: mount_opts[:with] || {}, named_params: inheritable_setting.named_params, mounted_in: self)
       end
 
       # The settings the endpoint mounting +app+ at +path+ is built with. Past
