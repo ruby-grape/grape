@@ -1222,6 +1222,19 @@ params do
 end
 ```
 
+A default declared inside an optional `Hash` or `Array` param applies only when the request sends that param. Otherwise a `requires` beside it would reject a client that left the whole param out. The params of an empty Hash, or of an Array whose elements are all blank, are not checked or given their defaults either. `declared(params)` still lists the params of a Hash left out, as `nil`. To give an optional Hash a value when it is left out, put the default on the Hash itself:
+
+```ruby
+params do
+  optional :filter, type: Hash, default: { status: 'new' } do
+    optional :status, type: String, default: 'new'
+    optional :sort, type: String
+  end
+end
+```
+
+Left out, `filter` is `{ status: 'new' }`. Sent as `{ sort: 'asc' }`, it is `{ sort: 'asc', status: 'new' }`. Sent as `{}`, it stays `{}`.
+
 ### Supported Parameter Types
 
 The following are all valid types, supported out of the box by Grape:
