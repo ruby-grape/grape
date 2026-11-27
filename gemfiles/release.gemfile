@@ -1,0 +1,8 @@
+# frozen_string_literal: true
+
+# The release workflow's bundle: the main Gemfile, so the release job still runs
+# the full suite, plus the release tooling only it needs.
+eval_gemfile '../Gemfile'
+
+gem 'commonmarker', '~> 2.10', require: false
+gem 'ruby-gem-release', '0.9.0', require: false
