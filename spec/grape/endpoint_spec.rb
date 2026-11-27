@@ -1217,8 +1217,11 @@ describe Grape::Endpoint do
       let(:run_event) { events.find { |event| event.name == 'endpoint_run.grape' } }
 
       it 'reports the response of an exception rescue_from answers' do
-        subject.rescue_from(ArgumentError) { error!('not found', 404) }
-        subject.get('/missing') { raise ArgumentError }
+        # A scope of its own, so that the rescue_from leaves the describe's route alone.
+        subject.namespace do
+          rescue_from(ArgumentError) { error!('not found', 404) }
+          get('/missing') { raise ArgumentError }
+        end
         get '/missing'
         expect(call_event.payload[:response]).to match([404, a_kind_of(Hash), respond_to(:each)])
         expect(call_event.payload[:endpoint].status).to eq 404
@@ -1233,8 +1236,11 @@ describe Grape::Endpoint do
       end
 
       it 'leaves the rescued exception to endpoint_run.grape' do
-        subject.rescue_from(ArgumentError) { error!('not found', 404) }
-        subject.get('/missing') { raise ArgumentError }
+        # A scope of its own, so that the rescue_from leaves the describe's route alone.
+        subject.namespace do
+          rescue_from(ArgumentError) { error!('not found', 404) }
+          get('/missing') { raise ArgumentError }
+        end
         get '/missing'
         expect(run_event.payload[:exception_object]).to be_a(ArgumentError)
         expect(call_event.payload).not_to have_key(:exception_object)

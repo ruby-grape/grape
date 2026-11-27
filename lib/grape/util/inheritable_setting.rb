@@ -146,6 +146,13 @@ module Grape
         copy
       end
 
+      # Remove in 5.0 (see Endpoint::RegistrationsBelowWarning). Whether this
+      # scope added to any of the +keys+ stores after +copy+ was taken from it.
+      # Counts entries rather than comparing them, so that a route compiles
+      # without allocating for it.
+      # @api private
+      def registered_after?(copy, keys) = keys.any? { |key| @stackable_values&.[](key)&.size != copy.stackable_values&.[](key)&.size }
+
       # Resets the instance store of per-route settings.
       # @api private
       def route_end
