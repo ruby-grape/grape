@@ -3,6 +3,20 @@ Upgrading Grape
 
 ### Upgrading to >= 4.2.0
 
+#### `declared` in a `before_validation` filter is deprecated
+
+`declared` raises `Grape::DSL::Declared::MethodNotYetAvailable` in a `before` filter, since the params are not validated yet. A `before_validation` filter runs before validation too, but `declared` there answered, with the params as the request sent them: not coerced, and without their defaults. So an optional param with a `default` came back `nil`, while `declared` in the endpoint gave the default ([#1145](https://github.com/ruby-grape/grape/issues/1145)).
+
+It still answers the same way, with a deprecation warning ([#3114](https://github.com/ruby-grape/grape/pull/3114)), and from Grape 5.0 it will raise as in a `before` filter. Call `declared` in an `after_validation` filter or in the endpoint instead:
+
+```ruby
+params do
+  optional :gizmo, type: String, default: 'gadget'
+end
+before_validation { declared(params) } # deprecated: {"gizmo"=>nil}
+after_validation { declared(params) }  # {"gizmo"=>"gadget"}
+```
+
 #### Middleware, authentication, callbacks and `rescue_from` reach every route of their scope
 
 A `use` (or `insert`, `insert_before`, `insert_after`), an `http_basic` or other `auth`, a callback such as `before`, or a `rescue_from` used to skip the routes declared above it in the same scope. It still reached the namespaces and mounted APIs declared above it, so an `http_basic` below a route left only that route open ([#1331](https://github.com/ruby-grape/grape/issues/1331)). Since [#3105](https://github.com/ruby-grape/grape/pull/3105) it reaches every route of its scope, wherever it is declared, as `helpers` do since [#3061](https://github.com/ruby-grape/grape/pull/3061). For routes of the same scope, this reverses the 4.0.0 entry below on registrations no longer reaching routes defined above them.

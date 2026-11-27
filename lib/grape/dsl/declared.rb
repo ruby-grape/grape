@@ -23,6 +23,14 @@ module Grape
       def declared(passed_params, include_parent_namespaces: true, include_missing: true, evaluate_given: false, stringify: false)
         raise MethodNotYetAvailable unless before_filter_passed
 
+        # Remove in 5.0, when this raises MethodNotYetAvailable instead.
+        if running_before_validation
+          Grape.deprecator.warn(
+            'Calling `declared` in a `before_validation` filter is deprecated, and will raise Grape::DSL::Declared::MethodNotYetAvailable in Grape 5.0 ' \
+            'as it does in a `before` filter: the params are not validated, coerced or given their defaults yet. Call it in an `after_validation` filter or in the endpoint.'
+          )
+        end
+
         declared_params = compiled_declared_params
         handler = DeclaredParamsHandler.new(include_missing:, evaluate_given:, stringify:, contract_key_map: declared_params.contract_key_maps)
         handler.call(passed_params, include_parent_namespaces ? declared_params.all : declared_params.own)

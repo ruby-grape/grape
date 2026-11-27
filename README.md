@@ -855,7 +855,7 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
 
 The returned hash is an `ActiveSupport::HashWithIndifferentAccess`.
 
-The `#declared` method is not available to `before` filters, as those are evaluated prior to parameter coercion.
+The `#declared` method is not available to `before` filters, as those are evaluated prior to parameter coercion: it raises `Grape::DSL::Declared::MethodNotYetAvailable`. A `before_validation` filter runs prior to coercion too, and `declared` there still answers, with the params as the request sent them: not coerced, and without their defaults. That is deprecated, and raises as in a `before` filter from Grape 5.0. Call `declared` in an `after_validation` filter or in the endpoint.
 
 ### Include Parent Namespaces
 
