@@ -3958,6 +3958,8 @@ http_basic do |username, password|
 end
 ```
 
+The block runs before the endpoint reads the request, so `params` and `headers` aren't available in it, and a JSON or XML body isn't parsed yet. Read anything else the check needs from `env`, as in `env['HTTP_X_API_KEY']`.
+
 ### Register custom middleware for authentication
 
 Grape can use custom Middleware for authentication. How to implement these Middleware have a look at `Rack::Auth::Basic` or similar implementations.
@@ -3984,7 +3986,7 @@ end
 
 Use [Doorkeeper](https://github.com/doorkeeper-gem/doorkeeper), [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2](https://github.com/nov/rack-oauth2) for OAuth2 support.
 
-You can access the controller params, headers, and helpers through the context with the `#context` method inside any auth middleware inherited from `Grape::Middleware::Auth::Base`.
+As with `http_basic`, the `auth` block runs on the endpoint before it reads the request, so read the request from `env` there rather than `params` or `headers`.
 
 ## Describing and Inspecting an API
 
@@ -4317,7 +4319,17 @@ class API < Grape::API
 end
 ```
 
-You can access the controller params, headers, and helpers through the context with the `#context` method inside any middleware inherited from `Grape::Middleware::Base`.
+Inside a middleware, `header` and `headers` are both the headers the middleware adds to the response. Unlike in an endpoint, `headers` is not the request's headers: it is empty until the middleware sets one. Read the request's headers from `env`, or through `rack_request`:
+
+```ruby
+class RequestId < Grape::Middleware::Base
+  def before
+    header 'X-Request-Id', env['HTTP_X_REQUEST_ID'] || SecureRandom.uuid
+  end
+end
+```
+
+`context` is the endpoint that answers the request. Its `params` and `headers` can be read in `after`, but not in `before`, which runs before the endpoint reads the request. A JSON or XML body isn't parsed yet in `before` either.
 
 ### Rails Middleware
 
