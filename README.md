@@ -1298,6 +1298,8 @@ params do
 end
 ```
 
+Without `coerce_with`, an `Array` or `Set` of a custom type, such as `type: Array[SecureUri]`, only accepts an `Array` or a `Set` of values. Any other value is rejected. When it is one of several `types`, as in `types: [Array[SecureUri], SecureUri]`, a single value is passed on to the next type. An explicit `coerce_with` is not affected: it still receives the raw value, so it can build the collection from a `String`.
+
 ### Multipart File Parameters
 
 Grape makes use of `Rack::Request`'s built-in support for multipart file parameters. Such parameters can be declared with `type: File`:
