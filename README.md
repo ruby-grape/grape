@@ -3540,6 +3540,7 @@ Built-in formatters are the following.
 * `:binary`: data will be returned "as is"
 * `:jsonl`: one line per element of an Array or Enumerator, otherwise one line, each rendered as `:json` renders it. Not a default content type, see [JSON Lines](#json-lines)
 * `:md`, `:markdown`: use object's `to_markdown` when available, return a String "as is", otherwise raise `Grape::Exceptions::InvalidFormatter`. Not default content types, see [Serving Markdown](#serving-markdown)
+* `:sse`: one server-sent event per element of an Array or Enumerator, otherwise one event, its data a String as is or anything else rendered as `:json` renders it. Not a default content type, see [Server-sent events](#server-sent-events)
 
 #### Serving Markdown
 
@@ -3646,6 +3647,50 @@ end
 ```
 
 An error renders as a single JSON line.
+
+#### Server-sent events
+
+`:sse` serves [server-sent events](https://html.spec.whatwg.org/multipage/server-sent-events.html), the `text/event-stream` that a browser reads with `EventSource`. It is not among the default content types, so declare it in the API or namespace that streams.
+
+```ruby
+class Chat < Grape::API
+  content_type :sse, 'text/event-stream'
+  format :sse
+
+  params do
+    requires :prompt, type: String
+  end
+  get :completions do
+    header 'cache-control', 'no-cache'
+    Enumerator.new do |events|
+      llm.stream(params[:prompt]) { |token| events << { text: token } } # data: {"text":"Hel"}
+      events << Grape::ServerSentEvent.new(event: 'done', data: '')       # event: done
+    end
+  end
+end
+```
+
+Each element of an `Array` or `Enumerator` is one event, and any other object is one event. Its data is a `String` as it is, and anything else as the `:json` formatter renders it. Data that spans lines is sent as one `data:` line per line. A `String` body is served as it is, taken to be an event stream already.
+
+An `Enumerator` is streamed: each event is sent as the enumerator yields it. Return the enumerator rather than passing it to `stream`, which sends what it is given unformatted. As with [JSON Lines](#json-lines), an exception raised while it streams is past `rescue_from`: the response just ends.
+
+`Grape::ServerSentEvent` gives an event more than its data.
+
+```ruby
+Grape::ServerSentEvent.new(event: 'token', id: 42, retry: 5_000, data: { text: 'Hi' })
+Grape::ServerSentEvent.new(comment: 'keepalive')
+```
+
+* `event` is the type that `EventSource#addEventListener` listens for. An event without one is a `message` event.
+* `id` is what a reconnecting client sends back in its `Last-Event-ID` header, read with `headers['last-event-id']`, so that the stream can resume after the last event the client got.
+* `retry` is how long the client waits before reconnecting, in milliseconds.
+* `comment` is ignored by the client. A proxy may close a connection that stays idle, so yield a comment every 15 seconds or so to keep it open.
+* An event without `data` dispatches nothing on the client. Give `data: ''` for an event that carries nothing.
+* `event` and `id` must be one line, and `retry` a non-negative Integer. Anything else raises `ArgumentError`.
+
+An error, such as a failed validation or `error!`, answers before the stream starts, as one `error` event whose data is the error rendered as JSON. An `EventSource` reads nothing from a response that is not `200`, but a client that reads the stream with `fetch` does.
+
+A proxy may buffer a response before passing it on: behind nginx, add `header 'x-accel-buffering', 'no'`. On a server that gives each request a thread, such as Puma, an open stream holds its thread until it ends.
 
 ### JSONP
 

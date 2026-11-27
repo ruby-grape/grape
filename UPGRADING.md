@@ -250,6 +250,15 @@ end
 
 A route defined after the mount already answered 400. A `default_error_status` the mounting API sets after `mount` now applies too, as its `format` and `rescue_from` already did. A mounted API's own `default_error_status` still wins, so to keep 500 in a mounted API, declare `default_error_status 500` in it.
 
+#### A `:sse` format you declared now gets Grape's server-sent events formatter and error formatter
+
+Grape now renders server-sent events under `:sse` ([#3113](https://github.com/ruby-grape/grape/pull/3113)). An API that declared `content_type :sse, ...` itself, with nothing of its own registered for it, gets Grape's:
+
+* A response body that is not a String renders as events. A String is still served as it is, and so is a body passed to `stream`.
+* An error renders as an `error` event instead of through `default_error_formatter`.
+
+A formatter or error formatter you register for `:sse` with `formatter` or `error_formatter` still takes precedence. A formatter class of your own named `Sse` that inherits `Grape::Formatter::Base` now replaces Grape's globally, with a warning that `sse` is already registered.
+
 ### Upgrading to >= 4.1.0
 
 #### `Rack::Head` wraps the router instead of each endpoint's stack
