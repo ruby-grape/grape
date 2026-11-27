@@ -1657,6 +1657,8 @@ params do
 end
 ```
 
+Each parameter is validated on its own, so the Proc is called with one value at a time, and one that needs more arguments raises `ArgumentError` when the API is defined. To validate several parameters together, use a [custom validator](#custom-validators), which is given the other parameters, or a `rule` of a [`dry-validation` contract](#using-dry-validation-or-dry-schema).
+
 While Procs are convenient for single cases, consider using [Custom Validators](#custom-validators) in cases where a validation is used more than once.
 
 When using `optional` together with `:values`, a missing key, a `nil` value, and any value that coerces to `nil` (such as `""` for `type: Symbol`) all pass validation — `optional` collapses "key may be absent" with "value may be nil". To reject blank values while still allowing the key to be absent, add `allow_blank: false`:
