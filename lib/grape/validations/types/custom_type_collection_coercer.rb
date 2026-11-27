@@ -37,9 +37,12 @@ module Grape
         # Coerces the given value.
         #
         # @param value [Array<String>] an array of values to be coerced
-        # @return [Array,Set] the coerced result. May be an +Array+ or a
-        #   +Set+ depending on the setting given to the constructor
+        # @return [Array,Set,InvalidValue] the coerced result. May be an +Array+
+        #   or a +Set+ depending on the setting given to the constructor, or an
+        #   {InvalidValue} when the value is not a collection
         def call(value)
+          return InvalidValue.new unless value.is_a?(Array) || value.is_a?(Set)
+
           coerced = value.map do |item|
             coerced_item = super(item)
 

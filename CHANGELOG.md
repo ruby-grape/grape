@@ -59,6 +59,7 @@
 * [#3099](https://github.com/ruby-grape/grape/pull/3099): Report a nested Array scope that got no Array under its own name only - [@ericproulx](https://github.com/ericproulx).
 * [#3100](https://github.com/ruby-grape/grape/pull/3100): Report a required param the request left out as missing only - [@ericproulx](https://github.com/ericproulx).
 * [#3102](https://github.com/ruby-grape/grape/pull/3102): Stop reading a setting by its key on an API class, such as `MyAPI.namespace_setting(:key)`, from being recorded and discarding the compiled API - [@ericproulx](https://github.com/ericproulx).
+* [#3109](https://github.com/ruby-grape/grape/pull/3109): Fix `types: [Array[CustomType], CustomType]` rejecting a single value - [@lee3Q](https://github.com/lee3Q).
 * Your contribution here.
 
 ### 4.1.0 (2026-10-31)
