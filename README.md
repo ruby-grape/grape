@@ -468,6 +468,19 @@ GET /v3/var # => Same behavior as v2
 
 A version is a String, a Symbol or an Integer (`version 2` serves `/2/...`), and `version` takes one or more of them, or Arrays of them. It raises `ArgumentError` on anything else, such as a Float, which would lose its trailing zeros: write `version '1.10'`.
 
+A `version` applies to the routes declared after it, including those in the namespaces declared after it. A namespace declared above it keeps the version it was declared under, as a route does:
+
+```ruby
+class API < Grape::API
+  version 'v1', using: :path
+  namespace(:statuses) { get { ... } } # GET /v1/statuses
+  version 'v2', using: :path
+  namespace(:users) { get { ... } }    # GET /v2/users
+end
+```
+
+The same goes for `format`, `content_type`, `prefix` and the other settings.
+
 There are four strategies in which clients can reach your API's endpoints: `:path`, `:header`, `:accept_version_header` and `:param`. The default strategy is `:path`.
 
 ### Strategies

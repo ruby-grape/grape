@@ -15,8 +15,9 @@ module Grape
     # (see #inherit_from), and endpoints snapshot the chain with
     # #point_in_time_copy_for_endpoint. Nothing is copied down the chain when
     # a scope is created; every reader resolves against #parent on demand, so
-    # a value an enclosing scope gains later is visible through scopes already
-    # nested inside it.
+    # a registration an enclosing scope gains later reaches scopes already
+    # nested inside it. A setting such as +format+ or +version+ does not: a
+    # scope nested by +namespace+ takes those as they stood (see #nest).
     class InheritableSetting
       # Maps the callbacks DSL method names to their pluralized
       # namespace-stackable storage keys (see #callbacks / #add_callback).
@@ -27,6 +28,14 @@ module Grape
         after: :afters,
         finally: :finallies
       }.freeze
+
+      # What the setting methods of the DSL -- +format+, +content_type+,
+      # +version+, +prefix+ and the like -- assign for a route to read. A
+      # scope nested by +namespace+ takes these as they stood where it was
+      # declared (see #nest). Registrations, such as +use+, +helpers+, +auth+
+      # or +rescue_from+, reach it wherever they are declared. A Hash, since
+      # most keys looked up through a nested scope are not among them.
+      SETTING_KEYS = %i[format default_format default_error_formatter default_error_status content_types version version_options root_prefix build_params_with do_not_route_head].to_h { |key| [key, true] }.freeze
 
       # Shared empty result for #stacked / #stacked_keys when nothing is
       # registered anywhere in the chain, so neither hands out a mutable Array.
@@ -98,13 +107,14 @@ module Grape
         # each carry an empty Hash.
         @stackable_values = nil
         @parent = nil
+        # The enclosing scope as it stood when #nest nested this one: where
+        # its settings resolve. nil for a scope nested otherwise.
+        @settled = nil
         @point_in_time_copies = nil
       end
 
       # Return the class-level global properties.
-      def global
-        self.class.global
-      end
+      def global = self.class.global
 
       # Inherit from the given parent: its values resolve behind ours from now
       # on, including any it gains later. Also re-parents any settings
@@ -118,6 +128,27 @@ module Grape
         @route = parent.route.merge(route)
 
         @point_in_time_copies&.each { |cloned_one| cloned_one.inherit_from parent }
+      end
+
+      # A scope nested in this one, as +namespace+ opens (see
+      # DSL::Settings#within_namespace). Its registrations resolve against this
+      # scope live, so that the ones declared further down reach it too. Its
+      # settings (see SETTING_KEYS) resolve against a point-in-time copy of
+      # this scope instead, whose own settings resolve the same way, so that
+      # one declared further down applies only to what follows it, as it does
+      # to a route declared here. Past the API's own scopes, what it inherits
+      # from the API mounting it, or from its superclass, still resolves live.
+      #
+      # @example
+      #   version 'v1', using: :path
+      #   namespace(:a) { get { 'a' } } # GET /v1/a
+      #   version 'v2', using: :path
+      #   namespace(:b) { get { 'b' } } # GET /v2/b
+      def nest
+        nested = self.class.new
+        nested.inherit_from(self)
+        nested.settled = point_in_time_copy
+        nested
       end
 
       # Create a point-in-time copy of this settings instance, with clones of
@@ -152,6 +183,18 @@ module Grape
       # without allocating for it.
       # @api private
       def registered_after?(copy, keys) = keys.any? { |key| @stackable_values&.[](key)&.size != copy.stackable_values&.[](key)&.size }
+
+      # Remove in 5.0 (see Endpoint::SettingsAfterNamespaceWarning), with
+      # #settled_otherwise?. Whether a scope #nest settled anything from, up
+      # the chain, has set an inheritable value since: the cheap test, before
+      # resolving each setting both ways.
+      # @api private
+      def changed_since_settled? = (@settled && parent.namespace_inheritable != @settled.namespace_inheritable) || parent&.changed_since_settled? || false
+
+      # Whether +key+ resolves otherwise than before 4.2.0, when a nested
+      # scope read its settings from the enclosing scope as it stands now.
+      # @api private
+      def settled_otherwise?(key) = inheritable(key) != live_inheritable(key)
 
       # Resets the instance store of per-route settings.
       # @api private
@@ -585,21 +628,12 @@ module Grape
       # also flips +do_not_document!+).
       inheritable_flag :do_not_route_head, :do_not_route_options, :do_not_document, :lint
 
-      def cascade_defined?
-        inheritable?(:cascade)
-      end
+      def cascade_defined? = inheritable?(:cascade)
 
       # The logger assigned by the +logger+ DSL (see DSL::Logger), written to
       # an API's top-level settings so that it reaches the APIs mounted under
-      # it. Nearest-wins scalar; nil when never set, where DSL::Logger falls
-      # back to its default; the backing store is an internal detail.
-      def logger
-        inheritable(:logger)
-      end
-
-      def logger=(logger)
-        set_inheritable(:logger, logger)
-      end
+      # it. Nil when never set, where DSL::Logger falls back to its default.
+      inheritable_property :logger
 
       # Immutable snapshot of the settings Router::Pattern::Path reads to
       # assemble a route's origin and suffix, built by #path_settings, which
@@ -632,28 +666,27 @@ module Grape
       # the scope overrode nothing. Peer access for #copy_state_from and #==.
       attr_reader :namespace_inheritable
 
+      # Peer access for #nest, #copy_state_from and #==.
+      attr_accessor :settled
+
       # The nearest scope's value for +key+: this scope's own override when it
       # has one, otherwise the enclosing scope's. Keyed on presence rather than
       # truthiness, so a scope can deliberately override an inherited value
       # with nil (see #cascade).
-      def inheritable(key)
-        return @namespace_inheritable[key] if @namespace_inheritable&.key?(key)
+      def inheritable(key) = @namespace_inheritable&.key?(key) ? @namespace_inheritable[key] : enclosing(key)&.inheritable(key)
 
-        parent&.inheritable(key)
-      end
+      # #inheritable as it resolved before #nest settled anything.
+      def live_inheritable(key) = @namespace_inheritable&.key?(key) ? @namespace_inheritable[key] : parent&.live_inheritable(key)
 
       # Whether any scope along the chain assigned +key+ — including one that
       # assigned nil, which #inheritable cannot distinguish from never-set.
-      def inheritable?(key)
-        return true if @namespace_inheritable&.key?(key)
-
-        parent&.inheritable?(key) || false
-      end
+      def inheritable?(key) = @namespace_inheritable&.key?(key) || enclosing(key)&.inheritable?(key) || false
 
       # Every inheritable value along the chain resolved into one Hash, nearest
       # scope winning. May be the root scope's own Hash: treat it as read-only.
       def inheritable_values
         inherited = parent&.inheritable_values
+        inherited = inherited.except(*SETTING_KEYS.keys).merge!(@settled.inheritable_values.slice(*SETTING_KEYS.keys)) if @settled
         own = @namespace_inheritable
         return own || {} unless inherited
 
@@ -672,7 +705,7 @@ module Grape
       # the frozen EMPTY_STACK when there is none. May be the root scope's own
       # Array: treat it as read-only.
       def stacked(key)
-        inherited = parent&.stacked(key)
+        inherited = enclosing(key)&.stacked(key)
         own = @stackable_values&.[](key)
         return own || EMPTY_STACK unless inherited
 
@@ -712,9 +745,13 @@ module Grape
         @stackable_values = source.stackable_values&.transform_values(&:dup)
         @rescue_handler_maps = source.rescue_handler_maps&.transform_values(&:dup)
         @route = source.route.clone
+        @settled = source.settled
       end
 
       private
+
+      # Where +key+ resolves past this scope (see #nest).
+      def enclosing(key) = @settled && SETTING_KEYS.key?(key) ? @settled : parent
 
       # The +:all+ entry is added on read, so it follows the scope's own
       # handlers however they were interleaved with the +rescue_from :all+.
@@ -753,7 +790,7 @@ module Grape
 
       # #== between two scopes hanging off the same parent.
       def same_own_state?(other)
-        same_own_store?(@stackable_values, other.stackable_values) && route == other.route && @namespace_inheritable == other.namespace_inheritable &&
+        same_own_store?(@stackable_values, other.stackable_values) && route == other.route && @namespace_inheritable == other.namespace_inheritable && @settled == other.settled &&
           namespace == other.namespace && rescue_handlers == other.rescue_handlers && base_only_rescue_handlers == other.base_only_rescue_handlers
       end
 

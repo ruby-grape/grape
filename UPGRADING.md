@@ -36,6 +36,41 @@ Grape: since 4.2.0, GET /status also goes through what is declared below it in t
 
 Settings such as `format`, `prefix` and `version` are unchanged.
 
+#### Settings declared after a namespace no longer reach it
+
+A `version`, `format`, `prefix` or other setting declared after a namespace used to apply to the routes in it, while a route declared directly in the scope kept the one declared above it ([#3106](https://github.com/ruby-grape/grape/pull/3106)). A namespace now keeps the settings it was declared under, as a route does:
+
+```ruby
+class API < Grape::API
+  version 'v1', using: :path
+  namespace(:statuses) { get { 'statuses' } }
+  version 'v2', using: :path
+  namespace(:users) { get { 'users' } }
+end
+```
+
+```
+# Before
+GET /v2/statuses
+GET /v2/users
+
+# After
+GET /v1/statuses
+GET /v2/users
+```
+
+So a `format :json` declared at the bottom of an API no longer applies to the namespaces above it. The same holds for a namespace an API is mounted in: the mounted API takes the settings that namespace was declared under. To keep a setting applying to a namespace, declare it above the namespace.
+
+A `content_type` follows `format`: one registered after a namespace no longer narrows the formats its routes answer, which made them refuse a plain request with a `406`.
+
+Until 5.0, Grape warns when it compiles a route that no longer takes a setting declared after its namespace:
+
+```
+Grape: since 4.2.0, GET /:version/statuses no longer takes the `version` declared after a namespace it is in (see UPGRADING.md). Declare settings above the namespaces they apply to.
+```
+
+Registrations, such as `use`, `helpers`, `auth` and `rescue_from`, still reach the namespaces declared above them. What an API inherits from its superclass is unchanged.
+
 #### Upload tempfiles are deleted once the response is closed
 
 Grape now closes and deletes the tempfiles of a multipart upload once the response is closed, or once an exception escapes the API ([#3086](https://github.com/ruby-grape/grape/pull/3086)). It used to leave them until garbage collection or the process exited, unless the API ran inside an application that already did this, such as Rails with its `Rack::TempfileReaper`.

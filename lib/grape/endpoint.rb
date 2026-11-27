@@ -378,6 +378,7 @@ module Grape
     # scopes hang off this one, so only a route warns.
     def build_rack_stack
       RegistrationsBelowWarning.call(routes:, above: inheritable_setting, scope: @scope_setting)
+      SettingsAfterNamespaceWarning.call(routes:, setting: inheritable_setting)
       RackStack.build(inheritable_setting, scope: @scope_setting)
     end
 

@@ -353,6 +353,54 @@ describe Grape::Util::InheritableSetting do
     end
   end
 
+  describe '#nest' do
+    let(:top_level) { described_class.new }
+    let(:enclosing) { described_class.new.tap { |setting| setting.inherit_from(top_level) } }
+    let!(:nested) { enclosing.nest }
+
+    it 'takes a setting the enclosing scope declares later as it stood' do
+      enclosing.root_prefix = :after
+
+      expect(nested.root_prefix).to be_nil
+      expect(nested.point_in_time_copy.root_prefix).to be_nil
+    end
+
+    it 'takes the content types the enclosing scope registers later as they stood' do
+      enclosing.add_content_type(:json, 'application/json')
+
+      expect(nested.content_types).to be_nil
+    end
+
+    it 'takes the settings of the scopes around the enclosing one as they stood' do
+      deeper = nested.nest
+      enclosing.root_prefix = :after
+
+      expect(deeper.root_prefix).to be_nil
+    end
+
+    it 'reaches the registrations the enclosing scope declares later' do
+      enclosing.add_helper(:later)
+      enclosing.auth = { type: :http_basic }
+
+      expect(nested.helpers).to eq [:later]
+      expect(nested.auth).to eq(type: :http_basic)
+    end
+
+    it 'takes what the API inherits from outside its own scopes as it stands' do
+      top_level.root_prefix = :outer
+      top_level.add_content_type(:json, 'application/json')
+
+      expect(nested.root_prefix).to eq :outer
+      expect(nested.content_types).to eq(json: 'application/json')
+    end
+
+    it 'tells apart two scopes nested before and after a setting changed' do
+      enclosing.root_prefix = :after
+
+      expect(enclosing.nest).not_to eq nested
+    end
+  end
+
   describe '#point_in_time_copy' do
     let!(:cloned_obj) { subject.point_in_time_copy }
 
