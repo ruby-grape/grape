@@ -103,6 +103,39 @@ describe Grape::Endpoint do
       )
     end
 
+    # The params are not validated, coerced or given their defaults yet, so
+    # it answered nil for a param with a default (#1145).
+    it 'is deprecated in a before_validation filter' do
+      subject.before_validation do
+        declared(params)
+      end
+      subject.get('/declared') { declared(params) }
+
+      expect { get('/declared') }.to raise_error(
+        ActiveSupport::DeprecationException, /Calling `declared` in a `before_validation` filter is deprecated/
+      )
+    end
+
+    it 'is not deprecated in an after_validation filter, a finally filter or the endpoint, nor on an OPTIONS request' do
+      subject.after_validation { declared(params) }
+      subject.finally { declared(params) }
+      subject.get('/declared') { declared(params) }
+
+      get '/declared?first=present'
+      expect(last_response).to be_successful
+      options '/declared'
+      expect(last_response.status).to eq(204)
+    end
+
+    it 'is not deprecated in a finally filter after a before_validation filter halted' do
+      subject.before_validation { error!('halted', 400) }
+      subject.finally { declared(params) }
+      subject.get('/declared') { 'never' }
+
+      get '/declared'
+      expect(last_response.status).to eq(400)
+    end
+
     it 'has as many keys as there are declared params' do
       subject.get '/declared' do
         declared(params)

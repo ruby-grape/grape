@@ -258,12 +258,13 @@ module Grape
       @stream = nil
       @body = nil
       @before_filter_passed = false
+      @running_before_validation = false
       self
     end
 
     private
 
-    attr_reader :before_filter_passed
+    attr_reader :before_filter_passed, :running_before_validation
 
     # What #declared filters params by. Named so that no helper is likely to
     # take its place: a helper overrides any method of the endpoint.
@@ -302,10 +303,20 @@ module Grape
     # The route block's value, run once the params are validated between the
     # +before_validation+ and +after_validation+ filters.
     def validate_and_execute(callbacks)
-      run_filters callbacks, :before_validation if callbacks
+      run_before_validation_filters(callbacks) if callbacks
       run_validators(request:)
       run_filters callbacks, :after_validation if callbacks
       execute
+    end
+
+    # Remove in 5.0, when #declared raises in a +before_validation+ filter as
+    # it does in a +before+ one. Only while those filters run: a +finally+
+    # filter, or an +OPTIONS+ request that never validates, isn't one.
+    def run_before_validation_filters(callbacks)
+      @running_before_validation = true
+      run_filters callbacks, :before_validation
+    ensure
+      @running_before_validation = false
     end
 
     # The response #run answers with, its body +route_value+ unless the
