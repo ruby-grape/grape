@@ -1215,6 +1215,44 @@ describe Grape::Validations::Validators::CoerceValidator do
         expect(last_response.body).to eq('String')
       end
 
+      it 'falls back to a custom type when the value is not an array' do
+        custom_type = Class.new do
+          def self.parse(value) = "#{value}haha"
+          def self.parsed?(value) = value.is_a?(String)
+        end
+        subject.params do
+          optional :a, types: [Array[custom_type], custom_type]
+        end
+        subject.get '/' do
+          params[:a].to_json
+        end
+
+        get '/', a: '1'
+        expect(last_response).to be_successful
+        expect(last_response.body).to eq('"1haha"')
+
+        get '/', a: %w[1 2]
+        expect(last_response).to be_successful
+        expect(last_response.body).to eq('["1haha","2haha"]')
+      end
+
+      it 'rejects a hash for a collection of a custom type' do
+        custom_type = Class.new do
+          def self.parse(value) = "#{value}haha"
+          def self.parsed?(value) = value.is_a?(String)
+        end
+        subject.params do
+          optional :a, type: Array[custom_type]
+        end
+        subject.get('/') { 'ok' }
+
+        get '/', a: { b: '1' }
+        expect(last_response.status).to eq(400)
+
+        get '/', a: '1'
+        expect(last_response.status).to eq(400)
+      end
+
       it 'fails when no coercion is possible' do
         subject.params do
           requires :a, types: [Grape::API::Boolean, Integer]
